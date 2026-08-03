@@ -1,0 +1,204 @@
+{
+  "tsp": {
+    "downloaded": [
+      {
+        "instance": "eil51",
+        "source": "https://raw.githubusercontent.com/mastqe/tsplib/master/eil51.tsp"
+      },
+      {
+        "instance": "berlin52",
+        "source": "https://raw.githubusercontent.com/mastqe/tsplib/master/berlin52.tsp"
+      },
+      {
+        "instance": "st70",
+        "source": "https://raw.githubusercontent.com/mastqe/tsplib/master/st70.tsp"
+      },
+      {
+        "instance": "kroA100",
+        "source": "https://raw.githubusercontent.com/mastqe/tsplib/master/kroA100.tsp"
+      },
+      {
+        "instance": "kroB100",
+        "source": "https://raw.githubusercontent.com/mastqe/tsplib/master/kroB100.tsp"
+      },
+      {
+        "instance": "ch130",
+        "source": "https://raw.githubusercontent.com/mastqe/tsplib/master/ch130.tsp"
+      },
+      {
+        "instance": "rat195",
+        "source": "https://raw.githubusercontent.com/mastqe/tsplib/master/rat195.tsp"
+      },
+      {
+        "instance": "tsp225",
+        "source": "https://raw.githubusercontent.com/mastqe/tsplib/master/tsp225.tsp"
+      }
+    ],
+    "failed": []
+  },
+  "jsp": {
+    "downloaded": [
+      {
+        "instance": "ft10",
+        "source": "https://raw.githubusercontent.com/SchedulingLab/jsp-instances/main/ft/ft10.txt"
+      },
+      {
+        "instance": "ta01",
+        "source": "https://raw.githubusercontent.com/SchedulingLab/jsp-instances/main/ta/ta01.txt"
+      },
+      {
+        "instance": "ta21",
+        "source": "https://raw.githubusercontent.com/SchedulingLab/jsp-instances/main/ta/ta21.txt"
+      },
+      {
+        "instance": "ta31",
+        "source": "https://raw.githubusercontent.com/SchedulingLab/jsp-instances/main/ta/ta31.txt"
+      },
+      {
+        "instance": "ta41",
+        "source": "https://raw.githubusercontent.com/SchedulingLab/jsp-instances/main/ta/ta41.txt"
+      },
+      {
+        "instance": "ta51",
+        "source": "https://raw.githubusercontent.com/SchedulingLab/jsp-instances/main/ta/ta51.txt"
+      },
+      {
+        "instance": "ta71",
+        "source": "https://raw.githubusercontent.com/SchedulingLab/jsp-instances/main/ta/ta71.txt"
+      }
+    ],
+    "failed": []
+  },
+  "feature_selection": {
+    "uci_downloaded": [
+      {
+        "dataset": "zoo",
+        "source": "https://archive.ics.uci.edu/static/public/111/zoo.zip",
+        "files": [
+          "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\raw\\zoo\\zoo.data"
+        ]
+      },
+      {
+        "dataset": "wine",
+        "source": "https://archive.ics.uci.edu/static/public/109/wine.zip",
+        "files": [
+          "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\raw\\wine\\wine.data"
+        ]
+      },
+      {
+        "dataset": "breast_cancer_diagnostic",
+        "source": "https://archive.ics.uci.edu/static/public/17/breast+cancer+wisconsin+diagnostic.zip",
+        "files": [
+          "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\raw\\breast_cancer_diagnostic\\wdbc.data"
+        ]
+      },
+      {
+        "dataset": "ionosphere",
+        "source": "https://archive.ics.uci.edu/static/public/52/ionosphere.zip",
+        "files": [
+          "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\raw\\ionosphere\\ionosphere.data"
+        ]
+      },
+      {
+        "dataset": "sonar",
+        "source": "https://archive.ics.uci.edu/static/public/151/connectionist+bench+sonar+mines+vs+rocks.zip",
+        "files": [
+          "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\raw\\sonar\\sonar.all-data"
+        ]
+      },
+      {
+        "dataset": "spect",
+        "source": "https://archive.ics.uci.edu/static/public/95/spect+heart.zip",
+        "files": [
+          "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\raw\\spect\\SPECT.train",
+          "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\raw\\spect\\SPECT.test"
+        ]
+      },
+      {
+        "dataset": "spectf",
+        "source": "https://archive.ics.uci.edu/static/public/96/spectf+heart.zip",
+        "files": [
+          "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\raw\\spectf\\SPECTF.train",
+          "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\raw\\spectf\\SPECTF.test"
+        ]
+      },
+      {
+        "dataset": "lymphography",
+        "source": "https://archive.ics.uci.edu/static/public/63/lymphography.zip",
+        "files": [
+          "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\raw\\lymphography\\lymphography.data"
+        ]
+      },
+      {
+        "dataset": "madelon",
+        "source": "https://archive.ics.uci.edu/static/public/171/madelon.zip",
+        "path": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\raw\\madelon\\extracted"
+      }
+    ],
+    "uci_failed": [],
+    "ew_downloaded": [
+      {
+        "dataset": "BreastEW",
+        "source": "OpenML dataset 1510 + equal-width discretization (k=5)",
+        "file": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\ew\\BreastEW.csv",
+        "instances": 569,
+        "features": 30,
+        "discretization": "equal_width_5_bins"
+      },
+      {
+        "dataset": "WineEW",
+        "source": "OpenML dataset 187 + equal-width discretization (k=5)",
+        "file": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\ew\\WineEW.csv",
+        "instances": 178,
+        "features": 13,
+        "discretization": "equal_width_5_bins"
+      },
+      {
+        "dataset": "SonarEW",
+        "source": "OpenML dataset 40 + equal-width discretization (k=5)",
+        "file": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\ew\\SonarEW.csv",
+        "instances": 208,
+        "features": 60,
+        "discretization": "equal_width_5_bins"
+      },
+      {
+        "dataset": "IonosphereEW",
+        "source": "OpenML dataset 59 + equal-width discretization (k=5)",
+        "file": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\ew\\IonosphereEW.csv",
+        "instances": 351,
+        "features": 34,
+        "discretization": "equal_width_5_bins"
+      },
+      {
+        "dataset": "ZooEW",
+        "source": "OpenML dataset 62 + equal-width discretization (k=5)",
+        "file": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\ew\\ZooEW.csv",
+        "instances": 101,
+        "features": 16,
+        "discretization": "equal_width_5_bins"
+      },
+      {
+        "dataset": "MadelonEW",
+        "source": "OpenML dataset 1485 + equal-width discretization (k=5)",
+        "file": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\ew\\MadelonEW.csv",
+        "instances": 2600,
+        "features": 500,
+        "discretization": "equal_width_5_bins"
+      },
+      {
+        "dataset": "SpectEW",
+        "source": "UCI SPECT train+test (native 22 binary features)",
+        "file": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\datasets\\feature_selection\\ew\\SpectEW.csv",
+        "instances": 267,
+        "features": 22,
+        "discretization": "none (already binary)"
+      }
+    ],
+    "ew_failed": [
+      {
+        "dataset": "LymphographyEW",
+        "error": "could not convert string to float: 'arched'"
+      }
+    ]
+  }
+}

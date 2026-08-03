@@ -1,0 +1,56 @@
+{
+  "source": "SchedulingLab/jsp-instances (Taillard & OR-Library classics)",
+  "format": "Standard JSP text (machine, processing_time pairs per job)",
+  "reference": "Taillard (1993); JSPLib / SchedulingLab",
+  "instances": [
+    {
+      "name": "ft10",
+      "file": "instances/ft10.txt",
+      "jobs": 10,
+      "machines": 10,
+      "best_known_makespan": 930
+    },
+    {
+      "name": "ta01",
+      "file": "instances/ta01.txt",
+      "jobs": 15,
+      "machines": 15,
+      "best_known_makespan": 1231
+    },
+    {
+      "name": "ta21",
+      "file": "instances/ta21.txt",
+      "jobs": 20,
+      "machines": 20,
+      "best_known_makespan": 1642
+    },
+    {
+      "name": "ta31",
+      "file": "instances/ta31.txt",
+      "jobs": 30,
+      "machines": 15,
+      "best_known_makespan": 1764
+    },
+    {
+      "name": "ta41",
+      "file": "instances/ta41.txt",
+      "jobs": 30,
+      "machines": 20,
+      "best_known_makespan": null
+    },
+    {
+      "name": "ta51",
+      "file": "instances/ta51.txt",
+      "jobs": 50,
+      "machines": 15,
+      "best_known_makespan": 2760
+    },
+    {
+      "name": "ta71",
+      "file": "instances/ta71.txt",
+      "jobs": 100,
+      "machines": 20,
+      "best_known_makespan": 5464
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "study_name": "tsp_scalability_study",
+  "output_directory": "results",
+  "experiments": [
+    {
+      "config": "config/examples/tsp_eil51_comparison.json",
+      "instance": "eil51",
+      "problem_size": 51
+    },
+    {
+      "config": "config/examples/tsp_berlin52_comparison.json",
+      "instance": "berlin52",
+      "problem_size": 52
+    },
+    {
+      "config": "config/examples/tsp_st70_comparison.json",
+      "instance": "st70",
+      "problem_size": 70
+    },
+    {
+      "config": "config/examples/tsp_kroA100_comparison.json",
+      "instance": "kroA100",
+      "problem_size": 100
+    },
+    {
+      "config": "config/examples/tsp_ch130_comparison.json",
+      "instance": "ch130",
+      "problem_size": 130
+    },
+    {
+      "config": "config/examples/tsp_rat195_comparison.json",
+      "instance": "rat195",
+      "problem_size": 195
+    }
+  ]
+}

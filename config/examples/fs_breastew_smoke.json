@@ -1,0 +1,32 @@
+{
+  "experiment_name": "fs_breastew_smoke",
+  "domain": "feature_selection",
+  "instance": "BreastEW",
+  "instance_path": "datasets/feature_selection/ew/BreastEW.csv",
+  "algorithms": ["simulated_annealing"],
+  "runs": 1,
+  "evaluation_budget": 100,
+  "seed_policy": {
+    "base_seed": 3000
+  },
+  "domain_config": {
+    "performance_weight": 0.9,
+    "reduction_weight": 0.1,
+    "test_size": 0.3,
+    "cv_folds": 5,
+    "k_neighbors": 5,
+    "initial_solution": "random",
+    "operators": ["flip", "swap"]
+  },
+  "algorithm_configs": {
+    "simulated_annealing": {
+      "initial_temperature": 1.0,
+      "final_temperature": 0.01,
+      "cooling_factor": 0.95,
+      "moves_per_temperature": 20
+    }
+  },
+  "output": {
+    "directory": "results"
+  }
+}

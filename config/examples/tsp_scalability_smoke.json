@@ -1,0 +1,16 @@
+{
+  "study_name": "tsp_scalability_smoke",
+  "output_directory": "results",
+  "experiments": [
+    {
+      "config": "config/examples/tsp_eil51_smoke.json",
+      "instance": "eil51",
+      "problem_size": 51
+    },
+    {
+      "config": "config/examples/tsp_st70_smoke.json",
+      "instance": "st70",
+      "problem_size": 70
+    }
+  ]
+}

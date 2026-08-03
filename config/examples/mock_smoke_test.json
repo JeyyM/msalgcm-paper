@@ -1,0 +1,19 @@
+{
+  "experiment_name": "mock_smoke_test",
+  "domain": "mock",
+  "instance": "sphere_5d",
+  "algorithms": ["mock_random_search"],
+  "runs": 3,
+  "evaluation_budget": 500,
+  "seed_policy": {
+    "base_seed": 1000
+  },
+  "algorithm_configs": {
+    "mock_random_search": {
+      "steps_per_iteration": 1
+    }
+  },
+  "output": {
+    "directory": "results"
+  }
+}

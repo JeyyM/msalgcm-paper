@@ -1,0 +1,27 @@
+{
+  "experiment_name": "jsp_ft10_smoke",
+  "domain": "scheduling",
+  "instance": "ft10",
+  "instance_path": "datasets/scheduling/jsp/instances/ft10.txt",
+  "algorithms": ["simulated_annealing"],
+  "runs": 1,
+  "evaluation_budget": 2000,
+  "seed_policy": {
+    "base_seed": 1000
+  },
+  "domain_config": {
+    "initial_solution": "longest_processing_time",
+    "operators": ["swap", "insertion", "inversion"]
+  },
+  "algorithm_configs": {
+    "simulated_annealing": {
+      "initial_temperature": 5000.0,
+      "final_temperature": 0.01,
+      "cooling_factor": 0.995,
+      "moves_per_temperature": 100
+    }
+  },
+  "output": {
+    "directory": "results"
+  }
+}

@@ -1,0 +1,99 @@
+# Living decision registry — update when research choices are locked.
+# See pipeline_definition.md §7
+
+decisions:
+  D1_language:
+    status: resolved
+    value: "Python 3.11+"
+    notes: "Approved for Phase 0 scaffold"
+
+  D2_ui:
+    status: resolved
+    value: "React dashboard (web/frontend) + FastAPI backend; CLI retained"
+    notes: "optimize serve for API; npm run dev in web/frontend for UI"
+
+  D3_storage:
+    status: resolved
+    value: "File-only (JSON + CSV)"
+    notes: null
+
+  D4_tsp_data:
+    status: resolved
+    value: "TSPLIB via datasets/tsp/instances/"
+    instances:
+      - eil51
+      - berlin52
+      - st70
+      - kroA100
+      - kroB100
+      - ch130
+      - rat195
+      - tsp225
+    format: "TSPLIB .tsp (EUC_2D)"
+    known_optima: "datasets/tsp/metadata.json"
+
+  D5_tsp_operators:
+    status: resolved
+    value:
+      - swap
+      - insertion
+      - inversion
+      - two_opt
+    two_opt_policy: "standard move operator (not hybrid local search add-on)"
+
+  D6_scheduling:
+    status: resolved
+    formulation: "classic job-shop (JSP)"
+    benchmark: "Taillard via datasets/scheduling/jsp/instances/"
+    representation: "operation sequence + serial schedule decoder (SSGS)"
+    verify_before_phase_3:
+      - "Confirm ta21 dimensions match literature (SchedulingLab shows 20x20)"
+
+  D7_scheduling_benchmarks:
+    status: resolved
+    instances:
+      - ft10
+      - ta01
+      - ta21
+      - ta31
+      - ta41
+      - ta51
+      - ta71
+
+  D8_fs_datasets:
+    status: resolved
+    raw: "datasets/feature_selection/raw/"
+    ew: "datasets/feature_selection/ew/"
+    ew_provenance: >
+      EW CSVs built from OpenML + equal-width k=5 discretization (Hall & Holmes style).
+      SpectEW uses native binary UCI SPECT train+test merge.
+
+  D9_fs_ml_design:
+    status: resolved
+    classifier: "k-NN (sklearn)"
+    cv: "stratified k-fold on training data"
+    primary_metric: "accuracy"
+    multiclass_metric: "macro-F1 for WineEW"
+    objective_weights:
+      performance_weight: "configurable; no silent default in experiments"
+      reduction_weight: "configurable"
+    madelon_split: "Use official train/valid/test from UCI — never optimize on test"
+    spect_split: "stratified holdout via domain_config.test_size + split_seed from seed_policy.base_seed"
+
+  D10_experimental_design:
+    status: open
+    runs: "configurable per experiment JSON"
+    evaluation_budget: "configurable per experiment JSON"
+    size_tiers: "configurable; see dataset metadata"
+
+  D11_statistics:
+    status: open
+    value: "Export CSV for external analysis until tests approved"
+
+  D12_tuning_protocol:
+    status: open
+    value: "Separate tuning pipeline; not automated in v1"
+
+first_build_target:
+  phase: "TSP vertical slice"
+  path: "Phase 0 → 1 → 2 → minimal runner → CLI"

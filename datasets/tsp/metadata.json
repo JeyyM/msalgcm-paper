@@ -1,0 +1,56 @@
+{
+  "source": "TSPLIB95 (via GitHub mirrors)",
+  "format": "TSPLIB .tsp (EUC_2D)",
+  "known_optima": {
+    "eil51": 426,
+    "berlin52": 7542,
+    "st70": 675,
+    "kroA100": 21282,
+    "kroB100": 22141,
+    "ch130": 6110,
+    "rat195": 2323,
+    "tsp225": 3919
+  },
+  "instances": [
+    {
+      "name": "eil51",
+      "file": "instances/eil51.tsp",
+      "known_optimum": 426
+    },
+    {
+      "name": "berlin52",
+      "file": "instances/berlin52.tsp",
+      "known_optimum": 7542
+    },
+    {
+      "name": "st70",
+      "file": "instances/st70.tsp",
+      "known_optimum": 675
+    },
+    {
+      "name": "kroA100",
+      "file": "instances/kroA100.tsp",
+      "known_optimum": 21282
+    },
+    {
+      "name": "kroB100",
+      "file": "instances/kroB100.tsp",
+      "known_optimum": 22141
+    },
+    {
+      "name": "ch130",
+      "file": "instances/ch130.tsp",
+      "known_optimum": 6110
+    },
+    {
+      "name": "rat195",
+      "file": "instances/rat195.tsp",
+      "known_optimum": 2323
+    },
+    {
+      "name": "tsp225",
+      "file": "instances/tsp225.tsp",
+      "known_optimum": 3919
+    }
+  ]
+}

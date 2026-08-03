@@ -1,0 +1,33 @@
+{
+  "experiment_name": "tsp_st70_comparison",
+  "domain": "tsp",
+  "instance": "st70",
+  "instance_path": "datasets/tsp/instances/st70.tsp",
+  "algorithms": ["simulated_annealing", "tabu_search", "particle_swarm"],
+  "runs": 10,
+  "evaluation_budget": 100000,
+  "seed_policy": { "base_seed": 1000 },
+  "domain_config": {
+    "initial_solution": "nearest_neighbor",
+    "operators": ["two_opt", "two_opt", "inversion", "insertion", "swap"]
+  },
+  "algorithm_configs": {
+    "simulated_annealing": {
+      "initial_temperature": 3000.0,
+      "final_temperature": 0.001,
+      "cooling_factor": 0.999,
+      "moves_per_temperature": 200
+    },
+    "tabu_search": {
+      "tabu_tenure": 25,
+      "candidate_list_size": 50
+    },
+    "particle_swarm": {
+      "swarm_size": 50,
+      "inertia_weight": 0.6,
+      "cognitive_coefficient": 1.8,
+      "social_coefficient": 1.8
+    }
+  },
+  "output": { "directory": "results" }
+}
