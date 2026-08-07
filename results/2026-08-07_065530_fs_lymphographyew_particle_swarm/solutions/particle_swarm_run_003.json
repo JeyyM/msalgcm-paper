@@ -1,0 +1,50 @@
+{
+  "instance": "LymphographyEW",
+  "feature_mask": [
+    0,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0
+  ],
+  "selected_feature_indices": [
+    1,
+    2,
+    8,
+    9,
+    10,
+    12,
+    15
+  ],
+  "selected_feature_names": [
+    "F2",
+    "F3",
+    "F9",
+    "F10",
+    "F11",
+    "F13",
+    "F16"
+  ],
+  "selected_feature_count": 7,
+  "selected_feature_ratio": 0.3888888888888889,
+  "performance_weight": 0.9,
+  "reduction_weight": 0.1,
+  "metric": "macro_f1",
+  "cv_score": 0.8116351096294562,
+  "cv_loss": 0.18836489037054382,
+  "test_score": 0.35416666666666663,
+  "objective_value": 0.20841729022237834
+}

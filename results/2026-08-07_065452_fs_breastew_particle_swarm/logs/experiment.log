@@ -1,0 +1,13 @@
+experiment=fs_breastew_particle_swarm
+domain=feature_selection
+instance=BreastEW
+algorithms=particle_swarm
+runs=30
+completed=30
+failed=0
+charts=5
+chart=charts/convergence.png
+chart=charts/convergence_by_run.png
+chart=charts/objective_boxplot.png
+chart=charts/runtime_comparison.png
+chart=charts/fs_selected_features_particle_swarm.png

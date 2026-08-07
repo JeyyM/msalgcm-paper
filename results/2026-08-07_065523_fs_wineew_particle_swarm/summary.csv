@@ -1,0 +1,2 @@
+domain,instance,problem_size,algorithm,parameters,runs,successful_runs,failed_runs,success_rate,mean_objective,std_objective,median_objective,min_objective,max_objective,mean_runtime_seconds,mean_objective_evaluations,mean_gap_percentage,best_gap_percentage
+feature_selection,WineEW,13,particle_swarm,"{""cognitive_coefficient"": 1.8, ""inertia_weight"": 0.6, ""operators"": [""flip"", ""swap""], ""social_coefficient"": 1.8, ""swarm_size"": 30}",30,30,0,1.0,0.5991303860136813,0.0019187986598840658,0.5986175655008608,0.5986175655008608,0.6063098731931684,310.78160859333,5000,,

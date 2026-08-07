@@ -1,0 +1,50 @@
+{
+  "instance": "BreastEW",
+  "feature_mask": [
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "selected_feature_indices": [
+    3
+  ],
+  "selected_feature_names": [
+    "F4"
+  ],
+  "selected_feature_count": 1,
+  "selected_feature_ratio": 0.03333333333333333,
+  "performance_weight": 0.9,
+  "reduction_weight": 0.1,
+  "metric": "accuracy",
+  "cv_score": 0.6933860759493671,
+  "cv_loss": 0.3066139240506329,
+  "test_score": 0.672514619883041,
+  "objective_value": 0.279285864978903
+}

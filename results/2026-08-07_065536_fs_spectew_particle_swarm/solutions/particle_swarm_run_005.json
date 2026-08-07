@@ -1,0 +1,52 @@
+{
+  "instance": "SpectEW",
+  "feature_mask": [
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    1,
+    1
+  ],
+  "selected_feature_indices": [
+    0,
+    1,
+    6,
+    18,
+    20,
+    21
+  ],
+  "selected_feature_names": [
+    "F1",
+    "F2",
+    "F7",
+    "F19",
+    "F21",
+    "F22"
+  ],
+  "selected_feature_count": 6,
+  "selected_feature_ratio": 0.2727272727272727,
+  "performance_weight": 0.9,
+  "reduction_weight": 0.1,
+  "metric": "accuracy",
+  "cv_score": 0.8490753911806543,
+  "cv_loss": 0.15092460881934566,
+  "test_score": 0.7654320987654321,
+  "objective_value": 0.1631048752101384
+}

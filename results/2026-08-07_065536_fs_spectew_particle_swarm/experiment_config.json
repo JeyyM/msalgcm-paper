@@ -1,0 +1,51 @@
+{
+  "source_config_path": "C:\\Users\\lance\\OneDrive\\Documents\\GitHub\\msalgcm-paper\\config\\.generated\\fs_spectew_particle_swarm.json",
+  "config": {
+    "experiment_name": "fs_spectew_particle_swarm",
+    "domain": "feature_selection",
+    "instance": "SpectEW",
+    "algorithms": [
+      "particle_swarm"
+    ],
+    "runs": 30,
+    "evaluation_budget": 5000,
+    "seed_policy": {
+      "base_seed": 4000
+    },
+    "instance_path": "datasets/feature_selection/ew/SpectEW.csv",
+    "domain_config": {
+      "performance_weight": 0.9,
+      "reduction_weight": 0.1,
+      "test_size": 0.3,
+      "cv_folds": 5,
+      "k_neighbors": 5,
+      "initial_solution": "random",
+      "operators": [
+        "flip",
+        "swap"
+      ]
+    },
+    "algorithm_configs": {
+      "simulated_annealing": {
+        "cooling_factor": 0.995,
+        "final_temperature": 0.001,
+        "initial_temperature": 2.0,
+        "moves_per_temperature": 50
+      },
+      "tabu_search": {
+        "candidate_list_size": 30,
+        "tabu_tenure": 30
+      },
+      "particle_swarm": {
+        "cognitive_coefficient": 1.8,
+        "inertia_weight": 0.6,
+        "social_coefficient": 1.8,
+        "swarm_size": 30
+      }
+    },
+    "output": {
+      "directory": "results"
+    },
+    "runtime_budget_seconds": null
+  }
+}

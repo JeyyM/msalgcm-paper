@@ -1,0 +1,60 @@
+{
+  "live": true,
+  "objective_evaluations": 5000,
+  "current": {
+    "instance": "SpectEW",
+    "feature_mask": [
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    "selected_feature_indices": [
+      0,
+      1,
+      3,
+      7,
+      11,
+      14,
+      19,
+      21
+    ],
+    "selected_feature_names": [
+      "F1",
+      "F2",
+      "F4",
+      "F8",
+      "F12",
+      "F15",
+      "F20",
+      "F22"
+    ],
+    "selected_feature_count": 8,
+    "selected_feature_ratio": 0.36363636363636365,
+    "performance_weight": 0.9,
+    "reduction_weight": 0.1,
+    "metric": "accuracy",
+    "cv_score": 0.8597439544807965,
+    "cv_loss": 0.14025604551920345,
+    "test_score": 0.8024691358024691,
+    "objective_value": 0.1625940773309195
+  }
+}
