@@ -11,7 +11,7 @@
 
 This study compares Simulated Annealing (SA), Tabu Search (TS), and Particle Swarm Optimization (PSO) across route optimization, job scheduling, and machine-learning feature selection. The work merges a structured literature review and formal search-theoretic analysis with controlled sample tests on a shared experimental platform. Tests use equal objective-evaluation budgets, disjoint tuning and comparison instance sets, literature-informed parameter grids, and 30 independent seeds per algorithm per benchmark.
 
-On Traveling Salesman Problem (TSP) instances (51–195 cities), TS achieved the lowest best-of-30 gap to known optima on every instance (0.33–17.6%), followed by SA (8–19%); PSO underperformed sharply (58–264% gap). On job-shop scheduling (JSP), TS led on all five benchmarks (1.8–21.1% best gap); PSO ranked ahead of SA on larger instances but remained behind TS. On feature selection, all three algorithms converged within a narrow wrapper-objective band (~0.01–0.05); PSO matched TS at best-seed on three of four EW datasets (BreastEW, LymphographyEW, SpectEW) and tied all methods on WineEW—consistent with native binary/threshold encoding and Zhang and Sun’s ~2% Tabu–GA spread in wrapper landscapes.
+On Traveling Salesman Problem (TSP) instances (51–195 cities), TS achieved the lowest best-of-30 gap to known optima on every instance (0.33–17.6% on reported instances), followed by SA (8–19% best-gap range on held-out instances); reported PSO gaps (58–264%) are **not treated as valid standalone PSO evidence** because the implementation does not apply the configured nearest-neighbor initializer to the swarm (§3.5, §5.1). On job-shop scheduling (JSP)—the cleanest protocol block with disjoint tuning/comparison sets and a documented shared initializer—TS led on all five held-out benchmarks (1.8–21.1% best gap); PSO beat SA on **all five** instances but remained behind TS. On feature selection, the three algorithms produced similar wrapper-objective scores (~0.01–0.05 spread), but the objective uses raw (non-standardized) features and α=0.9/β=0.1 weights; PSO matched TS at best-seed on three of four EW datasets while TS had the lowest mean on two of four (BreastEW, WineEW).
 
 Early pilot tests (10 runs, single instances, 20k evaluations) had shown SA ahead on one 50-city TSP after a cooling-schedule correction; the expanded protocol consistently ranked TS first on routing, confirming that TS advantage is scale- and budget-dependent rather than universal. The study does not identify a single winner. It delivers a Comparative Evaluation Framework linking algorithm choice to problem representation, evaluation cost, and search mechanism. Rankings align with reviewed literature expectations even where absolute gap magnitudes differ because of benchmark scale, initializer design, and standalone (non-hybrid) implementations.
 
@@ -271,7 +271,7 @@ Under equal evaluation budgets, TS and PSO perform fewer outer iterations than S
 
 | Domain | Tuning instances | Comparison instances | Budget | Metric |
 |--------|------------------|----------------------|--------|--------|
-| TSP | eil51, berlin52, st70 | All six TSPLIB instances | 100,000 | Mean gap % |
+| TSP | eil51, berlin52, st70 | kroA100, ch130, rat195 *(§5.1 also reports tuning instances for transparency)* | 100,000 | Mean gap % |
 | JSP | ft10, ta01, ta21 | abz5, ta02, ta22, ta31, ta51 | 50,000 | Mean gap % |
 | FS | ZooEW, IonosphereEW, SonarEW | BreastEW, WineEW, LymphographyEW, SpectEW | 5,000 | Mean best objective |
 
@@ -279,11 +279,11 @@ Frozen parameters: `results/tuning/selected_parameters.json`, `jsp_selected_para
 
 ### 3.5 Domain Setup and Known Limitations
 
-**TSP:** Nearest-neighbor initial tours; gap % = (distance − optimum) / optimum × 100.
+**TSP:** SA and TS start from nearest-neighbor tours (~13–32% above optimum on eil51 in our runs). Gap % = (distance − optimum) / optimum × 100. **PSO exception:** although configs set `initial_solution: nearest_neighbor`, the PSO implementation initializes particles from uniform random keys in [0,1]^d and never decodes the configured NN tour into the swarm; eil51 PSO runs therefore start near **214–250%** above optimum versus **~13–32%** for SA/TS. Reported PSO TSP gaps measure this protocol asymmetry (and random-key search from extreme starts), not fairly initialized standalone PSO. Elitist best-solution tracking is in decoded tour space, but the missing shared initializer invalidates cross-algorithm TSP comparison for PSO.
 
 **JSP:** Shared job-major initializer (`longest_processing_time`) produces a weak identical start for all algorithms (~400–990% above BKS before search vs ~50–70% for random shuffle). **Relative** rankings remain fair; **absolute** gaps are pessimistic (cf. Jwo et al. on initialization).
 
-**FS:** Wrapper objective = weighted CV loss + feature-reduction penalty; test scores recorded but not used in search.
+**FS:** Wrapper objective = α·CV loss + β·feature ratio (α=0.9, β=0.1 in all runs); kNN on **raw** EW features without per-fold standardization; test scores recorded but not used in search. This differs from common wrapper practice (scaled features; lighter sparsity penalties such as α=0.99/β=0.01 in Xie et al., 2021).
 
 ### 3.6 Pilot Tests and Protocol Evolution
 
@@ -315,7 +315,7 @@ Under evaluation-budget fairness, TS with m=100 performs roughly 100× fewer out
 
 ### 4.3 Convergence Properties
 
-SA converges in probability to a global optimum under logarithmic cooling with fully connected neighborhoods (Kirkpatrick et al., 1983); finite geometric schedules provide no formal guarantee. TS has no probabilistic convergence guarantee—behavior is bounded by neighborhood coverage unless diversified. PSO has no global guarantee; premature diversity loss is a convergence-theoretic weakness (Sengupta et al., 2019).
+Finite geometric SA schedules used in practice have **no** global optimality guarantee. Asymptotic convergence in probability under logarithmic cooling is established in the annealing literature (Hajek, 1988; Geman & Geman, 1984), not in Kirkpatrick et al. (1983), which introduced the method empirically. TS has no probabilistic convergence guarantee—behavior is bounded by neighborhood coverage unless diversified. PSO has no global guarantee; premature diversity loss is a convergence-theoretic weakness (Sengupta et al., 2019).
 
 ### 4.4 Representation and State-Space Considerations
 
@@ -326,6 +326,8 @@ TSP uses permutation space; JSP joint sequencing space; FS binary hypercube {0,1
 ## 5. RESULTS, DISCUSSION, AND COMPARATIVE EVALUATION FRAMEWORK
 
 All completed full tests use **30 seeds** per algorithm per instance.
+
+**Literature-alignment verdicts** (Tables 5, 7, 8b, 9): **Confirmed** = same ranking direction as cited literature; **Supported** = directionally consistent with caveats (scale, hybrid variant, or protocol difference); **Partial** = mixed or calibration-sensitive; **Unresolved** = outcome reflects a documented protocol or implementation issue rather than algorithm capability.
 
 ### 5.0 Pilot vs Full Study Reconciliation
 
@@ -362,9 +364,11 @@ Mean runtime per 100k evals: TS ~3–9 s; SA ~20–40 s; PSO ~3–7 s.
 | Gap scale | LBSA <0.5% PEav (Zhan) | TS 0.33–4% (≤70 cities); 10–18% (≥100) | Ranking yes; gaps wider |
 | SA role | Competitive if calibrated | Second; high seed variance | Partial |
 | Scalability | TS–SA gap may shrink (Pirim) | Tie best gap at rat195 (13.52%) | Supported |
-| PSO permutations | Hybrids needed (Mhamdi; Sengupta) | 58–264% gap | Confirmed |
+| PSO permutations | Hybrids needed (Mhamdi; Sengupta) | 58–264% gap under **broken NN init** | **Unresolved** (protocol) |
 
-**RQ1:** TS delivers best route quality; SA is viable second choice; PSO not competitive without hybrid local search.
+**TSP generalization note:** On tuning instances (eil51, berlin52, st70), TS mean best gap ≈ **2.2%** vs SA ≈ **13.5%**; on held-out instances (kroA100, ch130, rat195), TS ≈ **13.8%** vs SA ≈ **17.1%**—a **6.3×** TS degradation tuning→held-out versus **1.3×** for SA. TS still wins every instance, but the abstract routing lead is partly tuned-set strength; held-out gaps are the fairer generalization read.
+
+**RQ1:** TS delivers best route quality; SA is viable second choice. PSO TSP numbers are withheld from ranking claims pending NN-consistent initialization.
 
 ### 5.2 Job-Shop Scheduling (15/15 complete)
 
@@ -383,11 +387,11 @@ Mean runtime per 100k evals: TS ~3–9 s; SA ~20–40 s; PSO ~3–7 s.
 | Topic | Literature | Our tests | Verdict |
 |-------|------------|-----------|---------|
 | Scheduling winner | TS strong at scale (Alharkan) | TS best all 5 | Confirmed |
-| PSO vs SA | GPSO 2nd (Alharkan) | PSO < SA gap on ta02–ta51 | Supported |
+| PSO vs SA | GPSO 2nd (Alharkan) | PSO < SA gap on **all 5** held-out instances (incl. abz5) | Supported |
 | SA large instances | SA loses LB hits (Alharkan) | SA 54–58% on ta22+ | Directional |
 | Absolute gaps | ~3% above LB (Alharkan) | 17–57% above BKS | Not comparable (init, problem class) |
 
-**RQ2:** TS leads makespan quality; PSO ranks between TS and SA on larger instances.
+**RQ2:** TS leads makespan quality on all five held-out JSP instances; PSO consistently ranks second (better gap than SA on every instance, including abz5). JSP is the strongest evidence block: disjoint tuning/comparison sets, shared initializer, and consistent TS > PSO > SA ordering.
 
 ### 5.3 Feature Selection (12/12 complete)
 
@@ -406,20 +410,20 @@ Mean runtime per 5k evals: SA ~72–103 s; TS ~73–83 s; PSO ~235–318 s (swar
 
 | Topic | Literature | Our tests | Verdict |
 |-------|------------|-----------|---------|
-| TS vs GA in wrappers | Tabu wins with fewer evals (Zhang & Sun) | TS lowest mean on 3/4 | Supported |
+| TS vs GA in wrappers | Tabu wins with fewer evals (Zhang & Sun) | TS lowest mean on **2/4** (BreastEW, WineEW); PSO lowest on LymphographyEW & SpectEW | Partial |
 | SA in wrappers | SA > random (Allvi) | SA within ~0.02 of TS/PSO best | Supported |
 | Algorithm spread | ~2% criterion spread (Tabu vs GA) | ~0.01–0.05 objective spread all three | Supported |
 | PSO on FS | Enhanced PSO wins benchmarks (Xie) | **Baseline PSO matches TS best on 3/4** | Supported for encoding; not enhanced variant |
 | PSO vs permutations | PSO collapses without adaptation (Sengupta) | PSO **competitive on FS**, worst on TSP | Confirmed (§4.4) |
 
-**RQ3:** Binary wrapper FS shows the tightest three-way competition. TS remains most stable (zero std on BreastEW/WineEW means); PSO reaches the same best objective as TS on three datasets, validating the representation-sensitivity prediction in §4.4. SA is viable but slightly behind at best-seed on three datasets.
+**RQ3:** Wrapper FS shows a narrow objective band, but interpret cautiously: kNN uses **raw EW features without in-fold standardization** (WineEW proline-scale dominance); weights are **α=0.9, β=0.1** (heavier reduction pressure than the α=0.99/β=0.01 convention in Xie et al., 2021). WineEW best solutions select **one feature** at CV score **0.34** (below the **0.40** majority baseline)—suggesting a degenerate objective landscape, not necessarily encoding advantage. TS has zero std on BreastEW/WineEW means but **higher** variance than PSO on LymphographyEW and SpectEW. PSO matches TS at best-seed on three datasets; overall mean objective is slightly best for PSO (0.317 vs TS 0.319 vs SA 0.325).
 
 ### 5.4 Cross-Domain Patterns
 
 | Pattern | TSP | JSP | FS |
 |---------|-----|-----|-----|
 | Best quality (best-of-30) | TS | TS | TS = PSO (3/4); all tie WineEW |
-| Best mean stability | TS | TS | TS |
+| Best mean stability | TS | TS | Mixed (TS on Breast/Wine; PSO on Lymph/Spect) |
 | Second | SA | PSO (large) | SA or PSO (dataset-dependent) |
 | Weakest | PSO | SA (large) | SA (best-seed, 3/4) |
 | PSO encoding penalty | Severe | Moderate | **Low** — matches native binary form |
@@ -431,7 +435,7 @@ Mean runtime per 5k evals: SA ~72–103 s; TS ~73–83 s; PSO ~235–318 s (swar
 | Expectation | Literature | Our result | Verdict |
 |-------------|------------|------------|---------|
 | TS wins routing/scheduling | Pirim; Glover; Alharkan | TS 11/11 instance wins | Confirmed |
-| PSO weak on permutations | Sengupta; Mhamdi | PSO worst TSP; mid JSP | Confirmed |
+| PSO weak on permutations | Sengupta; Mhamdi | PSO worst TSP *(protocol)*; 2nd on JSP | Partial |
 | SA calibration-sensitive | Youssef | SA 2nd TSP; weak large JSP | Partial |
 | FS narrow spread | Zhang & Sun (~2%) | <0.05 obj spread SA/TS/PSO | Confirmed |
 | PSO competitive on binary FS | Xie et al. (enhanced variants) | PSO matches TS best 3/4 | Confirmed (baseline) |
@@ -447,7 +451,7 @@ Rankings align; gap magnitudes differ because literature often reports tuned/hyb
 | Criterion | SA | TS | PSO |
 |-----------|----|----|-----|
 | Quality (permutation) | Moderate; seed-sensitive | **Best** in our tests | Poor standalone |
-| Quality (wrapper FS) | Competitive | **Most stable mean** | **Matches TS best** on 3/4 datasets |
+| Quality (wrapper FS) | Competitive | Best mean on 2/4 datasets | Best mean on 2/4; matches TS best on 3/4 |
 | Scalability | Narrows vs TS at rat195; weak large JSP | Best gaps throughout | TSP collapse; JSP mid-tier |
 | Parameter burden | High (cooling vs budget) | Moderate (tenure, list) | High (swarm + encoding) |
 | Choose when… | Simple baseline; adequate TSP budget | **Quality-first** routing/scheduling | **Binary/FS wrappers**; hybrid if permutations |
@@ -462,15 +466,17 @@ Rankings align; gap magnitudes differ because literature often reports tuned/hyb
 
 1. Sample-test scale; not production benchmarks.  
 2. Single frozen parameter set per domain.  
-3. JSP job-major initializer inflates absolute gaps.  
-4. No formal significance tests yet (Wilcoxon/Friedman planned, D11).  
-5. Standalone algorithms only (literature hybrids out of scope).  
-6. AI-assisted development; researcher-directed protocol and interpretation.  
-7. Convergence figures exist under `results/` but are not embedded in this PDF export.
+3. **TSP PSO initializer bug:** PSO ignores configured nearest-neighbor starts; TSP PSO gaps are not fair cross-algorithm evidence until fixed and rerun.  
+4. **TSP tuning leakage in reporting:** Parameters tuned on eil51/berlin52/st70; only kroA100/ch130/rat195 are held-out comparison instances—TS gaps widen 6.3× tuning→held-out vs 1.3× for SA.  
+5. **FS objective:** raw features (no in-fold scaling), α=0.9/β=0.1 weights; WineEW winners can sit below majority CV accuracy—narrow bands may reflect misspecification, not encoding alone.  
+6. JSP job-major initializer inflates absolute gaps (relative rankings still fair).  
+7. No formal significance tests yet (Wilcoxon/Friedman planned, D11).  
+8. Standalone algorithms only (literature hybrids out of scope).  
+9. AI-assisted development; researcher-directed protocol and interpretation.
 
 ### 5.9 Conclusion
 
-Sample tests confirm directional patterns in the reviewed literature: Tabu Search leads on routing and scheduling quality; PSO fails on permutation TSP but remains more viable on JSP; feature selection shows narrow three-way competition in which PSO matches Tabu Search at best-seed on three of four wrapper datasets—directly supporting the encoding-distortion argument in §4.4. Early pilots illustrated SA calibration sensitivity on TSP; the full multi-instance study restores TS as routing leader at scale. The Comparative Evaluation Framework maps problem properties to algorithm choice rather than declaring a single winner—consistent with the No Free Lunch principle and Pirim’s problem-dependent interpretation.
+Sample tests support **JSP as the strongest evidence**: Tabu Search leads all five held-out instances with PSO second and SA third under a clean disjoint tuning/comparison protocol. On TSP, TS wins every reported instance, but held-out gaps are much wider than tuning-set gaps (6.3× mean degradation for TS vs 1.3× for SA), and PSO routing numbers are **Unresolved** until the initializer bug is fixed. Feature selection shows a narrow objective band, but WineEW winners sit below majority CV accuracy—interpretation as an encoding finding requires objective and preprocessing revision. The Comparative Evaluation Framework maps problem properties to algorithm choice rather than declaring a single winner—consistent with the No Free Lunch principle and Pirim’s problem-dependent interpretation.
 
 ---
 
@@ -495,7 +501,10 @@ Sample tests confirm directional patterns in the reviewed literature: Tabu Searc
 17. Zhan, S.-H., et al. (2016). List-based SA for TSP. *Computational Intelligence and Neuroscience*, 2016, 1712630.  
 18. Zhang, H., & Sun, G. (2002). Feature selection using tabu search. *Pattern Recognition*, 35(3), 701–711.  
 19. Zhang, W., & Nicholson, C. D. (2018). Metaheuristics for slope scaling procedure. arXiv:1808.10264.  
-20. Wolpert, D. H., & Macready, W. G. (1997). No free lunch theorems for optimization. *IEEE Trans. EC*, 1(1), 67–82.
+20. Wolpert, D. H., & Macready, W. G. (1997). No free lunch theorems for optimization. *IEEE Trans. EC*, 1(1), 67–82.  
+21. Hajek, B. (1988). Cooling schedules for optimal annealing. *Mathematics of Operations Research*, 13(2), 311–329.  
+22. Geman, S., & Geman, D. (1984). Stochastic relaxation, Gibbs distributions, and the Bayesian restoration of images. *IEEE TPAMI*, 6(6), 721–741.  
+23. Niño, F. (2012). *An Introduction to Tabu Search*. In *Nature-Inspired Algorithms for Optimisation*. Springer.
 
 ---
 

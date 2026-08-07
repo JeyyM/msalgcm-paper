@@ -11,6 +11,7 @@ import numpy as np
 from optimize.domains.base_problem import OptimizationProblem
 from optimize.domains.tsp.distance import build_distance_matrix, nearest_neighbor_route, tour_length
 from optimize.domains.tsp.loader import TSPInstance, load_tsplib
+from optimize.algorithms.pso_encoding import encode_permutation_by_item
 from optimize.domains.tsp.neighborhoods import apply_operator, random_operator
 from optimize.experiments.budget import EvaluationBudget
 
@@ -96,6 +97,9 @@ class TSPProblem(OptimizationProblem):
     def decode_for_pso(self, position: list[float]) -> list[int]:
         indices = np.argsort(position)
         return indices.tolist()
+
+    def encode_for_pso(self, solution: list[int]) -> np.ndarray:
+        return encode_permutation_by_item(solution, self.instance.num_cities)
 
     def serialize_solution(self, solution: list[int]) -> dict[str, Any]:
         length = tour_length(solution, self.distance_matrix)

@@ -47,6 +47,10 @@ class OptimizationProblem(ABC):
         """Decode a PSO position into a valid domain solution."""
         raise NotImplementedError(f"decode_for_pso not implemented for {self.domain_name}")
 
+    def encode_for_pso(self, solution: Any) -> np.ndarray:
+        """Encode a domain solution into random-key PSO position vector."""
+        raise NotImplementedError(f"encode_for_pso not implemented for {self.domain_name}")
+
     @abstractmethod
     def serialize_solution(self, solution: Any) -> dict[str, Any]:
         """JSON-serializable representation of a solution."""

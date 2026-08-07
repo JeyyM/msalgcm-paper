@@ -21,6 +21,7 @@ from optimize.types import StopReason
 
 ROOT = Path(__file__).resolve().parents[1]
 BREASTEW = ROOT / "datasets" / "feature_selection" / "ew" / "BreastEW.csv"
+WINEEW = ROOT / "datasets" / "feature_selection" / "ew" / "WineEW.csv"
 
 
 def test_load_breastew() -> None:
@@ -82,6 +83,29 @@ def test_fs_evaluator_uses_training_only_for_cv() -> None:
         assert np.array_equal(mocked_test, original_test)
 
 
+def test_fs_evaluator_standardization_scales_features() -> None:
+    dataset = load_ew_dataset(BREASTEW)
+    evaluator = FeatureSubsetEvaluator.from_dataset(
+        dataset,
+        test_size=0.3,
+        split_seed=7,
+        k_neighbors=3,
+        cv_folds=3,
+        standardize_features=True,
+    )
+    raw = np.array([[1.0, 1000.0], [2.0, 2000.0], [3.0, 3000.0]])
+    scaled, _ = evaluator._scale_train_test(raw, raw[:1])
+    assert not np.allclose(raw, scaled)
+    assert np.isclose(scaled[:, 0].std(), 1.0, atol=1e-6)
+
+
+def test_fs_default_weights_are_literature_aligned() -> None:
+    config = load_experiment_config(ROOT / "config" / "examples" / "fs_breastew_comparison.json")
+    assert config.domain_config["performance_weight"] == 0.99
+    assert config.domain_config["reduction_weight"] == 0.01
+    assert config.domain_config.get("standardize_features", True) is True
+
+
 def test_fs_sa_smoke() -> None:
     budget = EvaluationBudget(50)
     problem = create_problem(
@@ -89,8 +113,9 @@ def test_fs_sa_smoke() -> None:
         budget,
         {
             "instance_path": str(BREASTEW),
-            "performance_weight": 0.9,
-            "reduction_weight": 0.1,
+            "performance_weight": 0.99,
+            "reduction_weight": 0.01,
+            "standardize_features": True,
             "split_seed": 11,
             "operators": ["flip", "swap"],
         },
@@ -132,8 +157,9 @@ def test_fs_pso_smoke() -> None:
         budget,
         {
             "instance_path": str(BREASTEW),
-            "performance_weight": 0.9,
-            "reduction_weight": 0.1,
+            "performance_weight": 0.99,
+            "reduction_weight": 0.01,
+            "standardize_features": True,
             "split_seed": 11,
             "operators": ["flip", "swap"],
         },

@@ -22,11 +22,12 @@ def _require_sklearn():
         from sklearn.metrics import accuracy_score, f1_score
         from sklearn.model_selection import StratifiedKFold, train_test_split
         from sklearn.neighbors import KNeighborsClassifier
+        from sklearn.preprocessing import StandardScaler
     except ImportError as exc:
         raise ImportError(
             "scikit-learn is required for feature selection. Install with: pip install '.[ml]'"
         ) from exc
-    return KNeighborsClassifier, StratifiedKFold, train_test_split, accuracy_score, f1_score
+    return KNeighborsClassifier, StratifiedKFold, train_test_split, accuracy_score, f1_score, StandardScaler
 
 
 @dataclass
@@ -40,6 +41,7 @@ class FeatureSubsetEvaluator:
     cv_folds: int
     metric: str
     cv_seed: int
+    standardize_features: bool = True
     _cv_splits: list[tuple[np.ndarray, np.ndarray]] | None = field(
         default=None, init=False, repr=False, compare=False
     )
@@ -54,8 +56,9 @@ class FeatureSubsetEvaluator:
         k_neighbors: int,
         cv_folds: int,
         metric: str | None = None,
+        standardize_features: bool = True,
     ) -> FeatureSubsetEvaluator:
-        _, StratifiedKFold, train_test_split, _, _ = _require_sklearn()
+        _, StratifiedKFold, train_test_split, _, _, _ = _require_sklearn()
 
         resolved_metric = metric or cls._default_metric(dataset)
         X_train, X_test, y_train, y_test = train_test_split(
@@ -75,6 +78,7 @@ class FeatureSubsetEvaluator:
             cv_folds=cv_folds,
             metric=resolved_metric,
             cv_seed=split_seed,
+            standardize_features=standardize_features,
         )
 
     @staticmethod
@@ -89,8 +93,19 @@ class FeatureSubsetEvaluator:
             raise ValueError("at least one feature must be selected")
         return data[:, indices]
 
+    def _scale_train_test(
+        self,
+        X_train: np.ndarray,
+        X_other: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        if not self.standardize_features:
+            return X_train, X_other
+        _, _, _, _, _, StandardScaler = _require_sklearn()
+        scaler = StandardScaler()
+        return scaler.fit_transform(X_train), scaler.transform(X_other)
+
     def _score(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
-        _, _, _, accuracy_score, f1_score = _require_sklearn()
+        _, _, _, accuracy_score, f1_score, _ = _require_sklearn()
         if self.metric == "macro_f1":
             return float(f1_score(y_true, y_pred, average="macro"))
         if self.metric == "accuracy":
@@ -102,7 +117,7 @@ class FeatureSubsetEvaluator:
         # feature mask, so it is identical across every evaluation of a given
         # run — compute once and reuse instead of rebuilding per call.
         if self._cv_splits is None:
-            _, StratifiedKFold, _, _, _ = _require_sklearn()
+            _, StratifiedKFold, _, _, _, _ = _require_sklearn()
             splitter = StratifiedKFold(
                 n_splits=self.cv_folds,
                 shuffle=True,
@@ -112,21 +127,24 @@ class FeatureSubsetEvaluator:
         return self._cv_splits
 
     def cross_validation_loss(self, mask: list[int]) -> float:
-        KNeighborsClassifier, _, _, _, _ = _require_sklearn()
-        X_train = self._selected_matrix(mask, self.X_train)
+        KNeighborsClassifier, _, _, _, _, _ = _require_sklearn()
         scores: list[float] = []
         for train_index, validation_index in self._get_cv_splits():
+            X_train = self._selected_matrix(mask, self.X_train[train_index])
+            X_validation = self._selected_matrix(mask, self.X_train[validation_index])
+            X_train, X_validation = self._scale_train_test(X_train, X_validation)
             model = KNeighborsClassifier(n_neighbors=self.k_neighbors)
-            model.fit(X_train[train_index], self.y_train[train_index])
-            predictions = model.predict(X_train[validation_index])
+            model.fit(X_train, self.y_train[train_index])
+            predictions = model.predict(X_validation)
             scores.append(self._score(self.y_train[validation_index], predictions))
         mean_score = sum(scores) / len(scores)
         return 1.0 - mean_score
 
     def test_performance(self, mask: list[int]) -> float:
-        KNeighborsClassifier, _, _, _, _ = _require_sklearn()
+        KNeighborsClassifier, _, _, _, _, _ = _require_sklearn()
         X_train = self._selected_matrix(mask, self.X_train)
         X_test = self._selected_matrix(mask, self.X_test)
+        X_train, X_test = self._scale_train_test(X_train, X_test)
         model = KNeighborsClassifier(n_neighbors=self.k_neighbors)
         model.fit(X_train, self.y_train)
         predictions = model.predict(X_test)

@@ -185,12 +185,17 @@ def finalize_experiment(
     ]
 
     try:
-        from optimize.visualization.charts import generate_experiment_charts
+        import os
 
-        chart_paths = generate_experiment_charts(experiment_dir, results, config)
-        log_lines.append(f"charts={len(chart_paths)}")
-        for chart_path in chart_paths:
-            log_lines.append(f"chart={chart_path.relative_to(experiment_dir).as_posix()}")
+        if os.environ.get("OPTIMIZE_SKIP_CHARTS"):
+            log_lines.append("charts=skipped (OPTIMIZE_SKIP_CHARTS=1)")
+        else:
+            from optimize.visualization.charts import generate_experiment_charts
+
+            chart_paths = generate_experiment_charts(experiment_dir, results, config)
+            log_lines.append(f"charts={len(chart_paths)}")
+            for chart_path in chart_paths:
+                log_lines.append(f"chart={chart_path.relative_to(experiment_dir).as_posix()}")
     except ImportError:
         log_lines.append("charts=skipped (install matplotlib: pip install '.[viz]')")
     except Exception as exc:  # noqa: BLE001

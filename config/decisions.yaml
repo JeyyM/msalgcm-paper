@@ -95,8 +95,11 @@ decisions:
     primary_metric: "accuracy"
     multiclass_metric: "macro-F1 for WineEW"
     objective_weights:
-      performance_weight: "configurable; no silent default in experiments"
-      reduction_weight: "configurable"
+      performance_weight: 0.99
+      reduction_weight: 0.01
+      note: "Aligned with Xie et al. (2021) wrapper sparsity convention (v2 protocol, 2026-08-07)"
+    standardize_features: true
+    standardization_note: "StandardScaler fit on each CV train fold only; full train fit for hold-out test score"
     madelon_split: "Use official train/valid/test from UCI — never optimize on test"
     spect_split: "stratified holdout via domain_config.test_size + split_seed from seed_policy.base_seed"
     loader_bug_fixed: >
@@ -137,6 +140,17 @@ decisions:
       existed anywhere in the repo, so nothing needed a rerun beyond the 12 tuning
       groups affected (deleted and rerun clean). Added regression test
       test_fs_pso_smoke in tests/test_feature_selection.py.
+    fs_protocol_v2_fixed: >
+      2026-08-07: In-fold StandardScaler (standardize_features=true) and α=0.99/β=0.01
+      wrapper weights. Rerun all FS comparison experiments (4 datasets × 3 algorithms).
+
+  D15_pso_shared_initializer:
+    status: resolved
+    date: "2026-08-07"
+    value: "PSO seeds particle 0 from create_initial_solution via encode_for_pso"
+    notes: >
+      Fixes TSP PSO ignoring nearest_neighbor (starts were ~200%+ gap vs ~24% for SA/TS).
+      Rerun all 6 TSP particle_swarm comparison instances.
 
   D10_experimental_design:
     status: open

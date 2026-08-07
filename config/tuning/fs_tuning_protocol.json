@@ -20,22 +20,35 @@
       "known_optimum": null
     }
   ],
-  "comparison_instances": ["BreastEW", "WineEW", "LymphographyEW", "SpectEW", "MadelonEW"],
+  "comparison_instances": [
+    "BreastEW",
+    "WineEW",
+    "LymphographyEW",
+    "SpectEW",
+    "MadelonEW"
+  ],
   "runs_per_config": 5,
   "evaluation_budget": 1200,
   "final_comparison_evaluation_budget": 5000,
   "evaluation_budget_note": "Tuning uses a reduced 1200-eval budget (24% of the 5000-eval final-comparison budget) purely to keep the 36-cell grid tractable given the per-evaluation cost of k-fold k-NN cross-validation; relative config ranking is the goal here, not absolute quality. Final comparison configs still use the full 5000-eval budget (see final_comparison_evaluation_budget and config/examples/fs_breastew_comparison.json).",
   "base_seed": 4000,
   "selection_metric": "mean_best_objective",
-  "tie_breakers": ["std_best_objective", "mean_runtime_seconds"],
+  "tie_breakers": [
+    "std_best_objective",
+    "mean_runtime_seconds"
+  ],
   "domain_config": {
-    "performance_weight": 0.9,
-    "reduction_weight": 0.1,
+    "performance_weight": 0.99,
+    "reduction_weight": 0.01,
     "test_size": 0.3,
     "cv_folds": 5,
     "k_neighbors": 5,
     "initial_solution": "random",
-    "operators": ["flip", "swap"]
+    "operators": [
+      "flip",
+      "swap"
+    ],
+    "standardize_features": true
   },
   "algorithms": {
     "simulated_annealing": {

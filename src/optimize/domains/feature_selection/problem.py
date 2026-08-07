@@ -9,6 +9,7 @@ import numpy as np
 from optimize.domains.base_problem import OptimizationProblem
 from optimize.domains.feature_selection.evaluator import FeatureSubsetEvaluator
 from optimize.domains.feature_selection.loader import FeatureSelectionDataset, load_ew_dataset
+from optimize.algorithms.pso_encoding import encode_binary_mask
 from optimize.domains.feature_selection.neighborhoods import apply_operator, random_operator
 from optimize.experiments.budget import EvaluationBudget
 
@@ -26,6 +27,7 @@ class FeatureSelectionProblem(OptimizationProblem):
         operators: list[str] | None = None,
         initial_solution: str = "random",
         min_selected_features: int = 1,
+        standardize_features: bool = True,
     ) -> None:
         super().__init__(budget)
         self.dataset = dataset
@@ -35,6 +37,7 @@ class FeatureSelectionProblem(OptimizationProblem):
         self.operators = operators or ["flip", "swap"]
         self.initial_solution = initial_solution
         self.min_selected_features = min_selected_features
+        self.standardize_features = standardize_features
 
     @classmethod
     def from_config(cls, budget: EvaluationBudget, config: dict[str, Any]) -> FeatureSelectionProblem:
@@ -63,10 +66,12 @@ class FeatureSelectionProblem(OptimizationProblem):
             k_neighbors=int(config.get("k_neighbors", 5)),
             cv_folds=int(config.get("cv_folds", 5)),
             metric=config.get("metric"),
+            standardize_features=bool(config.get("standardize_features", True)),
         )
         operators = config.get("operators")
         initial_solution = config.get("initial_solution", "random")
         min_selected_features = int(config.get("min_selected_features", 1))
+        standardize_features = bool(config.get("standardize_features", True))
         return cls(
             budget=budget,
             dataset=dataset,
@@ -76,6 +81,7 @@ class FeatureSelectionProblem(OptimizationProblem):
             operators=operators,
             initial_solution=initial_solution,
             min_selected_features=min_selected_features,
+            standardize_features=standardize_features,
         )
 
     @property
@@ -147,6 +153,9 @@ class FeatureSelectionProblem(OptimizationProblem):
     def decode_for_pso(self, position: list[float]) -> list[int]:
         mask = [1 if value >= 0.5 else 0 for value in position]
         return self.repair(mask)
+
+    def encode_for_pso(self, solution: list[int]) -> np.ndarray:
+        return encode_binary_mask(self.repair(solution))
 
     def serialize_solution(self, solution: list[int]) -> dict[str, Any]:
         mask = self.repair(solution)

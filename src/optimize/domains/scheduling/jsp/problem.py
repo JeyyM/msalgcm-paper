@@ -16,6 +16,7 @@ from optimize.domains.scheduling.jsp.decoder import (
     decode_schedule,
 )
 from optimize.domains.scheduling.jsp.loader import JSPInstance, load_jsp
+from optimize.algorithms.pso_encoding import encode_labeled_sequence
 from optimize.domains.scheduling.jsp.neighborhoods import apply_operator, random_operator
 from optimize.experiments.budget import EvaluationBudget
 
@@ -115,6 +116,9 @@ class JSPProblem(OptimizationProblem):
     def decode_for_pso(self, position: list[float]) -> list[int]:
         order = np.argsort(position)
         return [self._operation_labels[index] for index in order]
+
+    def encode_for_pso(self, solution: list[int]) -> np.ndarray:
+        return encode_labeled_sequence(solution, self._operation_labels)
 
     def serialize_solution(self, solution: list[int]) -> dict[str, Any]:
         schedule = decode_schedule(self.instance, solution)

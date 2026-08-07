@@ -12,8 +12,8 @@
   },
   "instance_path": "datasets/feature_selection/ew/SonarEW.csv",
   "domain_config": {
-    "performance_weight": 0.9,
-    "reduction_weight": 0.1,
+    "performance_weight": 0.99,
+    "reduction_weight": 0.01,
     "test_size": 0.3,
     "cv_folds": 5,
     "k_neighbors": 5,
@@ -21,7 +21,8 @@
     "operators": [
       "flip",
       "swap"
-    ]
+    ],
+    "standardize_features": true
   },
   "algorithm_configs": {
     "tabu_search": {
