@@ -2,33 +2,28 @@
 
 Comparative platform for **Simulated Annealing**, **Tabu Search**, and **Particle Swarm Optimization** across TSP, job-shop scheduling, and feature selection.
 
-## Status
+## Start here
 
-| Phase | Status |
-|-------|--------|
-| Phase 0 — Scaffold | Done |
-| Phase 1 — Core framework | Done (mock domain) |
-| Phase 2 — TSP | Next |
-| Phase 3 — Scheduling | Planned |
-| Phase 4 — Feature selection | Planned |
+**[`documentation v1.md`](documentation%20v1.md)** — installation, running the website, current status, next steps.
 
-## Setup
+Archived planning docs: [`old documentation/`](old%20documentation/)
+
+## Quick start (website)
 
 ```bash
-pip install -e ".[dev]"
+pip install -e ".[dev,web,ml,viz]"
+npm install && npm install --prefix web/frontend
+npm run dev
 ```
 
-## CLI
+Open http://127.0.0.1:5173
+
+## Quick start (CLI)
 
 ```bash
-# List registered domains and algorithms
-optimize list
-
-# Validate an experiment config
-optimize validate --config config/examples/mock_smoke_test.json
-
-# Run an experiment
-optimize run --config config/examples/mock_smoke_test.json
+pip install -e ".[dev,ml]"
+python -m optimize.ui.cli list
+python -m optimize.ui.cli run --config config/examples/tsp_eil51_smoke.json
 ```
 
 ## Tests
@@ -37,29 +32,14 @@ optimize run --config config/examples/mock_smoke_test.json
 pytest
 ```
 
-## Project layout
+## Layout
 
 ```text
-config/           Decision registry + example experiment JSON
-datasets/         Benchmark instances (TSP, JSP, feature selection)
-scripts/          Dataset download utilities
-src/optimize/     Application code
-tests/            Unit and integration tests
-results/          Generated experiment output (gitignored)
+documentation v1.md    Current guide
+literature/            Paper references
+config/                Decisions + experiment configs
+datasets/              Benchmarks
+results/               Experiment output (gitignored)
+src/optimize/          Application code
+web/frontend/          React dashboard
 ```
-
-## Documentation
-
-- `metaheuristic_optimization_project_overview.md` — full requirements
-- `pipeline_definition.md` — runtime flow and build phases
-- `config/decisions.yaml` — locked research decisions
-
-## Datasets
-
-Download benchmarks:
-
-```bash
-python scripts/download_datasets.py
-```
-
-See `datasets/README.md` for sources and layout.

@@ -1,0 +1,200 @@
+{
+  "protocol_name": "tsp_parameter_tuning_v2",
+  "description": "Second tuning pass with random initial tours and expanded SA/PSO grids. Random init lets metaheuristics improve from a weak start so parameters and convergence matter.",
+  "supersedes": "tsp_parameter_tuning_v1",
+  "tuning_instances": [
+    {
+      "name": "eil51",
+      "path": "datasets/tsp/instances/eil51.tsp",
+      "known_optimum": 426
+    },
+    {
+      "name": "berlin52",
+      "path": "datasets/tsp/instances/berlin52.tsp",
+      "known_optimum": 7542
+    },
+    {
+      "name": "st70",
+      "path": "datasets/tsp/instances/st70.tsp",
+      "known_optimum": 675
+    }
+  ],
+  "comparison_instances": ["kroA100", "ch130", "rat195"],
+  "removed_instances": ["kroB100", "tsp225"],
+  "removed_path": "datasets/tsp/removed/",
+  "runs_per_config": 5,
+  "evaluation_budget": 100000,
+  "base_seed": 1000,
+  "selection_metric": "mean_gap_percentage",
+  "tie_breakers": ["std_gap_percentage", "mean_runtime_seconds"],
+  "domain_config": {
+    "initial_solution": "random",
+    "operators": ["two_opt", "two_opt", "inversion", "insertion", "swap"]
+  },
+  "algorithms": {
+    "simulated_annealing": {
+      "configs": [
+        {
+          "id": "sa_baseline",
+          "label": "v1 winner schedule (cooling 0.9995)",
+          "params": {
+            "initial_temperature": 3000.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.9995,
+            "moves_per_temperature": 200
+          }
+        },
+        {
+          "id": "sa_slow_cool",
+          "label": "Very slow cooling",
+          "params": {
+            "initial_temperature": 3000.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.9997,
+            "moves_per_temperature": 200
+          }
+        },
+        {
+          "id": "sa_high_temp",
+          "label": "Higher initial temperature",
+          "params": {
+            "initial_temperature": 5000.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.9995,
+            "moves_per_temperature": 200
+          }
+        },
+        {
+          "id": "sa_fast_cool",
+          "label": "Faster cooling",
+          "params": {
+            "initial_temperature": 3000.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.995,
+            "moves_per_temperature": 200
+          }
+        },
+        {
+          "id": "sa_low_temp",
+          "label": "Lower initial temperature",
+          "params": {
+            "initial_temperature": 1000.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.9995,
+            "moves_per_temperature": 200
+          }
+        },
+        {
+          "id": "sa_fast_moves",
+          "label": "Shorter temperature plateaus",
+          "params": {
+            "initial_temperature": 3000.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.9995,
+            "moves_per_temperature": 100
+          }
+        }
+      ]
+    },
+    "tabu_search": {
+      "configs": [
+        {
+          "id": "ts_wide_list",
+          "label": "v1 winner (candidate list 100)",
+          "params": {
+            "tabu_tenure": 25,
+            "candidate_list_size": 100
+          }
+        },
+        {
+          "id": "ts_baseline",
+          "label": "Baseline (candidate list 50)",
+          "params": {
+            "tabu_tenure": 25,
+            "candidate_list_size": 50
+          }
+        },
+        {
+          "id": "ts_short_tabu",
+          "label": "Shorter tabu tenure",
+          "params": {
+            "tabu_tenure": 15,
+            "candidate_list_size": 100
+          }
+        },
+        {
+          "id": "ts_long_tabu",
+          "label": "Longer tabu tenure",
+          "params": {
+            "tabu_tenure": 40,
+            "candidate_list_size": 100
+          }
+        }
+      ]
+    },
+    "particle_swarm": {
+      "configs": [
+        {
+          "id": "pso_baseline",
+          "label": "v1 baseline",
+          "params": {
+            "swarm_size": 50,
+            "inertia_weight": 0.6,
+            "cognitive_coefficient": 1.8,
+            "social_coefficient": 1.8
+          }
+        },
+        {
+          "id": "pso_swarm_80",
+          "label": "Larger swarm (80)",
+          "params": {
+            "swarm_size": 80,
+            "inertia_weight": 0.6,
+            "cognitive_coefficient": 1.8,
+            "social_coefficient": 1.8
+          }
+        },
+        {
+          "id": "pso_swarm_100",
+          "label": "Larger swarm (100)",
+          "params": {
+            "swarm_size": 100,
+            "inertia_weight": 0.6,
+            "cognitive_coefficient": 1.8,
+            "social_coefficient": 1.8
+          }
+        },
+        {
+          "id": "pso_small_swarm",
+          "label": "Smaller swarm (30)",
+          "params": {
+            "swarm_size": 30,
+            "inertia_weight": 0.6,
+            "cognitive_coefficient": 1.8,
+            "social_coefficient": 1.8
+          }
+        },
+        {
+          "id": "pso_high_inertia",
+          "label": "Higher inertia and coefficients",
+          "params": {
+            "swarm_size": 50,
+            "inertia_weight": 0.7,
+            "cognitive_coefficient": 2.0,
+            "social_coefficient": 2.0
+          }
+        },
+        {
+          "id": "pso_low_inertia",
+          "label": "Lower inertia and coefficients",
+          "params": {
+            "swarm_size": 50,
+            "inertia_weight": 0.5,
+            "cognitive_coefficient": 1.5,
+            "social_coefficient": 1.5
+          }
+        }
+      ]
+    }
+  }
+}

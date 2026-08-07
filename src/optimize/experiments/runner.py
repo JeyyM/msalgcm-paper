@@ -17,9 +17,11 @@ from optimize.experiments.models import ExperimentConfig, RunResult
 from optimize.experiments.progress import RunProgress
 from optimize.experiments.seed_manager import SeedManager
 from optimize.storage.writer import (
+    LiveConvergenceWriter,
     finalize_experiment,
     write_environment,
     write_experiment_config,
+    write_live_route_snapshot,
     write_run_result,
     write_seeds_csv,
 )
@@ -52,6 +54,8 @@ class ExperimentRunner:
         domain_config: dict[str, Any] | None = None,
         experiment_name: str = "single_run",
         run_id: str | None = None,
+        history_listener: Callable[[Any], None] | None = None,
+        live_solution_path: Path | None = None,
     ) -> RunResult:
         budget = EvaluationBudget(evaluation_budget)
         merged_domain_config = domain_config or {}
@@ -72,8 +76,50 @@ class ExperimentRunner:
         history = []
         iterations = 0
 
+        last_written_evaluations = -1
+        live_route_interval = 5
+
         try:
             algorithm.initialize(problem, algo_config, seed)
+
+            def combined_history_listener(record: Any) -> None:
+                nonlocal last_written_evaluations
+                if history_listener is not None:
+                    history_listener(record)
+                if live_solution_path is None:
+                    return
+                evals = record.objective_evaluations
+                if evals <= last_written_evaluations:
+                    return
+                if (
+                    last_written_evaluations >= 0
+                    and evals - last_written_evaluations < live_route_interval
+                ):
+                    return
+                last_written_evaluations = evals
+                try:
+                    write_live_route_snapshot(
+                        live_solution_path,
+                        problem,
+                        algorithm,
+                        evals,
+                    )
+                except OSError:
+                    pass
+
+            algorithm.set_history_listener(combined_history_listener)
+            if live_solution_path is not None:
+                last_written_evaluations = budget.count
+                try:
+                    write_live_route_snapshot(
+                        live_solution_path,
+                        problem,
+                        algorithm,
+                        budget.count,
+                    )
+                except OSError:
+                    pass
+
             initial_objective = algorithm._current_objective  # noqa: SLF001
             algorithm.run()
             stop_reason = algorithm.get_stop_reason()
@@ -87,6 +133,22 @@ class ExperimentRunner:
             status = RunStatus.FAILED
             stop_reason = StopReason.ERROR
             error_message = str(exc)
+        finally:
+            algorithm.set_history_listener(None)
+            algorithm.set_solution_listener(None)
+            if (
+                live_solution_path is not None
+                and budget.count > last_written_evaluations
+            ):
+                try:
+                    write_live_route_snapshot(
+                        live_solution_path,
+                        problem,
+                        algorithm,
+                        budget.count,
+                    )
+                except OSError:
+                    pass
 
         runtime = time.perf_counter() - start
 
@@ -160,17 +222,36 @@ class ExperimentRunner:
                 if progress_callback:
                     progress_callback(progress)
 
-                result = self.run_single(
-                    algorithm_name=algorithm_name,
-                    problem_domain=config.domain,
-                    instance=config.instance,
-                    seed=seed,
-                    evaluation_budget=config.evaluation_budget,
-                    algorithm_config=algo_config,
-                    domain_config=domain_config,
-                    experiment_name=config.experiment_name,
-                    run_id=run_id,
-                )
+                convergence_path = experiment_dir / "convergence" / f"{run_id}.csv"
+                live_solution_path = experiment_dir / "solutions" / f"{run_id}.live.json"
+                live_writer = LiveConvergenceWriter(convergence_path)
+                last_progress_update = time.perf_counter()
+
+                def history_listener(record: Any) -> None:
+                    nonlocal last_progress_update
+                    live_writer.append(record)
+                    progress.current_best_objective = record.best_objective
+                    now = time.perf_counter()
+                    if progress_callback and now - last_progress_update >= 0.5:
+                        last_progress_update = now
+                        progress_callback(progress)
+
+                try:
+                    result = self.run_single(
+                        algorithm_name=algorithm_name,
+                        problem_domain=config.domain,
+                        instance=config.instance,
+                        seed=seed,
+                        evaluation_budget=config.evaluation_budget,
+                        algorithm_config=algo_config,
+                        domain_config=domain_config,
+                        experiment_name=config.experiment_name,
+                        run_id=run_id,
+                        history_listener=history_listener,
+                        live_solution_path=live_solution_path,
+                    )
+                finally:
+                    live_writer.close()
                 write_run_result(result, experiment_dir)
                 results.append(result)
                 completed += 1

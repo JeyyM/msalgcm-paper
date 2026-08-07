@@ -1,0 +1,34 @@
+{
+  "experiment_name": "tuning_ts_wide_list_eil51",
+  "domain": "tsp",
+  "instance": "eil51",
+  "algorithms": [
+    "tabu_search"
+  ],
+  "runs": 5,
+  "evaluation_budget": 100000,
+  "seed_policy": {
+    "base_seed": 1000
+  },
+  "instance_path": "datasets/tsp/instances/eil51.tsp",
+  "domain_config": {
+    "initial_solution": "random",
+    "operators": [
+      "two_opt",
+      "two_opt",
+      "inversion",
+      "insertion",
+      "swap"
+    ]
+  },
+  "algorithm_configs": {
+    "tabu_search": {
+      "tabu_tenure": 25,
+      "candidate_list_size": 100
+    }
+  },
+  "output": {
+    "directory": "results\\tuning_v2\\experiments"
+  },
+  "runtime_budget_seconds": null
+}

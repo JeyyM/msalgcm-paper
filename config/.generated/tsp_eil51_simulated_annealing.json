@@ -1,0 +1,46 @@
+{
+  "experiment_name": "tsp_eil51_simulated_annealing",
+  "domain": "tsp",
+  "instance": "eil51",
+  "algorithms": [
+    "simulated_annealing"
+  ],
+  "runs": 30,
+  "evaluation_budget": 100000,
+  "seed_policy": {
+    "base_seed": 1000
+  },
+  "instance_path": "datasets/tsp/instances/eil51.tsp",
+  "domain_config": {
+    "initial_solution": "nearest_neighbor",
+    "operators": [
+      "two_opt",
+      "two_opt",
+      "inversion",
+      "insertion",
+      "swap"
+    ]
+  },
+  "algorithm_configs": {
+    "simulated_annealing": {
+      "initial_temperature": 3000.0,
+      "final_temperature": 0.001,
+      "cooling_factor": 0.9995,
+      "moves_per_temperature": 200
+    },
+    "tabu_search": {
+      "candidate_list_size": 100,
+      "tabu_tenure": 15
+    },
+    "particle_swarm": {
+      "cognitive_coefficient": 1.8,
+      "inertia_weight": 0.6,
+      "social_coefficient": 1.8,
+      "swarm_size": 100
+    }
+  },
+  "output": {
+    "directory": "results"
+  },
+  "runtime_budget_seconds": null
+}

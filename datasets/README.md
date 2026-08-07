@@ -7,8 +7,12 @@ Established benchmark instances for the metaheuristic optimization platform.
 ```text
 datasets/
 ├── tsp/
-│   ├── instances/          # TSPLIB .tsp files
-│   └── metadata.json       # Known optima
+│   ├── instances/          # Active TSPLIB .tsp files (6 benchmark instances)
+│   ├── removed/            # Archived instances not in the paper benchmark
+│   │   ├── instances/
+│   │   ├── metadata.json
+│   │   └── README.md
+│   └── metadata.json       # Known optima + roles (tuning vs comparison)
 ├── scheduling/
 │   └── jsp/
 │       ├── instances/      # Taillard / OR-Library JSP files
@@ -25,7 +29,7 @@ datasets/
 
 | Domain | Source | Instances |
 |--------|--------|-----------|
-| TSP | [TSPLIB95](https://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/) via [mastqe/tsplib](https://github.com/mastqe/tsplib) | eil51, berlin52, st70, kroA100, kroB100, ch130, rat195, tsp225 |
+| TSP | [TSPLIB95](https://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/) via [mastqe/tsplib](https://github.com/mastqe/tsplib) | **Active:** eil51, berlin52, st70, kroA100, ch130, rat195. **Archived:** kroB100, tsp225 (`tsp/removed/`) |
 | JSP | [SchedulingLab/jsp-instances](https://github.com/SchedulingLab/jsp-instances) | ft10, ta01, ta21, ta31, ta41, ta51, ta71 |
 | Feature selection (raw) | [UCI ML Repository](https://archive.ics.uci.edu/) | zoo, wine, wdbc, ionosphere, sonar, spect, spectf, lymphography, madelon |
 | Feature selection (EW) | OpenML + equal-width discretization (k=5); SPECT native binary | BreastEW, WineEW, SonarEW, IonosphereEW, ZooEW, LymphographyEW, SpectEW, MadelonEW |

@@ -4,7 +4,7 @@
   "instance": "BreastEW",
   "instance_path": "datasets/feature_selection/ew/BreastEW.csv",
   "algorithms": ["simulated_annealing", "tabu_search", "particle_swarm"],
-  "runs": 10,
+  "runs": 30,
   "evaluation_budget": 5000,
   "seed_policy": {
     "base_seed": 4000

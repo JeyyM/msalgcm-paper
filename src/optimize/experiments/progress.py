@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -25,7 +26,7 @@ class RunProgress:
     log: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "status": self.status,
             "job_type": self.job_type,
             "config_path": self.config_path,
@@ -47,3 +48,15 @@ class RunProgress:
                 else 0.0
             ),
         }
+        if self.experiment_dir and self.current_run_id:
+            try:
+                from optimize.api.services.results_reader import get_live_solution
+
+                live = get_live_solution(self.experiment_dir, self.current_run_id)
+                current = live.get("current") or {}
+                payload["live_route"] = current.get("route")
+                payload["live_distance"] = current.get("distance")
+                payload["live_evaluations"] = live.get("objective_evaluations")
+            except (FileNotFoundError, OSError, ValueError, TypeError, json.JSONDecodeError):
+                pass
+        return payload

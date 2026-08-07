@@ -1,0 +1,24 @@
+{
+  "status": "removed_from_benchmark",
+  "reason": "Hold-out instances excluded to keep the active TSP suite at six (3 tuning + 3 comparison).",
+  "source": "TSPLIB95 (via GitHub mirrors)",
+  "format": "TSPLIB .tsp (EUC_2D)",
+  "known_optima": {
+    "kroB100": 22141,
+    "tsp225": 3919
+  },
+  "instances": [
+    {
+      "name": "kroB100",
+      "file": "instances/kroB100.tsp",
+      "known_optimum": 22141,
+      "former_role": "hold-out"
+    },
+    {
+      "name": "tsp225",
+      "file": "instances/tsp225.tsp",
+      "known_optimum": 3919,
+      "former_role": "hold-out"
+    }
+  ]
+}

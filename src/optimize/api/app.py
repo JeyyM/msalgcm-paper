@@ -14,6 +14,7 @@ from optimize.api.services.job_manager import job_manager
 from optimize.api.services.results_reader import (
     get_convergence,
     get_experiment_detail,
+    get_live_solution,
     get_solution,
     get_study_detail,
     list_configs,
@@ -24,7 +25,7 @@ from optimize.api.services.results_reader import (
 from optimize.config.loader import load_experiment_config
 from optimize.experiments.runner import ExperimentRunner
 
-app = FastAPI(title="MSALGCM Optimize API", version="0.1.0")
+app = FastAPI(title="MSALGCM Optimize API", version="0.1.1")
 
 app.add_middleware(
     CORSMiddleware,
@@ -38,6 +39,11 @@ app.add_middleware(
 class RunJobRequest(BaseModel):
     config_path: str
     job_type: str = "experiment"
+
+
+class TspRunRequest(BaseModel):
+    instance: str
+    algorithm: str
 
 
 @app.get("/api/health")
@@ -79,9 +85,19 @@ def api_get_convergence(experiment_id: str, run_id: str, downsample: int = 300) 
 
 
 @app.get("/api/experiments/{experiment_id}/solutions/{run_id}")
-def api_get_solution(experiment_id: str, run_id: str) -> dict:
+def api_get_solution(experiment_id: str, run_id: str, live: bool = False) -> dict:
     try:
+        if live:
+            return get_live_solution(experiment_id, run_id)
         return get_solution(experiment_id, run_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.get("/api/experiments/{experiment_id}/solutions/{run_id}/live")
+def api_get_live_solution(experiment_id: str, run_id: str) -> dict:
+    try:
+        return get_live_solution(experiment_id, run_id)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
@@ -133,6 +149,113 @@ def api_validate_config(body: RunJobRequest) -> dict:
     if errors:
         return {"valid": False, "errors": errors}
     return {"valid": True}
+
+
+class JspRunRequest(BaseModel):
+    instance: str
+    algorithm: str
+
+
+class FsRunRequest(BaseModel):
+    instance: str
+    algorithm: str
+
+
+@app.get("/api/domains/tsp")
+def api_tsp_catalog() -> dict:
+    from optimize.api.services.tsp_catalog import tsp_completion_status
+
+    return tsp_completion_status()
+
+
+@app.get("/api/domains/tsp/runs")
+def api_tsp_runs(instance: str, algorithm: str) -> list[dict]:
+    from optimize.api.services.tsp_catalog import list_tsp_runs
+
+    return list_tsp_runs(instance, algorithm)
+
+
+@app.get("/api/domains/tsp/instances/{instance}/geometry")
+def api_tsp_instance_geometry(instance: str) -> dict:
+    from optimize.api.services.tsp_catalog import get_tsp_instance_geometry
+
+    try:
+        return get_tsp_instance_geometry(instance)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/api/domains/tsp/run")
+def api_start_tsp_run(body: TspRunRequest) -> dict:
+    from optimize.api.services.tsp_catalog import TSP_ALGORITHMS, prepare_tsp_launch, write_tsp_config_file
+
+    if body.algorithm not in TSP_ALGORITHMS:
+        raise HTTPException(status_code=400, detail=f"unsupported algorithm: {body.algorithm}")
+    try:
+        prepare_tsp_launch(body.instance, body.algorithm)
+        config_path = write_tsp_config_file(body.instance, body.algorithm)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    job_id = job_manager.start_experiment(config_path)
+    return {"job_id": job_id, "config_path": str(config_path)}
+
+
+@app.get("/api/domains/scheduling")
+def api_jsp_catalog() -> dict:
+    from optimize.api.services.jsp_catalog import jsp_completion_status
+
+    return jsp_completion_status()
+
+
+@app.get("/api/domains/scheduling/runs")
+def api_jsp_runs(instance: str, algorithm: str) -> list[dict]:
+    from optimize.api.services.jsp_catalog import list_jsp_runs
+
+    return list_jsp_runs(instance, algorithm)
+
+
+@app.post("/api/domains/scheduling/run")
+def api_start_jsp_run(body: JspRunRequest) -> dict:
+    from optimize.api.services.jsp_catalog import JSP_ALGORITHMS, prepare_jsp_launch, write_jsp_config_file
+
+    if body.algorithm not in JSP_ALGORITHMS:
+        raise HTTPException(status_code=400, detail=f"unsupported algorithm: {body.algorithm}")
+    try:
+        prepare_jsp_launch(body.instance, body.algorithm)
+        config_path = write_jsp_config_file(body.instance, body.algorithm)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    job_id = job_manager.start_experiment(config_path)
+    return {"job_id": job_id, "config_path": str(config_path)}
+
+
+@app.get("/api/domains/feature-selection")
+def api_fs_catalog() -> dict:
+    from optimize.api.services.fs_catalog import fs_completion_status
+
+    return fs_completion_status()
+
+
+@app.get("/api/domains/feature-selection/runs")
+def api_fs_runs(instance: str, algorithm: str) -> list[dict]:
+    from optimize.api.services.fs_catalog import list_fs_runs
+
+    return list_fs_runs(instance, algorithm)
+
+
+@app.post("/api/domains/feature-selection/run")
+def api_start_fs_run(body: FsRunRequest) -> dict:
+    from optimize.api.services.fs_catalog import FS_ALGORITHMS, prepare_fs_launch, write_fs_config_file
+
+    if body.algorithm not in FS_ALGORITHMS:
+        raise HTTPException(status_code=400, detail=f"unsupported algorithm: {body.algorithm}")
+    try:
+        prepare_fs_launch(body.instance, body.algorithm)
+        config_path = write_fs_config_file(body.instance, body.algorithm)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    job_id = job_manager.start_experiment(config_path)
+    return {"job_id": job_id, "config_path": str(config_path)}
 
 
 @app.post("/api/jobs/run")

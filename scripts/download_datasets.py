@@ -12,14 +12,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DATASETS = ROOT / "datasets"
 
-TSP_INSTANCES = [
+TSP_ACTIVE_INSTANCES = [
     "eil51",
     "berlin52",
     "st70",
     "kroA100",
-    "kroB100",
     "ch130",
     "rat195",
+]
+
+TSP_REMOVED_INSTANCES = [
+    "kroB100",
     "tsp225",
 ]
 
@@ -32,6 +35,15 @@ TSP_KNOWN_OPTIMA = {
     "ch130": 6110,
     "rat195": 2323,
     "tsp225": 3919,
+}
+
+TSP_INSTANCE_ROLES = {
+    "eil51": "tuning",
+    "berlin52": "tuning",
+    "st70": "tuning",
+    "kroA100": "comparison",
+    "ch130": "comparison",
+    "rat195": "comparison",
 }
 
 JSP_INSTANCES = ["ft10", "ta01", "ta21", "ta31", "ta41", "ta51", "ta71"]
@@ -144,12 +156,10 @@ def download_with_fallback(urls: list[str], dest: Path) -> str:
     raise RuntimeError(f"All download attempts failed for {dest.name}: {last_error}")
 
 
-def download_tsp() -> dict:
-    out_dir = DATASETS / "tsp" / "instances"
+def _download_tsp_subset(names: list[str], out_dir: Path) -> dict:
     out_dir.mkdir(parents=True, exist_ok=True)
     results = {"downloaded": [], "failed": []}
-
-    for name in TSP_INSTANCES:
+    for name in names:
         dest = out_dir / f"{name}.tsp"
         urls = [template.format(name=name) for template in TSP_MIRRORS]
         try:
@@ -157,25 +167,64 @@ def download_tsp() -> dict:
             results["downloaded"].append({"instance": name, "source": source})
         except RuntimeError as exc:
             results["failed"].append({"instance": name, "error": str(exc)})
+    return results
 
-    metadata = {
+
+def download_tsp() -> dict:
+    active_dir = DATASETS / "tsp" / "instances"
+    removed_dir = DATASETS / "tsp" / "removed" / "instances"
+    active_results = _download_tsp_subset(TSP_ACTIVE_INSTANCES, active_dir)
+    removed_results = _download_tsp_subset(TSP_REMOVED_INSTANCES, removed_dir)
+
+    active_metadata = {
         "source": "TSPLIB95 (via GitHub mirrors)",
         "format": "TSPLIB .tsp (EUC_2D)",
-        "known_optima": TSP_KNOWN_OPTIMA,
+        "active_benchmark": {
+            "tuning": [name for name in TSP_ACTIVE_INSTANCES if TSP_INSTANCE_ROLES[name] == "tuning"],
+            "comparison": [
+                name for name in TSP_ACTIVE_INSTANCES if TSP_INSTANCE_ROLES[name] == "comparison"
+            ],
+        },
+        "removed_instances": "removed/",
+        "known_optima": {name: TSP_KNOWN_OPTIMA[name] for name in TSP_ACTIVE_INSTANCES},
         "instances": [
             {
                 "name": name,
                 "file": f"instances/{name}.tsp",
                 "known_optimum": TSP_KNOWN_OPTIMA.get(name),
+                "role": TSP_INSTANCE_ROLES[name],
             }
-            for name in TSP_INSTANCES
+            for name in TSP_ACTIVE_INSTANCES
+        ],
+    }
+    removed_metadata = {
+        "status": "removed_from_benchmark",
+        "reason": "Hold-out instances excluded to keep the active TSP suite at six.",
+        "source": "TSPLIB95 (via GitHub mirrors)",
+        "format": "TSPLIB .tsp (EUC_2D)",
+        "known_optima": {name: TSP_KNOWN_OPTIMA[name] for name in TSP_REMOVED_INSTANCES},
+        "instances": [
+            {
+                "name": name,
+                "file": f"instances/{name}.tsp",
+                "known_optimum": TSP_KNOWN_OPTIMA.get(name),
+                "former_role": "hold-out",
+            }
+            for name in TSP_REMOVED_INSTANCES
         ],
     }
     (DATASETS / "tsp" / "metadata.json").write_text(
-        json.dumps(metadata, indent=2),
+        json.dumps(active_metadata, indent=2),
         encoding="utf-8",
     )
-    return results
+    (DATASETS / "tsp" / "removed" / "metadata.json").write_text(
+        json.dumps(removed_metadata, indent=2),
+        encoding="utf-8",
+    )
+    return {
+        "active": active_results,
+        "removed": removed_results,
+    }
 
 
 def download_jsp() -> dict:

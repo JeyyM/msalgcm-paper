@@ -40,10 +40,40 @@ def _downsample(
     y_values: list[float],
     max_points: int = 300,
 ) -> tuple[list[float], list[float]]:
+    """Keep endpoints and best-improvement steps, then uniform fill."""
     if len(x_values) <= max_points:
         return x_values, y_values
-    step = max(1, len(x_values) // max_points)
-    return x_values[::step], y_values[::step]
+
+    keep: set[int] = {0, len(x_values) - 1}
+    best = float("inf")
+    for index, value in enumerate(y_values):
+        if value < best - 1e-9:
+            best = value
+            keep.add(index)
+
+    remaining = max_points - len(keep)
+    if remaining > 0:
+        step = max(1, len(x_values) // remaining)
+        for index in range(0, len(x_values), step):
+            keep.add(index)
+
+    ordered = sorted(keep)
+    if len(ordered) > max_points:
+        step = max(1, len(ordered) // max_points)
+        ordered = sorted({ordered[index] for index in range(0, len(ordered), step)} | {0, len(x_values) - 1})
+
+    ordered = ordered[: max_points - 1] + [len(x_values) - 1]
+    return [x_values[index] for index in ordered], [y_values[index] for index in ordered]
+
+
+def _y_limits(values: list[float]) -> tuple[float, float]:
+    if not values:
+        return 0.0, 1.0
+    ymin = min(values)
+    ymax = max(values)
+    span = ymax - ymin
+    pad = span * 0.08 if span > 1e-9 else max(abs(ymin) * 0.05, 1.0)
+    return ymin - pad, ymax + pad
 
 
 def _load_convergence_from_csv(path: Path) -> tuple[list[int], list[float]]:
@@ -101,6 +131,7 @@ def plot_convergence(
 
     figure, axis = plt.subplots(figsize=(10, 6))
     colors = plt.cm.tab10.colors
+    y_values_for_axis: list[float] = []
 
     for index, (algorithm, runs) in enumerate(sorted(grouped.items())):
         histories: list[tuple[list[int], list[float]]] = []
@@ -115,22 +146,27 @@ def plot_convergence(
                 else:
                     continue
             histories.append((evaluations, bests))
+            y_values_for_axis.extend([bests[0], bests[-1]])
 
         if not histories:
             continue
 
         x_values, y_values = _mean_convergence_curve(histories, config.evaluation_budget)
+        y_values_for_axis.extend(y_values)
         axis.plot(
             x_values,
             y_values,
             label=_algorithm_label(algorithm),
             color=colors[index % len(colors)],
             linewidth=2,
+            drawstyle="steps-post",
         )
 
     axis.set_xlabel("Objective Evaluations")
     axis.set_ylabel("Best Objective")
     axis.set_title(f"Convergence — {config.instance} ({config.domain})")
+    if y_values_for_axis:
+        axis.set_ylim(_y_limits(y_values_for_axis))
     axis.legend()
     axis.grid(True, alpha=0.3)
     figure.tight_layout()
@@ -158,6 +194,7 @@ def plot_convergence_by_algorithm(
 
     for row_index, algorithm in enumerate(algorithms):
         axis = axes[row_index, 0]
+        y_values_for_axis: list[float] = []
         for run in grouped[algorithm]:
             if run.history:
                 evaluations = [record.objective_evaluations for record in run.history]
@@ -168,15 +205,24 @@ def plot_convergence_by_algorithm(
                     continue
                 evaluations, bests = _load_convergence_from_csv(csv_path)
 
+            y_values_for_axis.extend([bests[0], bests[-1]])
             x_values, y_values = _downsample(
                 [float(value) for value in evaluations],
                 bests,
             )
-            axis.plot(x_values, y_values, alpha=0.35, linewidth=1)
+            axis.plot(
+                x_values,
+                y_values,
+                alpha=0.35,
+                linewidth=1,
+                drawstyle="steps-post",
+            )
 
         axis.set_ylabel("Best Objective")
         axis.set_title(_algorithm_label(algorithm))
         axis.grid(True, alpha=0.3)
+        if y_values_for_axis:
+            axis.set_ylim(_y_limits(y_values_for_axis))
 
     axes[-1, 0].set_xlabel("Objective Evaluations")
     figure.suptitle(f"Convergence by Run — {config.instance}", y=1.01)

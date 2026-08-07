@@ -1,5 +1,5 @@
 # Living decision registry — update when research choices are locked.
-# See pipeline_definition.md §7
+# See documentation v1.md and old documentation/pipeline_definition.md
 
 decisions:
   D1_language:
@@ -19,16 +19,11 @@ decisions:
 
   D4_tsp_data:
     status: resolved
-    value: "TSPLIB via datasets/tsp/instances/"
-    instances:
-      - eil51
-      - berlin52
-      - st70
-      - kroA100
-      - kroB100
-      - ch130
-      - rat195
-      - tsp225
+    value: "TSPLIB via datasets/tsp/instances/ (6 active instances)"
+    tuning_instances: [eil51, berlin52, st70]
+    comparison_instances: [kroA100, ch130, rat195]
+    removed_instances: [kroB100, tsp225]
+    removed_path: "datasets/tsp/removed/"
     format: "TSPLIB .tsp (EUC_2D)"
     known_optima: "datasets/tsp/metadata.json"
 
@@ -91,8 +86,22 @@ decisions:
     value: "Export CSV for external analysis until tests approved"
 
   D12_tuning_protocol:
-    status: open
-    value: "Separate tuning pipeline; not automated in v1"
+    status: resolved
+    value: "config/tuning/tsp_tuning_protocol_v2.json (supersedes v1)"
+    tuning_instances: [eil51, berlin52, st70]
+    comparison_instances: [kroA100, ch130, rat195]
+    removed_instances: [kroB100, tsp225]
+    removed_path: datasets/tsp/removed/
+    initial_solution: random
+    runs_per_config: 5
+    final_comparison_runs: 30
+    evaluation_budget: 100000
+    selection_metric: mean_gap_percentage
+    documentation: old documentation/tuning_documentation.md
+    notes: >
+      v2 uses random initial tours so metaheuristics can improve from weak starts.
+      v1 nearest-neighbor tuning retained under results/tuning for reference.
+      TS and PSO frozen via NN confirmation (tsp_tuning_confirm_nn.json) in results/tuning/nn_confirm/.
 
 first_build_target:
   phase: "TSP vertical slice"

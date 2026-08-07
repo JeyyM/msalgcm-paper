@@ -158,6 +158,34 @@ def get_study_detail(study_id: str, results_dir: Path | None = None) -> dict[str
     }
 
 
+def _downsample_convergence(rows: list[dict[str, Any]], max_points: int) -> list[dict[str, Any]]:
+    """Keep first/last points, best-improvement steps, then uniform fill up to max_points."""
+    if max_points <= 0 or len(rows) <= max_points:
+        return rows
+
+    keep: set[int] = {0, len(rows) - 1}
+    best = float("inf")
+    for index, row in enumerate(rows):
+        value = float(row["best_objective"])
+        if value < best - 1e-9:
+            best = value
+            keep.add(index)
+
+    remaining = max_points - len(keep)
+    if remaining > 0:
+        step = max(1, len(rows) // remaining)
+        for index in range(0, len(rows), step):
+            keep.add(index)
+
+    ordered = sorted(keep)
+    if len(ordered) > max_points:
+        step = max(1, len(ordered) // max_points)
+        ordered = sorted({ordered[index] for index in range(0, len(ordered), step)} | {0, len(rows) - 1})
+
+    ordered = ordered[: max_points - 1] + [len(rows) - 1]
+    return [rows[index] for index in ordered]
+
+
 def get_convergence(
     experiment_id: str,
     run_id: str,
@@ -171,8 +199,7 @@ def get_convergence(
 
     rows = _read_csv(path)
     if downsample > 0 and len(rows) > downsample:
-        step = max(1, len(rows) // downsample)
-        rows = rows[::step]
+        rows = _downsample_convergence(rows, downsample)
     return [
         {
             "objective_evaluations": int(row["objective_evaluations"]),
@@ -194,6 +221,31 @@ def get_solution(
     if not path.exists():
         raise FileNotFoundError(f"solution not found: {run_id}")
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def get_live_solution(
+    experiment_id: str,
+    run_id: str,
+    results_dir: Path | None = None,
+) -> dict[str, Any]:
+    import time
+
+    root = results_dir or results_root()
+    path = root / experiment_id / "solutions" / f"{run_id}.live.json"
+    if not path.exists():
+        raise FileNotFoundError(f"live solution not found: {run_id}")
+
+    last_error: json.JSONDecodeError | None = None
+    for _ in range(5):
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            last_error = exc
+            time.sleep(0.02)
+
+    if last_error is not None:
+        raise last_error
+    raise FileNotFoundError(f"live solution not readable: {run_id}")
 
 
 def list_configs(config_dir: Path | None = None) -> list[dict[str, Any]]:

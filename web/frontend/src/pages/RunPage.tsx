@@ -14,6 +14,15 @@ export function RunPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  const domainFilter = searchParams.get("domain");
+  const filteredDomain = domainFilter === "feature-selection" ? "feature_selection" : domainFilter;
+
+  const visibleConfigs = useMemo(() => {
+    const byKind = configs.filter((item) => item.kind === jobType);
+    if (!filteredDomain) return byKind;
+    return byKind.filter((item) => item.domain === filteredDomain);
+  }, [configs, jobType, filteredDomain]);
+
   const selectedConfig = useMemo(
     () => configs.find((item) => item.path === configPath),
     [configs, configPath],
@@ -22,11 +31,18 @@ export function RunPage() {
   useEffect(() => {
     api.listConfigs().then((items) => {
       setConfigs(items);
-      if (items.length) {
-        setConfigPath(items.find((item) => item.kind === "experiment")?.path ?? items[0].path);
-      }
     });
   }, []);
+
+  useEffect(() => {
+    if (!visibleConfigs.length) {
+      setConfigPath("");
+      return;
+    }
+    if (!visibleConfigs.some((item) => item.path === configPath)) {
+      setConfigPath(visibleConfigs[0].path);
+    }
+  }, [visibleConfigs, configPath]);
 
   useEffect(() => {
     const jobId = searchParams.get("job");
@@ -103,15 +119,13 @@ export function RunPage() {
               <option value="study">Multi-instance study</option>
             </select>
             <select value={configPath} onChange={(event) => setConfigPath(event.target.value)} className="wide-select">
-              {configs
-                .filter((item) => item.kind === jobType)
-                .map((item) => (
-                  <option key={item.path} value={item.path}>
-                    {item.name} · {item.path}
-                  </option>
-                ))}
+              {visibleConfigs.map((item) => (
+                <option key={item.path} value={item.path}>
+                  {item.name} · {item.path}
+                </option>
+              ))}
             </select>
-            <button onClick={startRun}>Start {selectedConfig?.name ?? "run"}</button>
+            <button onClick={startRun} disabled={!configPath}>Start {selectedConfig?.name ?? "run"}</button>
           </div>
         </SectionCard>
       )}
@@ -153,7 +167,7 @@ export function RunPage() {
           contextLabel={`${liveExperimentContext.fullLabel} · ${job.current_run_id}`}
           title={`Live convergence · ${job.current_run_id}`}
           subtitle={`Experiment folder: ${job.experiment_dir}`}
-          series={[{ name: job.current_run_id, data: liveConvergence, color: "#22d3ee" }]}
+            series={[{ name: job.current_run_id, data: liveConvergence, color: "#2563eb" }]}
         />
       )}
     </div>

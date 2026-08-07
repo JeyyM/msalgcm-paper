@@ -1,0 +1,36 @@
+{
+  "experiment_name": "tuning_pso_swarm_80_st70",
+  "domain": "tsp",
+  "instance": "st70",
+  "algorithms": [
+    "particle_swarm"
+  ],
+  "runs": 5,
+  "evaluation_budget": 100000,
+  "seed_policy": {
+    "base_seed": 1000
+  },
+  "instance_path": "datasets/tsp/instances/st70.tsp",
+  "domain_config": {
+    "initial_solution": "random",
+    "operators": [
+      "two_opt",
+      "two_opt",
+      "inversion",
+      "insertion",
+      "swap"
+    ]
+  },
+  "algorithm_configs": {
+    "particle_swarm": {
+      "swarm_size": 80,
+      "inertia_weight": 0.6,
+      "cognitive_coefficient": 1.8,
+      "social_coefficient": 1.8
+    }
+  },
+  "output": {
+    "directory": "results\\tuning_v2\\experiments"
+  },
+  "runtime_budget_seconds": null
+}

@@ -27,7 +27,7 @@ type Props = {
   metric: "best_gap_percentage" | "mean_gap_percentage";
 };
 
-const COLORS = ["#60a5fa", "#34d399", "#fbbf24"];
+const COLORS = ["#2563eb", "#059669", "#d97706"];
 
 export function ScalabilityChart({ contextLabel, title, subtitle, rows, metric }: Props) {
   const algorithms = Array.from(new Set(rows.map((row) => row.algorithm))).sort();
@@ -49,10 +49,10 @@ export function ScalabilityChart({ contextLabel, title, subtitle, rows, metric }
       <div className="chart-box">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <CartesianGrid stroke="#1f2937" />
-            <XAxis dataKey="problem_size" stroke="#9ca3af" label={{ value: "Cities", position: "insideBottom", offset: -5 }} />
-            <YAxis stroke="#9ca3af" />
-            <Tooltip contentStyle={{ background: "#111827", border: "1px solid #374151" }} />
+            <CartesianGrid stroke="#e5e7eb" />
+            <XAxis dataKey="problem_size" stroke="#6b7280" label={{ value: "Cities", position: "insideBottom", offset: -5 }} />
+            <YAxis stroke="#6b7280" />
+            <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #dbe1ea", color: "#111827" }} />
             <Legend />
             {algorithms.map((algorithm, index) => (
               <Line

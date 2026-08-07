@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import csv
 import json
+import time
 from pathlib import Path
 from typing import Any
 
 from optimize.experiments.aggregate import build_seed_rows, build_statistics_rows, build_summary_rows
-from optimize.experiments.models import ExperimentConfig, RunResult
+from optimize.experiments.models import ExperimentConfig, HistoryRecord, RunResult
 from optimize.storage.environment import capture_environment
 
 
@@ -18,6 +19,56 @@ def _serialize_csv_value(value: Any) -> Any:
     if hasattr(value, "value"):
         return value.value
     return value
+
+
+class LiveConvergenceWriter:
+    """Append convergence rows during a run so dashboards can poll partial curves."""
+
+    _FIELDNAMES = ["objective_evaluations", "best_objective", "current_objective", "iteration"]
+
+    def __init__(self, path: Path) -> None:
+        self.path = path
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._handle = path.open("w", newline="", encoding="utf-8")
+        self._writer = csv.DictWriter(self._handle, fieldnames=self._FIELDNAMES)
+        self._writer.writeheader()
+        self._handle.flush()
+
+    def append(self, record: HistoryRecord) -> None:
+        row = record.model_dump()
+        self._writer.writerow({key: row.get(key) for key in self._FIELDNAMES})
+        self._handle.flush()
+
+    def close(self) -> None:
+        self._handle.close()
+
+
+def write_live_route_snapshot(
+    path: Path,
+    problem: Any,
+    algorithm: Any,
+    objective_evaluations: int,
+) -> None:
+    """Write the current tour snapshot for live dashboard maps."""
+    current = algorithm.get_current_solution()
+    payload = {
+        "live": True,
+        "objective_evaluations": objective_evaluations,
+        "current": problem.serialize_solution(current) if current is not None else None,
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    content = json.dumps(payload, indent=2)
+    for attempt in range(6):
+        try:
+            path.write_text(content, encoding="utf-8")
+            stale_tmp = path.with_suffix(".tmp")
+            if stale_tmp.exists():
+                stale_tmp.unlink(missing_ok=True)
+            return
+        except OSError:
+            if attempt == 5:
+                raise
+            time.sleep(0.025 * (attempt + 1))
 
 
 def write_run_result(result: RunResult, experiment_dir: Path) -> None:

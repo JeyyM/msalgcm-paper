@@ -79,20 +79,29 @@ def dev_dashboard(
         typer.echo("Frontend not found at web/frontend", err=True)
         raise typer.Exit(code=1)
 
-    if package_json.exists() and shutil.which("npm"):
-        typer.echo("Starting dashboard dev stack via concurrently...")
-        typer.echo(f"  Dashboard: http://localhost:5173")
-        typer.echo(f"  API:       http://{host}:{port}/api/health")
-        raise typer.Exit(subprocess.call(["npm", "run", "dev"], cwd=root, shell=sys.platform == "win32"))
-
     if not shutil.which("npm"):
-        typer.echo("npm not found. Install Node.js or run: npm install (project root)", err=True)
+        typer.echo("npm not found. Install Node.js from https://nodejs.org/", err=True)
         raise typer.Exit(code=1)
 
-    typer.echo("Installing root dev dependencies...")
-    subprocess.check_call(["npm", "install"], cwd=root, shell=sys.platform == "win32")
-    typer.echo("Starting dashboard dev stack...")
-    raise typer.Exit(subprocess.call(["npm", "run", "dev"], cwd=root, shell=sys.platform == "win32"))
+    if not (root / "node_modules").exists():
+        typer.echo("Installing root npm dependencies...")
+        subprocess.check_call(["npm", "install"], cwd=root, shell=sys.platform == "win32")
+
+    if not (frontend_dir / "node_modules").exists():
+        typer.echo("Installing frontend npm dependencies...")
+        subprocess.check_call(["npm", "install"], cwd=frontend_dir, shell=sys.platform == "win32")
+
+    typer.echo("Freeing dev ports 5173 and 8001...")
+    subprocess.run([sys.executable, "scripts/free_dev_ports.py"], cwd=root, check=False)
+
+    if package_json.exists():
+        typer.echo("Starting dashboard dev stack via concurrently...")
+        typer.echo("  Dashboard: http://127.0.0.1:5173")
+        typer.echo("  API:       http://127.0.0.1:8001/api/health")
+        raise typer.Exit(subprocess.call(["npm", "run", "dev"], cwd=root, shell=sys.platform == "win32"))
+
+    typer.echo("package.json not found in project root", err=True)
+    raise typer.Exit(code=1)
 
 
 @app.command("validate")

@@ -1,0 +1,36 @@
+{
+  "experiment_name": "tuning_sa_fast_moves_eil51",
+  "domain": "tsp",
+  "instance": "eil51",
+  "algorithms": [
+    "simulated_annealing"
+  ],
+  "runs": 5,
+  "evaluation_budget": 100000,
+  "seed_policy": {
+    "base_seed": 1000
+  },
+  "instance_path": "datasets/tsp/instances/eil51.tsp",
+  "domain_config": {
+    "initial_solution": "nearest_neighbor",
+    "operators": [
+      "two_opt",
+      "two_opt",
+      "inversion",
+      "insertion",
+      "swap"
+    ]
+  },
+  "algorithm_configs": {
+    "simulated_annealing": {
+      "initial_temperature": 3000.0,
+      "final_temperature": 0.001,
+      "cooling_factor": 0.999,
+      "moves_per_temperature": 100
+    }
+  },
+  "output": {
+    "directory": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\tuning\\experiments"
+  },
+  "runtime_budget_seconds": null
+}

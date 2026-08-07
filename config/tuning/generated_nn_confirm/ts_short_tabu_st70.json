@@ -1,0 +1,34 @@
+{
+  "experiment_name": "tuning_nn_confirm_ts_short_tabu_st70",
+  "domain": "tsp",
+  "instance": "st70",
+  "algorithms": [
+    "tabu_search"
+  ],
+  "runs": 5,
+  "evaluation_budget": 100000,
+  "seed_policy": {
+    "base_seed": 1000
+  },
+  "instance_path": "datasets/tsp/instances/st70.tsp",
+  "domain_config": {
+    "initial_solution": "nearest_neighbor",
+    "operators": [
+      "two_opt",
+      "two_opt",
+      "inversion",
+      "insertion",
+      "swap"
+    ]
+  },
+  "algorithm_configs": {
+    "tabu_search": {
+      "tabu_tenure": 15,
+      "candidate_list_size": 100
+    }
+  },
+  "output": {
+    "directory": "results\\tuning\\nn_confirm\\experiments"
+  },
+  "runtime_budget_seconds": null
+}

@@ -1,0 +1,36 @@
+{
+  "experiment_name": "tuning_pso_low_inertia_berlin52",
+  "domain": "tsp",
+  "instance": "berlin52",
+  "algorithms": [
+    "particle_swarm"
+  ],
+  "runs": 5,
+  "evaluation_budget": 100000,
+  "seed_policy": {
+    "base_seed": 1000
+  },
+  "instance_path": "datasets/tsp/instances/berlin52.tsp",
+  "domain_config": {
+    "initial_solution": "random",
+    "operators": [
+      "two_opt",
+      "two_opt",
+      "inversion",
+      "insertion",
+      "swap"
+    ]
+  },
+  "algorithm_configs": {
+    "particle_swarm": {
+      "swarm_size": 50,
+      "inertia_weight": 0.5,
+      "cognitive_coefficient": 1.5,
+      "social_coefficient": 1.5
+    }
+  },
+  "output": {
+    "directory": "results\\tuning_v2\\experiments"
+  },
+  "runtime_budget_seconds": null
+}

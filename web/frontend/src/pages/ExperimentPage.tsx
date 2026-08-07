@@ -10,6 +10,7 @@ const COLORS = ["#60a5fa", "#34d399", "#fbbf24"];
 export function ExperimentPage() {
   const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<any>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedRun, setSelectedRun] = useState<string>("");
   const [convergence, setConvergence] = useState<any[]>([]);
   const [multiSeries, setMultiSeries] = useState<any[]>([]);
@@ -21,7 +22,14 @@ export function ExperimentPage() {
 
   useEffect(() => {
     if (!id) return;
-    api.getExperiment(id).then(setData);
+    setLoadError(null);
+    setData(null);
+    api
+      .getExperiment(id)
+      .then(setData)
+      .catch((error: Error) => {
+        setLoadError(error.message || "Failed to load experiment");
+      });
   }, [id]);
 
   useEffect(() => {
@@ -48,6 +56,7 @@ export function ExperimentPage() {
           name: `${ALGO_LABELS[algorithm as string] ?? algorithm} (${run.run_id})`,
           data: points,
           color: COLORS[index % COLORS.length],
+          showCurrent: false,
         };
       }),
     ).then(setMultiSeries);
@@ -55,6 +64,17 @@ export function ExperimentPage() {
 
   const runs = data?.runs ?? [];
   const selectedRunRow = runs.find((run: any) => run.run_id === selectedRun);
+
+  if (loadError) {
+    return (
+      <div>
+        <p className="status-pending">Could not load experiment: {loadError}</p>
+        <button type="button" onClick={() => id && window.location.reload()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   if (!data || !ctx) return <p>Loading experiment...</p>;
 
@@ -160,7 +180,7 @@ export function ExperimentPage() {
             contextLabel={`${ctx.fullLabel} · ${selectedRun}`}
             title={`Convergence for ${selectedRun}`}
             subtitle={`Experiment: ${ctx.name}`}
-            series={[{ name: selectedRun, data: convergence, color: "#60a5fa" }]}
+            series={[{ name: selectedRun, data: convergence, color: "#60a5fa", showCurrent: false }]}
           />
         )}
       </SectionCard>

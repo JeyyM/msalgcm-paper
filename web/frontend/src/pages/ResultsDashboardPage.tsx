@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { api, ExperimentSummary, StudySummary } from "../api";
 import { ContextBanner, SectionCard } from "../components/ContextBanner";
 
-export function DashboardPage() {
+export function ResultsDashboardPage() {
   const [experiments, setExperiments] = useState<ExperimentSummary[]>([]);
   const [studies, setStudies] = useState<StudySummary[]>([]);
   const [activeJobs, setActiveJobs] = useState<any[]>([]);
@@ -20,8 +20,8 @@ export function DashboardPage() {
     <div>
       <ContextBanner
         kind="dashboard"
-        title="Optimization Dashboard"
-        meta={["Compare experiments and studies side by side"]}
+        title="Results Dashboard"
+        meta={["All domains", "Experiments and scalability studies"]}
       />
 
       {activeJobs.length > 0 && (

@@ -2,13 +2,15 @@
   "name": "msalgcm-optimize-monorepo",
   "private": true,
   "scripts": {
-    "dev": "concurrently -k -n api,web -c blue,green \"npm run dev:api\" \"npm run dev:web\"",
-    "dev:api": "python -m uvicorn optimize.api.app:app --reload --host 127.0.0.1 --port 8000",
-    "dev:web": "npm run dev --prefix web/frontend",
+    "dev:clean": "python scripts/free_dev_ports.py && kill-port 5173 8001 8002",
+    "dev": "npm run dev:clean && concurrently -n api,web -c blue,green \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "python scripts/dev_api.py",
+    "dev:web": "python scripts/wait_for_api.py && npm run dev --prefix web/frontend",
     "build:web": "npm run build --prefix web/frontend",
     "serve": "npm run build:web && python -m optimize.ui.cli serve --with-frontend"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "kill-port": "^2.0.1"
   }
 }

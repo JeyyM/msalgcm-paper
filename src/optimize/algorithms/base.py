@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from typing import Any
 
 from optimize.domains.base_problem import OptimizationProblem
@@ -24,6 +25,8 @@ class OptimizationAlgorithm(ABC):
         self._current_solution: Any = None
         self._current_objective: float = float("inf")
         self._history: list[HistoryRecord] = []
+        self._history_listener: Callable[[HistoryRecord], None] | None = None
+        self._solution_listener: Callable[[Any, float], None] | None = None
         self._iterations = 0
         self._stop_reason = StopReason.COMPLETED
 
@@ -52,6 +55,9 @@ class OptimizationAlgorithm(ABC):
     def get_best_solution(self) -> Any:
         return self._best_solution
 
+    def get_current_solution(self) -> Any:
+        return self._current_solution
+
     def get_best_objective(self) -> float:
         return self._best_objective
 
@@ -61,17 +67,24 @@ class OptimizationAlgorithm(ABC):
     def get_stop_reason(self) -> StopReason:
         return self._stop_reason
 
+    def set_history_listener(self, listener: Callable[[HistoryRecord], None] | None) -> None:
+        self._history_listener = listener
+
+    def set_solution_listener(self, listener: Callable[[Any, float], None] | None) -> None:
+        self._solution_listener = listener
+
     def _record_history(self) -> None:
         if self.problem is None:
             return
-        self._history.append(
-            HistoryRecord(
-                objective_evaluations=self.problem.budget.count,
-                best_objective=self._best_objective,
-                current_objective=self._current_objective,
-                iteration=self._iterations,
-            )
+        record = HistoryRecord(
+            objective_evaluations=self.problem.budget.count,
+            best_objective=self._best_objective,
+            current_objective=self._current_objective,
+            iteration=self._iterations,
         )
+        self._history.append(record)
+        if self._history_listener is not None:
+            self._history_listener(record)
 
     def _consider_solution(self, solution: Any, objective: float) -> None:
         self._current_solution = solution
@@ -79,3 +92,5 @@ class OptimizationAlgorithm(ABC):
         if objective < self._best_objective:
             self._best_objective = objective
             self._best_solution = solution
+            if self._solution_listener is not None:
+                self._solution_listener(solution, objective)

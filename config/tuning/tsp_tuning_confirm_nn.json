@@ -1,0 +1,77 @@
+{
+  "protocol_name": "tsp_nn_confirm_ts_pso",
+  "description": "Nearest-neighbor confirmation for TS and PSO finalists (v1 vs v2 candidates). SA unchanged.",
+  "experiment_prefix": "tuning_nn_confirm",
+  "tuning_instances": [
+    {
+      "name": "eil51",
+      "path": "datasets/tsp/instances/eil51.tsp",
+      "known_optimum": 426
+    },
+    {
+      "name": "berlin52",
+      "path": "datasets/tsp/instances/berlin52.tsp",
+      "known_optimum": 7542
+    },
+    {
+      "name": "st70",
+      "path": "datasets/tsp/instances/st70.tsp",
+      "known_optimum": 675
+    }
+  ],
+  "runs_per_config": 5,
+  "evaluation_budget": 100000,
+  "base_seed": 1000,
+  "selection_metric": "mean_gap_percentage",
+  "tie_breakers": ["std_gap_percentage", "mean_runtime_seconds"],
+  "domain_config": {
+    "initial_solution": "nearest_neighbor",
+    "operators": ["two_opt", "two_opt", "inversion", "insertion", "swap"]
+  },
+  "algorithms": {
+    "tabu_search": {
+      "configs": [
+        {
+          "id": "ts_wide_list",
+          "label": "v1 NN winner (tenure 25, list 100)",
+          "params": {
+            "tabu_tenure": 25,
+            "candidate_list_size": 100
+          }
+        },
+        {
+          "id": "ts_short_tabu",
+          "label": "v2 candidate (tenure 15, list 100)",
+          "params": {
+            "tabu_tenure": 15,
+            "candidate_list_size": 100
+          }
+        }
+      ]
+    },
+    "particle_swarm": {
+      "configs": [
+        {
+          "id": "pso_baseline",
+          "label": "v1 NN winner (swarm 50)",
+          "params": {
+            "swarm_size": 50,
+            "inertia_weight": 0.6,
+            "cognitive_coefficient": 1.8,
+            "social_coefficient": 1.8
+          }
+        },
+        {
+          "id": "pso_swarm_100",
+          "label": "v2 candidate (swarm 100)",
+          "params": {
+            "swarm_size": 100,
+            "inertia_weight": 0.6,
+            "cognitive_coefficient": 1.8,
+            "social_coefficient": 1.8
+          }
+        }
+      ]
+    }
+  }
+}

@@ -4,7 +4,7 @@
   "instance": "ft10",
   "instance_path": "datasets/scheduling/jsp/instances/ft10.txt",
   "algorithms": ["simulated_annealing", "tabu_search", "particle_swarm"],
-  "runs": 10,
+  "runs": 30,
   "evaluation_budget": 50000,
   "seed_policy": {
     "base_seed": 2000

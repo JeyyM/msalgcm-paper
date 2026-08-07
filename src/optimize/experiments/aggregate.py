@@ -15,6 +15,23 @@ def _parameters_key(parameters: dict[str, Any]) -> str:
     return json.dumps(parameters, sort_keys=True)
 
 
+def _safe_pstdev(values: list[float]) -> float:
+    finite = [float(value) for value in values if value == value and value != float("inf") and value != float("-inf")]
+    if len(finite) < 2:
+        return 0.0
+    try:
+        return statistics.pstdev(finite)
+    except statistics.StatisticsError:
+        return 0.0
+
+
+def _safe_mean(values: list[float]) -> float | None:
+    finite = [float(value) for value in values if value == value and value != float("inf") and value != float("-inf")]
+    if not finite:
+        return None
+    return statistics.mean(finite)
+
+
 def _gap_values(results: list[RunResult]) -> list[float]:
     gaps: list[float] = []
     for result in results:
@@ -92,8 +109,8 @@ def build_summary_rows(
                 "successful_runs": len(successful),
                 "failed_runs": len(group) - len(successful),
                 "success_rate": len(successful) / len(group) if group else 0.0,
-                "mean_objective": statistics.mean(objectives) if objectives else None,
-                "std_objective": statistics.pstdev(objectives) if len(objectives) > 1 else 0.0,
+                "mean_objective": _safe_mean(objectives),
+                "std_objective": _safe_pstdev(objectives),
                 "median_objective": statistics.median(objectives) if objectives else None,
                 "min_objective": min(objectives) if objectives else None,
                 "max_objective": max(objectives) if objectives else None,
@@ -134,8 +151,8 @@ def build_statistics_rows(
                 "instance": config.instance,
                 "algorithm": algorithm,
                 "n": n,
-                "mean": statistics.mean(objectives),
-                "std": statistics.pstdev(objectives) if n > 1 else 0.0,
+                "mean": _safe_mean(objectives),
+                "std": _safe_pstdev(objectives),
                 "median": statistics.median(objectives),
                 "min": objectives[0],
                 "max": objectives[-1],
