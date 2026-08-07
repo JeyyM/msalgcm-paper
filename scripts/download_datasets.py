@@ -46,7 +46,18 @@ TSP_INSTANCE_ROLES = {
     "rat195": "comparison",
 }
 
-JSP_INSTANCES = ["ft10", "ta01", "ta21", "ta31", "ta41", "ta51", "ta71"]
+JSP_INSTANCES = [
+    "ft10",
+    "ta01",
+    "ta21",
+    "abz5",
+    "ta02",
+    "ta22",
+    "ta31",
+    "ta41",
+    "ta51",
+    "ta71",
+]
 
 JSP_BASE = "https://raw.githubusercontent.com/SchedulingLab/jsp-instances/main"
 JSP_CLASSICAL_URL = f"{JSP_BASE}/classical.json"

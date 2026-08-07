@@ -142,6 +142,68 @@ export function FsPage() {
     };
   }, [jobId, refreshCatalog, refreshRuns]);
 
+  // Fallback for batches that are running but weren't started from this browser
+  // tab (e.g. launched via a standalone script or by a teammate) — there's no
+  // in-memory job to poll, so read the same live-ish progress straight off disk
+  // instead. This lets the progress bar / live convergence / live feature mask
+  // panels below render exactly as if "Run experiment" had been clicked here.
+  useEffect(() => {
+    if (jobId) return;
+    if (!instance || !algorithm) return;
+
+    let active = true;
+    let lastSeenCompletedRuns = -1;
+
+    async function pollExternal() {
+      try {
+        const status = await api.getFsLiveStatus(instance, algorithm);
+        if (!active) return;
+        setJob(status);
+
+        if (status.current_run_id && status.current_run_id !== trackedRunIdRef.current) {
+          trackedRunIdRef.current = status.current_run_id;
+          setLiveConvergence([]);
+          setLiveSolution(null);
+        }
+        if (status.completed_runs !== lastSeenCompletedRuns) {
+          lastSeenCompletedRuns = status.completed_runs;
+          refreshRuns();
+        }
+
+        if (status.experiment_dir && status.current_run_id) {
+          try {
+            const points = await api.getConvergence(status.experiment_dir, status.current_run_id);
+            if (active) setLiveConvergence(points);
+          } catch {
+            /* partial file may not exist yet */
+          }
+          try {
+            const solution = await api.getLiveSolution(status.experiment_dir, status.current_run_id);
+            if (active) setLiveSolution(solution);
+          } catch {
+            /* no snapshot yet */
+          }
+        }
+      } catch {
+        // Nothing in progress outside this tab (404) — or it just finished.
+        if (active) {
+          setJob((current) => (current?.job_id === "external" ? null : current));
+          if (lastSeenCompletedRuns >= 0) {
+            refreshCatalog();
+            refreshRuns();
+          }
+        }
+      }
+    }
+
+    pollExternal();
+    const interval = setInterval(pollExternal, 1000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [jobId, instance, algorithm, refreshCatalog, refreshRuns]);
+
   const batchComplete = instanceStatus?.done ?? false;
   const isRunning = job?.status === "running";
   const liveAttempt = attemptLabel(job?.current_run_id, targetRuns);

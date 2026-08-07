@@ -21,6 +21,16 @@ JSP_ALGORITHMS = [
     "particle_swarm",
 ]
 
+# Held-out comparison instances for the dashboard. Same size classes as the tuning
+# set (ft10/ta01/ta21) but different instances, plus ta31/ta51 — ta71 excluded.
+JSP_COMPARISON_INSTANCES = [
+    "abz5",
+    "ta02",
+    "ta22",
+    "ta31",
+    "ta51",
+]
+
 ALGORITHM_LABELS = {
     "simulated_annealing": "Simulated Annealing",
     "tabu_search": "Tabu Search",
@@ -54,7 +64,8 @@ def prepare_jsp_launch(instance: str, algorithm: str, results_dir: Path | None =
 
 
 def _project_root() -> Path:
-    return Path.cwd()
+    # Anchor to repo root so metadata/config resolve regardless of process cwd.
+    return Path(__file__).resolve().parents[4]
 
 
 def _metadata_path() -> Path:
@@ -65,7 +76,7 @@ def _base_template_path() -> Path:
     return _project_root() / "config" / "examples" / "jsp_ft10_comparison.json"
 
 
-def load_jsp_instances() -> list[dict[str, Any]]:
+def _load_jsp_all_instances() -> list[dict[str, Any]]:
     metadata = json.loads(_metadata_path().read_text(encoding="utf-8"))
     instances: list[dict[str, Any]] = []
     for item in metadata.get("instances", []):
@@ -77,12 +88,23 @@ def load_jsp_instances() -> list[dict[str, Any]]:
     return instances
 
 
+def load_jsp_instances() -> list[dict[str, Any]]:
+    """Return held-out comparison instances for the dashboard dropdown."""
+    allowed = set(JSP_COMPARISON_INSTANCES)
+    return [item for item in _load_jsp_all_instances() if item["name"] in allowed]
+
+
 def build_jsp_config(instance: str, algorithm: str) -> ExperimentConfig:
     if algorithm not in JSP_ALGORITHMS:
         raise ValueError(f"unsupported JSP algorithm: {algorithm}")
 
     instances = {item["name"]: item for item in load_jsp_instances()}
     if instance not in instances:
+        if instance in {item["name"] for item in _load_jsp_all_instances()}:
+            raise ValueError(
+                f"instance {instance} is not in the final comparison set "
+                f"({', '.join(JSP_COMPARISON_INSTANCES)})"
+            )
         raise ValueError(f"unknown JSP instance: {instance}")
 
     template = json.loads(_base_template_path().read_text(encoding="utf-8"))
@@ -176,6 +198,12 @@ def _batch_stats(experiment_dir: Path) -> dict[str, float | int | None]:
                 "best_gap_percentage": float(row["best_gap_percentage"])
                 if row.get("best_gap_percentage")
                 else None,
+                "mean_gap_percentage": float(row["mean_gap_percentage"])
+                if row.get("mean_gap_percentage")
+                else None,
+                "mean_runtime_seconds": float(row["mean_runtime_seconds"])
+                if row.get("mean_runtime_seconds")
+                else None,
             }
 
     runs_path = experiment_dir / "runs.csv"
@@ -186,9 +214,12 @@ def _batch_stats(experiment_dir: Path) -> dict[str, float | int | None]:
             "best_objective": None,
             "mean_objective": None,
             "best_gap_percentage": None,
+            "mean_gap_percentage": None,
+            "mean_runtime_seconds": None,
         }
 
     objectives: list[float] = []
+    runtimes: list[float] = []
     successful = 0
     failed = 0
     with runs_path.open(encoding="utf-8") as handle:
@@ -198,6 +229,9 @@ def _batch_stats(experiment_dir: Path) -> dict[str, float | int | None]:
                 value = row.get("best_objective")
                 if value:
                     objectives.append(float(value))
+                runtime = row.get("runtime_seconds")
+                if runtime:
+                    runtimes.append(float(runtime))
             else:
                 failed += 1
 
@@ -207,6 +241,8 @@ def _batch_stats(experiment_dir: Path) -> dict[str, float | int | None]:
         "best_objective": min(objectives) if objectives else None,
         "mean_objective": sum(objectives) / len(objectives) if objectives else None,
         "best_gap_percentage": None,
+        "mean_gap_percentage": None,
+        "mean_runtime_seconds": sum(runtimes) / len(runtimes) if runtimes else None,
     }
 
 
@@ -290,6 +326,51 @@ def list_jsp_runs(
 
     rows.sort(key=lambda item: item["run_id"] or "")
     return rows
+
+
+def get_jsp_live_status(instance: str, algorithm: str, results_dir: Path | None = None) -> dict[str, Any] | None:
+    """Read live progress from disk for batches started outside the dashboard."""
+    from optimize.api.services.results_reader import results_root
+
+    root = results_dir or results_root()
+    batch = get_jsp_batch(instance, algorithm, results_dir=root)
+    if batch is None or batch.done:
+        return None
+
+    experiment_dir = root / batch.experiment_id
+    current_run_index = batch.completed_runs + 1
+    current_run_id = f"{algorithm}_run_{current_run_index:03d}"
+
+    current_best_objective: float | None = None
+    convergence_path = experiment_dir / "convergence" / f"{current_run_id}.csv"
+    if convergence_path.exists():
+        try:
+            with convergence_path.open(encoding="utf-8") as handle:
+                rows = list(csv.DictReader(handle))
+            if rows:
+                value = rows[-1].get("best_objective")
+                if value:
+                    current_best_objective = float(value)
+        except (OSError, ValueError):
+            pass
+
+    return {
+        "job_id": "external",
+        "status": "running",
+        "job_type": "experiment",
+        "experiment_name": f"jsp_{instance}_{algorithm}",
+        "current_algorithm": algorithm,
+        "current_run_index": current_run_index,
+        "total_runs": JSP_RUNS,
+        "completed_runs": batch.completed_runs,
+        "current_run_id": current_run_id,
+        "current_best_objective": current_best_objective,
+        "experiment_dir": batch.experiment_id,
+        "message": f"Running {current_run_id} (started outside the dashboard)",
+        "error": None,
+        "log": [],
+        "progress_percent": round(100 * batch.completed_runs / JSP_RUNS, 1),
+    }
 
 
 def write_jsp_config_file(instance: str, algorithm: str) -> Path:

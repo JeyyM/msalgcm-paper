@@ -1,0 +1,44 @@
+{
+  "experiment_name": "jsp_abz5_tabu_search",
+  "domain": "scheduling",
+  "instance": "abz5",
+  "algorithms": [
+    "tabu_search"
+  ],
+  "runs": 30,
+  "evaluation_budget": 50000,
+  "seed_policy": {
+    "base_seed": 2000
+  },
+  "instance_path": "datasets/scheduling/jsp/instances/abz5.txt",
+  "domain_config": {
+    "initial_solution": "longest_processing_time",
+    "operators": [
+      "swap",
+      "insertion",
+      "inversion"
+    ]
+  },
+  "algorithm_configs": {
+    "simulated_annealing": {
+      "initial_temperature": 8000.0,
+      "final_temperature": 0.001,
+      "cooling_factor": 0.999,
+      "moves_per_temperature": 150
+    },
+    "tabu_search": {
+      "candidate_list_size": 40,
+      "tabu_tenure": 30
+    },
+    "particle_swarm": {
+      "swarm_size": 40,
+      "inertia_weight": 0.6,
+      "cognitive_coefficient": 1.8,
+      "social_coefficient": 1.8
+    }
+  },
+  "output": {
+    "directory": "results"
+  },
+  "runtime_budget_seconds": null
+}

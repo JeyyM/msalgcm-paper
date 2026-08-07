@@ -1,0 +1,1402 @@
+--- PAGE 1 ---
+Multi‑objective flexible job‑shop 
+scheduling problem using modified  
+discrete particle swarm optimization
+Song Huang1*, Na Tian1, Yan Wang1* and Zhicheng Ji1,2
+Background
+Production planning and scheduling problems arise in many production manufacturing 
+systems. Scheduling problems have been investigated for several decades and various 
+dispatching rules are proposed to optimize scheduling problems. Up to present, many 
+different principles are presented to select and discover effective ways from a number 
+of candidate dispatching rules (Geiger et al. 2006; Tay and Ho 2008; Pickardt et al. 2010; 
+Mouelhi-Chibani and Pierreval 2010; Heger et al. 2016). Geiger et al. ( 2006) employed 
+a fast learning model with automatically selecting dispatching rules for single machine 
+environments. Tay and Ho (2008) used genetic programming to combine and construct 
+dispatching rules for multi-objective flexible job-shop problems. Pickardt et  al. ( 2010) 
+developed a coupling genetic programming to evolve and produce dispatching rules 
+under varied conditions. Heger et al. ( 2016) proposed a way to dynamically determine 
+parameter settings of dispatching rules on the previous state. Mouelhi-Chibani and 
+Abstract 
+Taking resource allocation into account, flexible job shop problem (FJSP) is a class of 
+complex scheduling problem in manufacturing system. In order to utilize the machine 
+resources rationally, multi-objective particle swarm optimization (MOPSO) integrating 
+with variable neighborhood search is introduced to address FJSP efficiently. Firstly, the 
+assignment rules (AL) and dispatching rules (DR) are provided to initialize the popula-
+tion. And then special discrete operators are designed to produce new individuals and 
+earliest completion machine (ECM) is adopted in the disturbance operator to escape 
+the optima. Secondly, personal-best archives (cognitive memories) and global-best 
+archive (social memory), which are updated by the predefined non-dominated archive 
+update strategy, are simultaneously designed to preserve non-dominated individuals 
+and select personal-best positions and the global-best position. Finally, three neighbor-
+hoods are provided to search the neighborhoods of global-best archive for enhancing 
+local search ability. The proposed algorithm is evaluated by using Kacem instances and 
+Brdata instances, and a comparison with other approaches shows the effectiveness of 
+the proposed algorithm for FJSP .
+Keywords: Flexible job shop scheduling, Particle swarm optimization, Variable 
+neighborhood search, Non-dominated archive update strategy
+Open Access
+© 2016 The Author(s). This article is distributed under the terms of the Creative Commons Attribution 4.0 International License 
+(http://creativecommons.org/licenses/by/4.0/), which permits unrestricted use, distribution, and reproduction in any medium, 
+provided you give appropriate credit to the original author(s) and the source, provide a link to the Creative Commons license, and 
+indicate if changes were made.
+RESEARCH
+Huang et al. SpringerPlus  (2016) 5:1432 
+DOI 10.1186/s40064‑016‑3054‑z
+*Correspondence:  
+huangson2@163.com; 
+wangyan88@jiangnan.edu.cn 
+1 School of Internet of Things 
+Engineering, Jiangnan 
+University, 1800 Lihu Avenue, 
+Wuxi, Jiangsu Province 
+214122, China
+Full list of author information 
+is available at the end of the 
+article
+--- PAGE 2 ---
+Page 2 of 22Huang et al. SpringerPlus  (2016) 5:1432 
+Pierreval (2010) adopted a trained neural networks (NN) to dynamically determine the 
+dispatching rules in real-time flexible manufacturing systems. Some other techniques 
+or approaches, such as shifting bottleneck (Wenqi and Aihua 2004), branch and bound 
+(Della Croce et  al. 2002; Artigues and Feillet 2008) were also applied to solve simple 
+scheduling problems in the early researches.
+FJSP is more close to the realistic situation and frequently used in flexible manufactur
+-
+ing systems. During the past decades, many researchers have a fast-growing interest on 
+FJSP and amount of written works have been published. However, no satisfactory algo
+-
+rithm presently is available for solving the problem to optimality in expected time. In 
+recent years, most researchers have recognized that probabilistic search method is an 
+attractive alternative to solve this constrained optimization problem. Genetic Algorithm 
+(GA) had emerged as one of the most important method to solve discrete optimization 
+problems and many variants of GA were developed to solve FJSP in the published lit
+-
+eratures (Cwiek and Nalepa 2014; Li and Chen 2014; Moghadam et al. 2014; Wang et al. 
+2014; Zhang et al. 2011). A fast GA with a combination of active schedule constructive 
+crossover (ASCX) and generalized order crossover (GOX) was proposed to solve FJSP 
+by Cwiek and Nalepa (2014). In addition, high-low fit selection scheme was developed 
+to enhance the search ability. Li and Chen (2014) presented an improved GA with two 
+level coding, working sequence coding and machine distribution coding. Crossover and 
+mutation operators were well-designed and neighborhood structure was defined to 
+minimize makespan for FJSP . Aiming at makespan of FJSP , Moghadam et al. (2014) pre
+-
+sented GA to create active schedule, which used an Operation order-based Global Selec-
+tion (OGS) to generate high-quality initial population and introduced crossover operator 
+with precedence preserving order-based crossover (POX) and uniform crossover. Then 
+intelligent mutation operator was introduced to GA. To minimize makespan criterion of 
+FJSP , a hybrid GA with modified coding scheme was presented by Wang et al. (2014). In 
+the hybrid GA, a novel machine assignment strategy was proposed in the initial phase 
+and an improvement strategy was performed when current best solution had not been 
+improved. To minimize the makespan, well-designed representation, global selection 
+and local selection for high-quality initial population, crossover and mutation operators 
+in GA were all developed (Zhang et al. 2011).
+Tabu Search (TS) and Particle Swarm Optimization (PSO) had also been investi
+-
+gated to optimize the FJSP (Shao et al. 2013; Jia and Hu 2014; Kamble et al. 2015). Path-
+relinking TS with neighborhood search and back-jump tracking was presented by Jia 
+and Hu (2014). In details, path-relinking technique to generate improved solutions and 
+dimension-oriented intensification search to find better solutions around extreme solu
+-
+tions were introduced. Kamble et al. (2015) presented a hybrid multi-objective PSO and 
+simulated annealing (SA) algorithm to solve five-objective FJSP . Rescheduling strategy 
+was applied to overcome the machine breakdown and then Pareto front and crowding 
+distance were introduced to handle five-objective problems. Identifying an approxima
+-
+tion of the Pareto front of FJSP , Shao et al. (2013) developed a hybrid discrete PSO and 
+SA and a novel displacement strategy was embedded to the proposed algorithm. Also, 
+Pareto ranking and crowding distance method were adopted to deal with multi-objective 
+problems.
+--- PAGE 3 ---
+Page 3 of 22
+Huang et al. SpringerPlus  (2016) 5:1432 
+Other optimization algorithms, such as firefly algorithm (FA) (Karthikeyan et  al. 
+2014), harmony search algorithm (HS) (Yuan et  al. 2013; Gao et  al. 2014), biogeogra -
+phy-based optimization (BBO) (Rahmati and Zandieh 2012), differential evolution algo -
+rithm (DE) (Balaraju et  al. 2014), evolutionary algorithm (EA) (Chiang and Lin 2013) 
+and immune algorithm (IA) (Xue et  al. 2014) have been used to solve FJSP in recent 
+years. By defining the presentation of attractiveness, the distance and movement of FA, 
+a hybrid discrete FA incorporating local search with neighborhood structures was pre
+-
+sented by Karthikeyan et al. (2014) to minimize the makespan, the critical workload and 
+the total workload. In the Yuan’s work (2013), a discrete hybrid harmony search (HHS) 
+embedding a local search procedure, which provided a neighborhood structure based 
+on common critical operations to enhance the local search, was developed to optimize 
+the makespan. Pareto-based grouping discrete harmony search algorithm (PGDHS) 
+was proposed to optimize the makespan and the mean of earliness and tardiness (Gao 
+et al. 2014). Several new heuristics scheme were firstly designed to the initialization of 
+harmony memory. In addition, multiple strategies and local search were proposed to 
+improve the performance of this algorithm.
+This paper proposes a well-designed MOPSO algorithm to optimize three-objective 
+FJSP (the makespan, the total workload and the critical machine workload). Firstly, the 
+AL and DR methods from other works are applied to initialize the population. Then an 
+extended position update formula with two-vector discrete operators is designed and 
+the discrete operator f
+2 is applied to share the information of personal-best positions and 
+global-best position. Then disturbance operator f 3 is to explore other space. In details, f 2 
+is applied to cross the current position with the personal-best position with a probability, 
+or the current position with the global-best position with the other probability. Secondly, 
+personal-best archives and global-best archive updated by predefined non-dominated 
+archive update strategy are developed to obtain high-quality and high-diversity posi
+-
+tions, and the personal-best position is selected from the corresponding personal-best 
+archive and the global-best position is selected from the global-best archive. Finally, var
+-
+iable neighborhood search is introduced to exploit the global-best archive.
+The organization of the rest is as follows: “Problem formulation” section briefly 
+describes the problem formulation of FJSP . In “ The MOPSO algorithm” section, a brief 
+introduction of basic PSO is given, and then the details of MOPSO algorithm are pre -
+sented. The simulation in comparison with other algorithms and parameter analysis are 
+shown in “The simulation experiments” section. Finally, “Conclusions” section concludes 
+this paper.
+Problem formulation
+Flexible job‑shop scheduling problem
+For FJSP , each operation can be assigned to one machine from a set of available 
+machines and then sequenced under precedence constraint. There are a set of n jobs 
+J = {J1, J2, …, Jk, …, Jn} to be processed on a set of m machines, M = {M1, M2, …, Mk,…, Mm}. 
+Each job consists of n i operations, O i ={ O i1 ... ,O i2 ,... ,O ij,... O ini}, where O ij and n i 
+respectively denote the jth operation of job i  and the number of operations for job i. The 
+machine processing the operation O ij is denoted as Mk from a given available machines 
+called Mij, where M ij denote the set of available machines for the operation O ij and 
+--- PAGE 4 ---
+Page 4 of 22Huang et al. SpringerPlus  (2016) 5:1432 
+Mij ⊂ M. Partial flexibility and total flexibility are two kinds of FJSP . The former means 
+that the available machines Mij processing on the operation Oij are a subset of M, and the 
+latter means that the available machines M ij processing on the operation O ij includes all 
+machines of M. Also, pijk denotes the executing time of operation Oij on the machine Mk.
+Hypotheses are listed as follows: (1) They are all independent jobs and machines. (2) 
+Setting up times of machines and move times between operations are negligible. (3) A 
+machine can only execute one operation at a given time. (4) For the same job, only one 
+operation is processing at the same time. (5) There are no precedence constraints among 
+different jobs. The task is to determine an assignment and a sequence of operations to 
+minimize several scheduling criteria. In this paper, three objectives of scheduling criteria 
+are as follows:
+1. C
+M: Makespan or maximal completion time of machines.
+2. WT: Total workload of machines, which is the total working time of all machines.
+3. WM: Critical machine workload, which is the biggest workload among the machines.
+Encoding and decoding
+Encoding a scheduling as a two-vector representation, which includes operation 
+sequence vector and machine assignment vector, is an effective way to represent the 
+decision of FJSP . In details, operation sequence vector is a decision of all operations’ 
+order, and machine assignment vector is a decision of the assigned machines of all 
+operations. Direct and indirect encoding scheme are two types of encoding methods 
+for operation sequence representation. Operation-based representation is an effective 
+indirect encoding method for operation sequence vector, which can absolutely meet 
+the constraints and is able to encode a feasible schedule (Gen et  al. 1994). Thus, the 
+operation-based encoding scheme is adopted to represent operation sequence vec
+-
+tor. In this encoding scheme, the length of each vector equals to the total number of 
+all operations. The number denotes the corresponding job and the kth occurrence of 
+the number refers to the kth operation of this job. For the machine assignment vector, 
+the numbers represent the machines assigned to the operations with the ascending job 
+number successively.
+Take three-job, three-machine instance for an example. As illustrated in Fig.  1, the 
+operation sequence vector [2 1 1 3 2 1 2 3] represents the operation sequence [O
+21, O11,  
+O12, O31, O22, O13, O23, O32]. Then the machine assignment vector [1 3 2 1 3 1 3 2] rep -
+resents the operations and their assigned machines: (O 11,  M1), (O 12,  M3), (O 13,  M2), 
+CM = max
+1≤k≤m
+{Ck}
+W T =
+n∑
+i=1
+ni∑
+j=1
+m∑
+k=1
+pijkxijk
+W M = max
+1≤k≤m
+n∑
+i=1
+ni∑
+j=1
+pijkxijk.
+--- PAGE 5 ---
+Page 5 of 22
+Huang et al. SpringerPlus  (2016) 5:1432 
+(O21, M1), (O22, M3), (O23, M1), (O31, M3), (O32, M2). The processing time can be organ -
+ized in Table  1, where rows correspond to operations and columns correspond to 
+machines. According to Table  1, we can obtain the processing times of the example, 
+which is [5 2 1 1 4 5 3 4].
+A semi-active schedule often occurs in decoding a schedule and results in the increas -
+ing of makespan. An active schedule can avoid the weakness. Local left shift and global 
+left shift are designed to decode a schedule to a active one (Li et al. 2010). In this paper, a 
+left-shift function proposed by Li et al. (2010) is applied to decode a semi-active schedule 
+into an active schedule. After applying the left-shift function to the semi-active schedule, 
+the schedule can be decoded as an active schedule.
+The MOPSO algorithm
+In this section, we developed an effective MOPSO algorithm and the details of the pro -
+posed algorithm is described as follows: “Initialization ” section describes population 
+initialization and “The details of MOPSO algorithm” section presents the extended posi-
+tion update formula in discrete PSO. Then variable neighborhood search is developed 
+in “Variable neighborhood search” section. Furthermore, non-dominated archive update 
+strategy of personal-best archives and global-best archive, and the selection method of 
+the personal-best position and the global-best position are introduced in “Personal-best 
+positions and global-best position ” section. Finally, the stop criterion and the flowchart 
+of the proposed algorithm are described in “Stop criterion” section.
+2
+Job2
+Operation sequence vector
+1 1 3 2 1 2 3
+Job1 Job1 Job3 Job2 Job1 Job2 Job3
+O21 O11 O12 O31 O22 O13 O23 O32
+1
+Machine assignment vector
+3 2 1 3 1 3 2
+M1 M3 M2 M1 M3 M1 M3 M2
+Job1 Job2 Job3
+ab
+Fig. 1 The two-vector representation a operation sequence vector, b machine assignment vector
+Table 1 Processing times for three-job, three-machine instance
+Processing time
+M1 M2 M3
+J1 O11 5 3 –
+O12 – 1 2
+O13 3 1 –
+J2 O21 1 – 4
+O22 – 5 4
+O23 5 – 6
+J3 O31 – 6 3
+O32 5 4 5
+--- PAGE 6 ---
+Page 6 of 22Huang et al. SpringerPlus  (2016) 5:1432 
+Initialization
+Appropriate initial methods can provide enough diversity and high-quality individuals 
+to the population. For FJSP , the initialization includes initializing machine assignment 
+and initializing operation sequence. The hybridization of assignment rules (AL) and dis -
+patching rules (DR) from other researchers are proved to be extremely efficient initial -
+izing methods for the FJSP (Kacem et al. 2002a ; Bagheri et al. 2010; Defersha and Chen 
+2010; Li et al. 2010). To obtain more promising individuals, the initial population in our 
+study is generated by three AL methods (20 % by GPT, 20 % by LPT, and 60 % by the ran-
+dom rule) proposed by Kacem et al. (2002a) and DR method (Random rule) proposed by 
+Pezzella et al. (2008).
+The details of MOPSO algorithm
+Discrete PSO
+Inspired by fish and birds’ behavior, particle swarm optimizer is developed by Kennedy 
+and Eberhart. As N individuals search in d dimensions space, individual i has a position 
+xi = (xi1 ,xi2 ,... ,xid) and a velocity vi = (vi1 ,vi2 ,... ,vid). The personal-best position of 
+the ith individual is pi = (p i1 ,pi2 ,... ,pid) and the global-best position of the population 
+is pg = (pg1 ,pg2 ,... ,pgd ). In the search process, the individual tries to update the veloc -
+ity and the position using the current velocity, personal-best position and global-best 
+position. Therefore, the velocity 
+vi and the position xi of individual i can be manipulated 
+by Eqs. (1) and (2).
+where c1, c2 are the coefficient of cognitive and social knowledge. ω denotes inertia fac -
+tor. r1, r2 are real numbers in (0, 1). t denotes the current generation.
+A discrete version of particle swarm optimizer needs to be developed to solve flex -
+ible job shop scheduling problem, which is a specific optimization problem with discrete 
+variables. Various discrete operators are developed to deal with discrete variables and 
+it is also a significant problem to obtain appropriate discrete form of particle swarm 
+optimizer. Discrete operators are convenient to handle the discrete variables, and some 
+discrete operators are designed and incorporated into particle swarm optimizer. The 
+position update equation with discrete operators is as follows:
+where ω, c
+1, and c2 are three probabilities, which represents the impact of current posi -
+tion, personal-best position and global-best position. ⊗ represents the right operator of 
+⊗ will be implemented while the probability in the left of ⊗ is satisfied and + represents 
+that left term of + is finished and the right term of + starts. Two discrete operator, f
+1 
+and f2, are well-designed to deal with discrete variables xi. In detail, f2 includes improved 
+precedence operation crossover (IPOX) (Zhang et al. 2005) and multipoint preservative 
+crossover (MPX) (Zhang et al. 2007). Additionally, c 2 equals to c1, which indicates that 
+(1)vt+1
+i = ω vt
+i + c1r1(pt
+i − xt
+i ) + c2r2(pt
+g − xt
+i )
+(2)xt+1
+i = xt
+i + vt+1
+i
+(3)xt+1
+i = ω ⊗ f1 (xt
+i ) + c1 ⊗ f2 (xt
+i ,pt
+i ) + c2 ⊗ f2 (xt
+i ,pt
+g )
+--- PAGE 7 ---
+Page 7 of 22
+Huang et al. SpringerPlus  (2016) 5:1432 
+the condition rand ≤1−c1 is satisfied. Detail implementation of f 1 and f2 is given in “ The 
+details of f1, f2 and f3” section. f3 is then embedded to search more space and is also pro -
+vided in “ The details of f 1, f2 and f 3” section. As above description, the pseudo-code of 
+the Eq. (3) is as follows: 
+The details of f1, f2 and f3
+As the discrete operator f 2 is not applied to all individuals, the function of f1 is keeping 
+the individuals unchanged with the probability ω and otherwise, perturbation operator 
+f3 is applied to the individuals. Then f2 is used to obtain useful information from the 
+personal-best positions with the probability c1 and global-best position with the prob -
+ability c2.
+Discrete operator f 2 The operator f 2 is implemented on the operation sequence vector 
+and the machine assignment vector successively. IPOX is implemented on the operation 
+sequence vector and MPX is implemented on the machine assignment vector.
+For example, F 1 and F 2 are two parents; S 1 and S 2 are their children. The machine 
+assignment vectors remain the same, and the procedure of f 2 (IPOX) on operation 
+sequence vector is as follows:
+Step 1: Select the operation sequence vectors of the parents F 1 and F2, and all the jobs 
+are randomly divided into two set J1 and J2.
+Step 2: Copy the elements of F 1 that are included in J 1 to S 1 in the same position and 
+copy the elements of F2 that are included in J1 to S2 in the same position.
+Step 3: Copy the elements of F2 that are included in J2 to S1 in the same order and copy 
+the elements of F1 that are included in J2 to S2 in the same order.
+--- PAGE 8 ---
+Page 8 of 22Huang et al. SpringerPlus  (2016) 5:1432 
+The operation sequence vectors remain the same, and the procedure of f 2 on the 
+machine assignment vectors (MPX) is as follows:
+Step 1: Select the machine assignment vectors of the parents F1 and F2.
+Step 2: Generate a decision vector H with random integers 0 and 1, which has the same 
+length with the machine assignment vector.
+Step 3: Find the places which are equal to 1 in H, and then copy the machine assign
+-
+ment number in these places of F1 and F2 to S2 and S1.
+Step 4: Copy machine numbers of the rest places in F1 and F2 to S1 and S2.
+The IPOX of f2 works as in Fig. 2(a), and the MPX of f2 works as in Fig. 2(b).
+Perturbation operator f 3 In order to avoid premature convergence, the perturbation 
+operator f3 is adopted. Earliest completion machine (ECM) is an efficient method to 
+assign an operation to a machine (Lin 2015). It can complete the operation with the ear -
+liest completion time but it needs expensive time consumption. Consequently, we apply 
+the ECM rule with a small probability c
+3. The ECM rule (f 3) works as follows: Calcu -
+late complete time of each operation in all machines by the order in operation sequence 
+vector, and then find the machine with shortest time and assign the operation to the 
+machine.
+Variable neighborhood search
+Disjunctive graph can also represent a feasible schedule. In the disjunctive graph, the 
+longest path in the disjunctive graph is the critical path and the critical operations are 
+these operations on the critical path. The maximal sequence of joint public critical 
+operations (which are belong to all the critical paths) processed on the same machine is 
+defined as public critical block. Only changing the critical paths can reduce the makes
+-
+pan and neighborhoods based on public critical block theory can significantly reduce 
+the search scope. Therefore, three neighborhood structures based on public critical 
+block are defined in variable neighborhood search. Two neighborhoods of machine 
+moves (NH
+1 and NH2) are generated on the critical operation and one neighborhood of 
+2F1 1 2 2 3 1 1 3
+2 1 2 2 3 1 1 3
+2 1 1 2 3 1 3 2
+S1
+F2
+J1={1,3}
+2 3 3 1 2 3 1 2F1
+1 3 3 2 3 3 1 2S1
+1 2 3 2 3 3 1 3F2
+1 0 0 1 1 0 1 0H
+a b
+Fig. 2 The discrete operator f2 on operation sequence and machine assignment. a IPOX for the operation 
+sequence, b MPX for the machine assignment
+--- PAGE 9 ---
+Page 9 of 22
+Huang et al. SpringerPlus  (2016) 5:1432 
+operation moves (NH3) is generated on public critical block. The details of three neigh -
+borhoods are as follows:
+NH1 Find these machines M s with the maximal makespan and then randomly select a 
+machine Mk from M s. Randomly select an public critical operation O ij on the machine 
+Mk. From the candidate machine set M ij, randomly select another machine M’ k different 
+from the current one M k for the selected operation O ij. Then randomly select an insert 
+point, which meets precedence constraints of the same job, from the chosen machine 
+M’k and insert the operation in this point.
+NH2 Randomly select an public critical operation O ij with more than one candidate 
+machines and sort the candidate machines of O ij by the processing time in ascending 
+order. Then randomly select another machine M’ k, which is different from the current 
+one Mk, from the front half candidate machines. Then assign the machine M’ k to the 
+operation Oij.
+NH3 Choose a public critical block π randomly, and then randomly select an operation 
+Oi
+π of the block π, which is different from the first operation or the last operation of the 
+block π. If the size of π is equal to 3, swap the first operation or the last operation of the 
+block π with the operation O i
+π as they are not belong to the same job. If the size of π is 
+bigger than 3, insert the first operation or the last operation of the block π into a random 
+selected position in π. The procedure of NH
+3 is illustrated in Fig. 3.
+Public critical block
+Size<=3
+Public critical block
+Size>3
+First operation Last operation
+Swap operation
+First operation Last operation
+Public critical block
+Size>3
+First operation Last operation
+Selected position
+Selected position
+Fig. 3 The procedure of NH3
+--- PAGE 10 ---
+Page 10 of 22Huang et al. SpringerPlus  (2016) 5:1432 
+The pseudo-code of variable neighborhood search is given in Algorithm 1.
+ 
+where K is the number of the neighborhood types and K equals to 3. s″  ≻ s indicates 
+that s″ dominates s.
+The pseudo-code of local search is given in Algorithm 2. 
+where NS is the searching size of the neighborhoods and NS is set to 20 empirically.
+Personal‑best positions and global‑best position
+The personal‑best archives and global‑best archive
+In this section, each individual has a personal-best archive to preserve non-dominated 
+individuals’ positions obtained by its history search and the global-best archive is 
+used to preserve non-dominated individuals’ positions obtained by the population. To 
+obtain high-quality and high-diversity solutions, a selective strategy of non-dominated 
+--- PAGE 11 ---
+Page 11 of 22
+Huang et al. SpringerPlus  (2016) 5:1432 
+individuals’ positions should be developed to update the global-best archive and the 
+personal-best archive. Many selection mechanisms, such as NSGA-II (Deb et al. 2002), 
+MOEA/D (Li and Zhang 2009), and SPEA2 (Zitzler et al. 2002) have already been used 
+to sort the non-dominated individuals. Weighted sum approach can combine all the 
+objectives into a single objective to represent relative superiority of individuals, and this 
+method can change the impacts of each criterion via adjusting the weights to solve the 
+multi-objective problems. In our study, a novel weighted sum approach is presented as a 
+criterion to update the personal-best archives and global-best archive.
+The update procedure is as follows: For particle i, suppose the maximal size of its 
+personal-best archive is N
+p. Add the personal-best archive and particle i to form a new 
+archive Ω, and then select N p non-dominated particles from Ω by non-dominated 
+archive updating strategy. The global-best archive is updated as follows: Suppose the 
+maximal size of global-best archive is N
+a. Add the current global-best archive and the 
+non-dominated particles of the current population to form a new archive Ω’ , and then 
+select Na non-dominated particles from Ω’ by non-dominated archive update strategy. 
+Here Np, Na is empirically set to 5 and 15. The non-dominated archive update strategy is 
+implemented as follows:
+Non‑dominated archive update strategy Randomly generate three numbers w1, w2, w3 in 
+[0 1] and the weights are able to add some random impacts on the objectives. Then three 
+coefficients (here is the 10, 1, 10−1), which represents the real impacts of three objectives, 
+are multiplied by these weights. Suppose the archive is Ω and its limited size is N a. The 
+pseudo-code of the non-dominated archive update strategy integrating weighted sum 
+approach is as follows: 
+--- PAGE 12 ---
+Page 12 of 22Huang et al. SpringerPlus  (2016) 5:1432 
+After personal-best archives and global-best archive are updated by the non-domi -
+nated archive update strategy, the personal-best position is randomly selected from its 
+personal-best archive and the global-best position is randomly selected from the global-
+best archive. The selection strategy of the personal-best position and the global-best 
+position as well as the updating procedure of population is illustrated in Fig. 4.
+Stop criterion
+Stop criterion: the predefined number of generations is reached. From the above 
+description, the flowchart of the proposed algorithm is shown in Fig. 5.
+Global-best archive
+First personal-best archive
+First individual
+Second personal-best archive      personal-best archiveith
+Second individual individual
+          personal-best archiveNth
+individual
+New individual
+ith
+ personal-best archiveith
+individualith individualith
+1rand c<
+N
+Y
+a
+b
+Nth
+2f
+New individual
+2f
+New individual
+2f
+New individual
+2f
+New individual
+2f
+New individual
+2f
+Fig. 4 The selection of personal-best position and the global-best position and the function of f2 operator. a 
+f2 operator on each personal-best archive. b Procedure of f2 operator
+--- PAGE 13 ---
+Page 13 of 22
+Huang et al. SpringerPlus  (2016) 5:1432 
+The simulation experiments
+Parameter settings and results
+Four Kacem instances and ten Brdata instances (Brandimarte 1993; Kacem et al. 2002b) 
+are used to evaluate the performance of our algorithm and several published algorithms 
+are applied to compared with the proposed algorithm. The proposed algorithm is imple -
+mented in Matlab 7.1 on Lenovo PC with 4G RAM and 3.4G Intel (R) Core(TM) i3-3240 
+CPU. In order to obtain reliable results, our algorithm is run ten times on the same 
+instance. The parameters are chosen experimentally to get a better satisfactory solution. 
+The population size N is set as 100. The maximal generation number Iter
+max is set as 300. 
+ω is set as 0.98. c1 and c2 are set as 0.6, 0.4. c3 is set as 0.02.
+Test on the Kacem instances
+Firstly, four Kacem instances ranging from 4 jobs  ×  5 machines to 15 jobs  ×  10 
+machines, which are frequently tested on recently published literatures, are used to eval-
+uate the validity and performance. The compared algorithms are the HTSA presented by 
+Li et al. (2010), the AIA presented by Bagheri et al. (2010), the Xing algorithm by Xing 
+et al. (2010), the MOGA by Wang et al. (2010), the P-DABC algorithm presented by Li 
+et al. (2011a), the SEA presented by Chiang and Lin (2013). Table  2 lists non-dominated 
+solutions obtained by the proposed algorithm and several recently published algorithms 
+for four Kacem instances. For the 4 jobs × 5 machines instance, the 8 jobs × 8 machines 
+instance and the 10 jobs  ×  10 machines instance, all the solutions obtained by seven 
+algorithms are non-dominated solutions. For the 15 jobs  ×  10 machines instance, the 
+solutions obtained by the HTSA, Xing algorithm and MOPSO algorithm are the same 
+and dominate some solutions obtained by AIA, MOGA and P-DABC.
+Fig. 5 The flowchart of MOPSO
+%(*,1
+Using heuristic rules to initialize population,
+all archives,p ersonal-best positions and
+global-best position
+Variable neighborhood search on
+global-best  archive
+END
+<
+1
+Update personal-best archives and global-best archive
+by non-dominated archive update strategy
+1tt=+
+1t =
+Produce the new position as follows:
+1
+11 22 2g() (, )( ,)tt tt ttfc fc fω+ =⊗ +⊗ +⊗xx xp xp
+3Execute perturbation operator   f
+<
+1
+3randc<
+Update the personal-bestp ositions and the global-
+bestp osition
+tp
+g
+tp
+maxtI ter>
+--- PAGE 14 ---
+Page 14 of 22Huang et al. SpringerPlus  (2016) 5:1432 
+Table 3 lists the number of the non-dominated solutions obtained by seven algorithms 
+and Fig.  6a shows the comparison of the data in Table  3. From Table 3 and Fig.  6a, it is 
+clear to see that the proposed algorithm obtains more non-dominated solutions than 
+HTSA, AIA, Xing algorithm and P-DABC algorithm for all four instances. For the 4 
+jobs  ×  5 machines instance, SEA obtains one more non-dominated solutions than 
+MOPSO algorithm but the paper lists no details of the non-dominated solutions, so it 
+is lack of data for a further objective appraisal. For the 8 jobs  ×  8 machines instance, 
+only P-DABC and MOPSO algorithm find four non-dominated solutions. For the 15 
+jobs × 10 machines instance, MOGA obtains three non-dominated solutions but two of 
+them are dominated by the solutions of MOPSO algorithm. And only the HTSA, Xing 
+algorithm and MOPSO algorithm find both non-dominated solutions (11, 91, 11) and 
+(11 93 10). For all four Kacem instances, all non-dominated solutions are obtained by 
+MOPSO algorithm and no one is dominated by the compared algorithm. Therefore, 
+MOPSO algorithm has better comprehensive performance than the compared algo
+-
+rithms. The Gantt charts of four Kacem instances obtained by MOPSO algorithm are 
+plotted in Fig. 6b–e.
+Table 2 Results of the four Kacem instances
+Kacem (m × n) 4 × 5 8 × 8 10 × 10 15 × 10
+Objective CM WT WM CM WT WM CM WT WM CM WT WM
+HTSA 11 32 10 14 77 12 7 43 5 11 91 11
+12 32 8 15 75 12 7 42 6 11 93 10
+AIA N/A 14 77 12 7 43 5 11 93 11
+Xing 12 32 8 14 77 12 7 42 6 11 91 11
+N/A 15 76 12 8 42 5 11 93 10
+MOGA 11 32 10 15 81 11 8 42 5 11 91 11
+12 32 8 15 75 12 7 42 6 12 95 10
+11 34 9 16 73 13 8 41 7 11 98 10
+P-DABC 11 32 10 14 77 12 8 41 7 12 91 11
+12 32 8 15 75 12 7 43 5 11 93 11
+13 33 7 16 73 13 8 42 5 N/A
+N/A N/A N/A N/A
+SEA N/A 14 77 12 N/A N/A
+N/A 15 75 12 N/A N/A
+N/A 16 73 13 N/A N/A
+N/A 16 77 11 N/A N/A
+MOPSO 11 32 10 16 73 13 8 41 7 11 91 11
+13 33 7 14 77 12 8 42 5 11 93 10
+12 32 8 16 77 11 7 43 5 N/A
+N/A 15 75 12 7 42 6 N/A
+Table 3 The number of non-dominated solutions for four Kacem instances
+Kacem (m × n) HTSA AIA Xing MOGA P‑DABC SEA MOPSO
+4 × 5 2 N/A 1 3 3 4 3
+8 × 8 2 1 2 3 3 4 4
+10 × 10 2 1 2 3 3 4 4
+15 × 10 2 1 2 3 2 2 2
+--- PAGE 15 ---
+Page 15 of 22
+Huang et al. SpringerPlus  (2016) 5:1432 
+Test on the Brdata instances
+The second category of 10 instances is from Brandimarte (Brdata instances) rang -
+ing from 10 jobs  × 6 machines to 20 jobs  × 15 machines and they are generated by a 
+uniform distribution between given limits. Xing’s algorithm (Xing et al. 2009), MOGA 
+(Wang et al. 2010), HTSA (Li et al. 2010), HSFLA (Li et al. 2012) and AIA (Bagheri et al. 
+bc
+a
+de
+0
+0.5
+1
+1.5
+2
+2.5
+3
+3.5
+4
+4.5
+4×58 ×8 10×101 5×10
+HTSA
+AIA
+Xing
+MOGA
+P-DABC
+SEA
+MOPSO-E
+0 2 4 6 8 10
+0
+1
+2
+3
+4
+5
+6
+O11
+01
+O21
+02
+O31
+60
+O12
+51
+O22
+72
+O41
+23
+O42
+56
+O13
+95
+O32
+67
+O23
+117
+O33
+79
+O34
+91 0
+time
+machine
+0 2 4 6 8 10 12 14 16
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+O61
+01
+O41
+01
+O31
+02
+O51
+03
+O11
+14
+O71
+13
+O62
+15
+O42
+16
+O52
+37
+O81
+35
+O21
+36
+O12
+47
+O72
+51 0
+O63
+51 0
+O43
+68
+O13
+79
+O22
+79
+O53
+91 1
+O23
+91 0
+O32
+91 3
+O82
+10 14
+O24
+10 14
+O54
+11 14
+O33
+13 14
+O73
+13 16
+O83
+14 15
+O84
+15 16
+time
+machine
+0 1 2 3 4 5 6 7 8
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+O51
+02
+O41
+01
+O31
+01
+O81
+02
+O91
+01
+O101
+01
+O71
+01
+O92
+12
+O61
+13
+O42
+13
+O32
+12
+O21
+13
+O72
+12
+O102
+23
+O52
+23
+O73
+23
+O103
+35
+O33
+34
+O82
+63
+O11
+34
+O62
+35
+O93
+34
+O22
+45
+O12
+45
+O53
+56
+O63
+56
+O23
+57
+O43
+67
+O83
+68
+O13
+78
+time
+machine
+0 2 4 6 8 10
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+O41
+01
+O91
+01
+O42
+12
+O31
+01
+O141
+02
+O51
+01
+O131
+02
+O121
+02
+O32
+12
+O151
+24
+O101
+12
+O111
+12
+O81
+23
+O102
+24
+O92
+13
+O142
+24
+O11
+45
+O52
+13
+O12
+56
+O132
+24
+O21
+01
+O122
+62
+O33
+24
+O43
+34
+O143
+46
+O112
+45
+O103
+45
+O22
+35
+O82
+67
+O23
+56
+O13
+67
+O152
+57
+O71
+67
+O34
+45
+O93
+73
+O144
+68
+O61
+45
+O113
+57
+O123
+79
+O104
+57
+O133
+68
+O53
+79
+O153
+79
+O83
+79
+O114
+78
+O134
+81 0
+O24
+78
+O84
+91 0
+O72
+10 11
+O54
+91 1
+O14
+117
+O94
+81 0
+O154
+91 1
+O44
+10 11
+O62
+10 11
+O124
+91 1
+time
+machine
+Fig. 6 The Gantt chart of the solution of Kacem instances. a The number of non-dominated solu-
+tions for four Kacem instances, b 4 jobs 5 machines (CM = 11, WT = 32, WM = 10) c 8 jobs 8 machines 
+(CM = 16, WT = 73, WM = 13), d 10 jobs 10 machines (CM = 16, WT = 73, WM = 13), e 15 jobs 10 machines
+--- PAGE 16 ---
+Page 16 of 22Huang et al. SpringerPlus  (2016) 5:1432 
+2010) are used to compare with MOPSO algorithm. The data of compared algorithm are 
+from the published paper (Li et al. 2010, 2012).
+Table 4 lists the experimental results of non-dominated solutions with minimal makes-
+pan obtained by these algorithms. It is marked in italic type if the solution is dominated 
+by other solutions. For MK02, MK05, MK06 and MK07 instances, the non-dominated 
+solutions obtained by Xing’s algorithm are dominated by that obtained by MOPSO 
+algorithm. For MK01 and MK03 instances, the non-dominated solutions obtained by 
+Table 4 Results of the ten Brdata instances
+Name Xing MOGA HTSA HSFLA AIA MOPSO
+MK01
+CM 42 40 40 40 40 40
+WT 162 169 167 165 171 167
+WM 42 36 36 37 36 36
+MK02
+C
+M 28 26 26 26 26 26
+WT 155 151 151 152 154 151
+WM 28 26 26 26 26 26
+MK03
+C
+M 204 204 204 204 204 204
+WT 852 855 852 852 1207 852
+WM 204 199 204 204 204 204
+MK04
+C
+M 68 66 61 62 60 61
+WT 352 345 366 364 403 382
+WM 67 63 61 61 60 60
+MK05
+C
+M 177 173 172 173 173 173
+WT 702 683 687 685 686 683
+WM 177 173 172 173 173 173
+MK06
+C
+M 75 62 65 64 63 62
+WT 431 424 398 403 470 424
+WM 67 55 62 55 56 55
+MK07
+C
+M 150 139 140 141 140 139
+WT 717 693 695 696 695 693
+WM 150 139 140 141 140 139
+MK08
+C
+M 523 523 523 523 523 523
+WT 2524 2524 2524 2524 2524 2524
+WM 523 515 523 523 523 523
+MK09
+C
+M 311 311 310 311 312 310
+WT 2374 2290 2294 2275 2591 2514
+WM 299 299 301 299 306 299
+MK10
+C
+M 227 214 214 215 214 214
+WT 1989 2082 2053 1957 2121 2082
+WM 221 204 210 198 206 204
+--- PAGE 17 ---
+Page 17 of 22
+Huang et al. SpringerPlus  (2016) 5:1432 
+MOGA are dominated by that obtained by MOPSO algorithm. For MK07 instances, 
+the non-dominated solutions obtained by HTSA are dominated by that obtained by 
+MOPSO algorithm. For MK02, MK05 and MK07 instances, the non-dominated solu -
+tions obtained by HSFLA are dominated by that obtained by MOPSO algorithm. For 
+MK01, MK02, MK03, MK05, MK06, MK07, MK09, and MK10 instances, the non-domi
+-
+nated solutions obtained by AIA are dominated by that obtained by MOPSO algorithm. 
+The only non-dominated solution of MK08 instance obtained by MOPSO algorithm is 
+dominated by MOGA. From Table 4, we can clearly see that MOPSO algorithm obtains 
+more high-quality solutions for ten Brdata instances.
+Table 5 lists the best makespan (denoted as C M), the average computational time 
+(denoted as Av(CPU)), the average best makespan (denoted as Av(C M)), the stand -
+ard deviation (denoted as Std(C M)) obtained by MOPSO algorithm and some results 
+obtained by SEA (Chiang and Lin 2013) and TSPCB (Li et al. 2011b). The improvements 
+contrasted to SEA and TSPCB (respectively denoted as imp 1 and imp2%) are calculated 
+as follows:
+where CM
+com and C M
+pro
+ are the best makespan obtained by compared algorithm and 
+obtained by our proposed algorithm respectively. imp% is the percentage of the improve-
+ment to the compared algorithm.
+From the data of imp1% in Table  5, we can see that C M obtained by MOPSO algo -
+rithm has an improvement on MK06, MK09 and MK10 contrasted to that obtained by 
+SEA, and no C M is worse than that obtained by SEA. From the data of imp 2%, MOPSO 
+algorithm have better results on MK04, MK06 and MK07 than that obtained by TSPCB, 
+and only for MK05, MOPSO algorithm obtains worse result than TSPCB. From Table  5, 
+the values of Av(C M) for all Brdata instances are close to C M and almost all the values 
+of Std(CM)are less than 1. Therefore, we can conclude that MOPSO algorithm also has 
+a stable searching ability. However, the MOPSO algorithm has more time-consuming 
+than TSPCB. That maybe depends on different simulation environment and simulation 
+imp% = C com
+M − C pro
+M
+C pro
+M
+× 100 %
+Table 5 Results of the ten Brdata instances
+Name SEA TSPCB MOPSO
+CM CM Av(CPU) CM Imp1 % Imp2 % Av(CM) Std(CM) Av(CPU)
+MK01 40 40 2.8 40 0 0 40.00 0 10.22
+MK02 26 26 19.31 26 0 0 26.40 0.52 30.35
+MK03 204 204 0.89 204 0 0 204.00 0 20.07
+MK04 61 62 40.82 61 0 +1.61 62.35 0.47 58.22
+MK05 173 172 20.23 173 0 −0.58 173.75 0.81 27.04
+MK06 65 65 27.18 62 +4.62 +4.62 62.34 0.36 75.22
+MK07 140 140 35.29 139 0 +0.71 139.30 0.46 52.51
+MK08 523 523 4.65 523 0 0 523.75 0.68 45.20
+MK09 311 310 70.38 310 +0.32 0 312.60 1.53 104.42
+MK10 255 214 89.83 214 +16.08 0 214.55 0.65 156.73
+--- PAGE 18 ---
+Page 18 of 22Huang et al. SpringerPlus  (2016) 5:1432 
+language to some extent because TSPCB is implemented on Pentium IV 1.6 GHz proces-
+sor in C++. The Gantt chart of one best solution obtained by the MOPSO algorithm for 
+MK01 is shown in Fig. 7 and the approximate Pareto front of MK03 and MK04 obtained 
+by MOPSO algorithm is shown in Fig. 8. 
+As PSO can memorize each particle’s experience and the population’s experience, PSO 
+for multi-objective problem can track and memorize non-dominated solutions encoun -
+tered by each particle (self experience) and the population (social experience), and a col -
+laborative guiding way of self experience and social experience can balance exploration 
+and exploitation and contribute to prevent premature. In our paper, the advantage of 
+MOPSO is having many cognitive memories (no other algorithms have such memo -
+ries) and a social memory to keep the diversity of non-dominated solutions and balance 
+local search and global search. Then it is convenient for social memory to do a further 
+research. This search mechanism can effectively avoid the premature and improve the 
+0 5 10 15 20 25 30 35 40 45 50
+0
+1
+2
+3
+4
+5
+6
+7
+6
+1
+3
+2
+4
+4
+4
+5
+7
+6
+7
+7
+7
+12
+8
+10
+9
+11
+10
+11
+16
+15
+13
+14
+14
+18
+14 15
+15
+19
+16 17
+22
+23
+24
+23
+28
+24
+26
+30
+25 29
+28
+30
+34
+30
+33
+36
+36
+34
+34
+38
+40
+37 40
+time
+machine
+Job1
+Job2
+Job3
+Job4
+Job5
+Job6
+Job7
+Job8
+Job9
+Job10
+Fig. 7 The Gantt chart of the solution of MK01 (CM = 40, WT = 167, WM = 36)
+ab
+200
+250
+300
+350 200 220 240 260 280 300 320
+815
+820
+825
+830
+835
+840
+845
+850
+855
+WMCM
+WT
+60
+80
+100
+120 50 60 70 80 90 100 110 120
+320
+330
+340
+350
+360
+370
+380
+390
+WMCM
+WT
+Fig. 8 The approximate Pareto front of MK03 and MK04 obtained by MOPSO algorithm. a MK03, b MK04
+--- PAGE 19 ---
+Page 19 of 22
+Huang et al. SpringerPlus  (2016) 5:1432 
+solutions. It is verified by that the proposed algorithm obtains high-quality and more 
+better solutions for most of Kacem instances and Brdata instances.
+Parameter sensitivity analysis
+In this section, we should analyze the sensitivity of parameters. MK02 is applied to assess 
+the performance of MOPSO with different parameter combinations. Four levels of the 
+parameters N, ω, (c1, c2) and c3 are considered and experiments are designed by using the 
+Taguchi method. The range of the parameters and the value of each factor level are pre -
+sented in Table 6. The designed experiments of an orthogonal array are presented in Table 7. 
+Each designed experiment runs 5 times independently. The maximal iteration num -
+ber is 100. Av(C M) denotes the average makespan of five runs. According to the results 
+of Av(CM) in Table 7, the average Av(CM) of each factor level is presented in Table  8. In 
+Table 8, ‘Delta’ denotes the maximal average Av(CM) minus the minimal average Av(CM) 
+for each parameter and reflects the significance of each parameter. According to the 
+Table 8, the trend of each factor level is illustrated in Fig.  9a–d and the effect on perfor
+-
+mance of each parameter is analyzed by Fig. 9. For comparisons of ‘Delta’ , the parameters 
+(c1, c2) rank first, and the parameter c3 ranks second. Therefore, the parameters (c 1, c2) 
+are the most significant factor on the performance of our algorithm. 
+Table 6 The factor level of parameters
+Parameters Value range Factor level
+1 2 3 4
+N 50–200 50 100 150 200
+ω 0.90–0.98 0.9 0.94 0.96 0.98
+(c1, c2) 0.2–0.8 (0.2, 0.8) (0.4, 0.6) (0.6, 0.4) (0.8, 0.2)
+c3 0.001 0.001 0.01 0.05 0.1
+Table 7 The orthogonal table of designed experiments
+Experiment number Factor level Av(CM)
+N ω (c1, c2) c3
+1 1 1 3 4 28.8
+2 1 2 4 3 29.4
+3 1 3 2 1 28.2
+4 1 4 1 2 27.8
+5 2 1 2 4 29.2
+6 2 2 3 1 28.8
+7 2 3 4 2 29.0
+8 2 4 1 3 28.8
+9 3 1 1 1 28.4
+10 3 2 2 2 28.8
+11 3 3 3 3 28.8
+12 3 4 4 4 28.6
+13 4 1 3 2 27.6
+14 4 2 1 4 28.6
+15 4 3 4 1 29.0
+16 4 4 2 3 28.8
+--- PAGE 20 ---
+Page 20 of 22Huang et al. SpringerPlus  (2016) 5:1432 
+Conclusions
+In this paper, a multi-objective FJSP with three criteria is investigated to meet the 
+requirements in manufacturing system and MOPSO algorithm is developed to address 
+this problem. In MOPSO algorithm, a discrete version of PSO employing special dis -
+crete operators is proposed, and personal-best archives and global-best archive, which 
+is updated by non-dominated archive update strategy and is respectively used to select 
+personal-best positions and global-best position, are developed to preserve non-dom -
+inated positions. Cognitive memories and social memory can keep the diversity of 
+non-dominated solutions and balance local search and global search. Additionally, vari
+-
+able neighborhood search integrating three neighborhoods on the global-best archive is 
+applied to improve the exploiting capability. MOPSO algorithm is evaluated on Kacem 
+instances and Brdata instances, and compared with some published algorithms. Compu
+-
+tational experiments demonstrate that the MOPSO algorithm have a better comprehen-
+sive performance than other algorithms to solve multi-objective FJSP .
+Table 8 The Delta of each parameter
+Factor N ω (c1, c2) c3
+1 28.55 28.50 28.40 28.60
+2 28.95 28.90 28.75 28.30
+3 28.65 28.75 28.50 28.65
+4 28.50 28.50 29.00 28.80
+Delta 0.45 0.40 0.60 0.5
+ab
+cd
+28.2
+28.4
+28.6
+28.8
+29
+1234
+P 
+P
+28.2
+28.4
+28.6
+28.8
+29
+1234
+28
+28.2
+28.4
+28.6
+28.8
+29
+29.2
+1234
+(c1,c2) 
+(c1,c2)
+28
+28.2
+28.4
+28.6
+28.8
+29
+1234
+c3 
+c3
+Fig. 9 The trend of each factor level. a Trend of P . b Trend of w. c Trend of (c1, c2). d Trend of c3
+--- PAGE 21 ---
+Page 21 of 22
+Huang et al. SpringerPlus  (2016) 5:1432 
+Research work should be continued in the future and it includes the followings: Firstly, 
+the theory of multi-objective optimization should be developed to support the study 
+of multi-objective FJSP . Secondly, the FJSP model also should be developed or rebuilt 
+to meet the dynamic and varied environment and requirements. Finally, more efficient 
+algorithm or strategy should be studied for solving the difficult FJSP problem.
+Authors’ contributions
+SH carried out the study, collected data, designed the experiments, implemented the simulation, analyzed data and 
+wrote the main manuscript. NT provided substantive intellectual contributions and supplementary information to this 
+study, participated in the design of the study and revised the manuscript for the content. YW gave conceptual advice 
+and technical support, and helped to prepare the manuscript. ZJ participated in literature research, gave some sugges-
+tions of the study and made the general supervision of the research. All authors read and approved the final manuscript.
+Author details
+1 School of Internet of Things Engineering, Jiangnan University, 1800 Lihu Avenue, Wuxi, Jiangsu Province 214122, China. 
+2 Engineering Research Center of Internet of Things Technology Applications, Ministry of Education, Jiangnan University, 
+Wuxi 214122, China. 
+Acknowledgements
+This work is supported by the National Natural Science Foundation of China under Grant No: 61572238, by the National 
+High-tech Research and Development Projects of China under Grant No: 2014AA041505, by the Provincial Outstanding 
+Youth Foundation of Jiangsu Province under Grant No: BK20160001.
+Competing interests
+The authors declared that they have no competing interests.
+Received: 5 May 2016   Accepted: 11 August 2016
+References
+Artigues C, Feillet D (2008) A branch and bound method for the job-shop problem with sequence-dependent setup 
+times. Ann Oper Res 159(1):135–159
+Bagheri A, Zandieh M, Mahdavi I, Yazdani M (2010) An artificial immune algorithm for the flexible job-shop scheduling 
+problem. Future Gener Comput Syst 26(4):533–541
+Balaraju G, Venkatesh S, Reddy BSP (2014) Multi-objective flexible job shop scheduling using hybrid differential evolution 
+algorithm. Int J Internet Manuf Serv 3(3):226–243
+Brandimarte P (1993) Routing and scheduling in a flexible job shop by tabu search. Ann Oper Res 41(3):157–183
+Chiang TC, Lin HJ (2013) A simple and effective evolutionary algorithm for multiobjective flexible job shop scheduling. 
+Int J Prod Econ 141(1):87–98
+Cwiek M, Nalepa J (2014) A fast genetic algorithm for the flexible job shop scheduling problem[C]. Proceedings of the 
+2014 conference companion on Genetic and evolutionary computation companion. ACM. pp. 1449–1450
+Deb K, Pratap A, Agarwal S, Meyarivan TAMT (2002) A fast and elitist multiobjective genetic algorithm: NSGA-II. IEEE Trans 
+Evol Comput 6(2):182–197
+Defersha FM, Chen M (2010) A parallel genetic algorithm for a flexible job-shop scheduling problem with sequence 
+dependent setups. Int J Adv Manuf Technol 49(1–4):263–279
+Della Croce F, Ghirardi M, Tadei R (2002) An improved branch-and-bound algorithm for the two machine total comple-
+tion time flow shop problem. Eur J Oper Res 139(2):293–301
+Gao KZ, Suganthan PN, Pan QK et al (2014) Pareto-based grouping discrete harmony search algorithm for multi-objective 
+flexible job shop scheduling[J]. Inf Sci 289(1):76–90
+Geiger CD, Uzsoy R, Aytuğ H (2006) Rapid modeling and discovery of priority dispatching rules: An autonomous learning 
+approach. J Sched 9(1):7–34
+Gen M, Tsujimura Y, Kubota E (1994). Solving job-shop scheduling problems by genetic algorithm. IEEE international 
+conference on systems, man, and cybernetics, humans, information and technology, vol 2. pp. 1577–1582
+Heger J, Branke J, Hildebrandt T, et al. (2016) Dynamic adjustment of dispatching rule parameters in flow shops with 
+sequence-dependent set-up times. Int J Prod Res 1–13
+Jia S, Hu ZH (2014) Path-relinking Tabu search for the multi-objective flexible job shop scheduling problem. Comput 
+Oper Res 47:11–26
+Kacem I, Hammadi S, Borne P (2002a) Approach by localization and multiobjective evolutionary optimization for flexible 
+job-shop scheduling problems. IEEE Trans Syst Man Cybern Part C Appl Rev 32(1):1–13
+Kacem I, Hammadi S, Borne P (2002b) Pareto-optimality approach for flexible job-shop scheduling problems: hybridiza-
+tion of evolutionary algorithms and fuzzy logic. Math Comput Simul 60(3):245–276
+Kamble SV, Mane SU, Umbarkar AJ (2015) Hybrid multi-objective particle swarm optimization for flexible job shop sched-
+uling problem. Int J Intell Syst Appl 7(4):54
+Karthikeyan S, Asokan P , Nickolas S (2014) A hybrid discrete firefly algorithm for multi-objective flexible job shop schedul-
+ing problem with limited resource constraints. Int J Adv Manuf Technol 72(9–12):1567–1579
+--- PAGE 22 ---
+Page 22 of 22Huang et al. SpringerPlus  (2016) 5:1432 
+Li Y, Chen Y (2014) An improved genetic algorithm of Bi-level coding for flexible job shop scheduling problems. J Netw 
+9(7):1783–1789
+Li H, Zhang Q (2009) Multiobjective optimization problems with complicated Pareto sets, MOEA/D and NSGA-II. IEEE 
+Trans Evol Comput 13(2):284–302
+Li JQ, Pan QK, Liang YC (2010) An effective hybrid tabu search algorithm for multi-objective flexible job-shop scheduling 
+problems. Comput Indust Eng 59(4):647–662
+Li JQ, Pan QK, Suganthan PN et al (2011a) A hybrid tabu search algorithm with an efficient neighborhood structure for 
+the flexible job shop scheduling problem. Int J Adv Manuf Technol 52(5–8):683–697
+Li JQ, Pan QK, Gao KZ (2011b) Pareto-based discrete artificial bee colony algorithm for multi-objective flexible job shop 
+scheduling problems. Int J Adv Manuf Technol 55(9–12):1159–1169
+Li J, Pan Q, Xie S (2012) An effective shuffled frog-leaping algorithm for multi-objective flexible job shop scheduling 
+problems[J]. Appl Math Comput 218(18):9353–9371
+Lin J (2015) A hybrid biogeography-based optimization for the fuzzy flexible job shop scheduling problem[J]. Knowl-
+Based Syst 78:59–74
+Moghadam AM, Wong KY, Piroozfard H (2014) An efficient genetic algorithm for flexible job-shop scheduling problem. 
+IEEE international conference on industrial engineering and engineering management. pp. 1409–1413
+Mouelhi-Chibani W, Pierreval H (2010) Training a neural network to select dispatching rules in real time. Comput Indus 
+Eng 58(2):249–256
+Pezzella F, Morganti G, Ciaschetti G (2008) A genetic algorithm for the flexible job-shop scheduling problem. Comput 
+Oper Res 35(10):3202–3212
+Pickardt C, Branke J, Hildebrandt T et al. (2010) Generating dispatching rules for semiconductor manufacturing to mini-
+mize weighted tardiness. Proceedings of the 2010 Winter Simulation Conference. IEEE. 2504–2515
+Rahmati SHA, Zandieh M (2012) A new biogeography-based optimization (BBO) algorithm for the flexible job shop 
+scheduling problem. Int J Adv Manuf Technol 58(9–12):1115–1129
+Shao X, Liu W, Liu Q, Zhang C (2013) Hybrid discrete particle swarm optimization for multi-objective flexible job-shop 
+scheduling problem. Int J Adv Manuf Technol 67(9–12):2885–2901
+Tay JC, Ho NB (2008) Evolving dispatching rules using genetic programming for solving multi-objective flexible job-shop 
+problems. Comput Indus Eng 54(3):453–473
+Wang X, Gao L, Zhang C, Shao X (2010) A multi-objective genetic algorithm based on immune and entropy principle for 
+flexible job-shop scheduling problem. Int J Adv Manuf Technol 51(5–8):757–767
+Wang SX, Zhang CY, Jin LL (2014) A hybrid genetic algorithm for flexible job-shop scheduling problem. Adv Mater Res 
+889:1179–1184
+Wenqi H, Aihua Y (2004) An improved shifting bottleneck procedure for the job shop scheduling problem. Comput Oper 
+Res 31(12):2093–2110
+Xing LN, Chen YW, Yang KW (2009) An efficient search method for multi-objective flexible job shop scheduling problems. 
+J Intell Manuf 20(3):283–293
+Xing LN, Chen YW, Wang P , Zhao QS, Xiong J (2010) A knowledge-based ant colony optimization for flexible job shop 
+scheduling problems. Appl Soft Comput 10(3):888–896
+Yuan Y, Xu H, Yang J (2013) A hybrid harmony search algorithm for the flexible job shop scheduling problem. Appl Soft 
+Comput 13(7):3259–3272
+Zhang C, Li P , Rao Y, Li S (2005) A new hybrid GA/SA algorithm for the job shop scheduling problem. Evolutionary Com-
+putation in Combinatorial Optimization. Springer, Berlin, Heidelberg, pp 246–259
+Zhang CY, Rao YQ, Li PG, Shao XY (2007) Bilevel genetic algorithm for the flexible job-shop scheduling problem. Chin J 
+Mech Eng 43(4):119–124
+Zhang G, Gao L, Shi Y (2011) An effective genetic algorithm for the flexible job-shop scheduling problem. Expert Syst 
+Appl 38(4):3563–3573
+Zitzler E, Laumanns M, Thiele L (2002) Spea2: improving the strength pareto evolutionary algorithm for multiobjective 
+optimization. In: Evolutionary methods for design optimisation and control. CIMNE, Barcelona, Spain, pp 95–100
+Xue H, Zhang P , Wei S, Yang L (2014) An improved immune algorithm for multi-objective flexible job-shop scheduling. J 
+Netw 9(10):2843–2850

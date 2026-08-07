@@ -21,6 +21,16 @@ FS_ALGORITHMS = [
     "particle_swarm",
 ]
 
+# Final comparison datasets shown in the dashboard and launchable via the API.
+# Tuning-only sets (ZooEW, IonosphereEW, SonarEW) and MadelonEW are excluded —
+# see config/decisions.yaml D14.
+FS_COMPARISON_DATASETS = [
+    "BreastEW",
+    "WineEW",
+    "LymphographyEW",
+    "SpectEW",
+]
+
 ALGORITHM_LABELS = {
     "simulated_annealing": "Simulated Annealing",
     "tabu_search": "Tabu Search",
@@ -64,7 +74,7 @@ def _base_template_path() -> Path:
     return _project_root() / "config" / "examples" / "fs_breastew_comparison.json"
 
 
-def load_fs_instances() -> list[dict[str, Any]]:
+def _load_fs_all_instances() -> list[dict[str, Any]]:
     metadata = json.loads(_metadata_path().read_text(encoding="utf-8"))
     instances: list[dict[str, Any]] = []
     for item in metadata.get("ew_benchmarks", {}).get("datasets", []):
@@ -82,12 +92,23 @@ def load_fs_instances() -> list[dict[str, Any]]:
     return instances
 
 
+def load_fs_instances() -> list[dict[str, Any]]:
+    """Return only the held-out comparison datasets exposed in the dashboard."""
+    allowed = set(FS_COMPARISON_DATASETS)
+    return [item for item in _load_fs_all_instances() if item["name"] in allowed]
+
+
 def build_fs_config(instance: str, algorithm: str) -> ExperimentConfig:
     if algorithm not in FS_ALGORITHMS:
         raise ValueError(f"unsupported feature-selection algorithm: {algorithm}")
 
     instances = {item["name"]: item for item in load_fs_instances()}
     if instance not in instances:
+        if instance in {item["name"] for item in _load_fs_all_instances()}:
+            raise ValueError(
+                f"dataset {instance} is not in the final comparison set "
+                f"({', '.join(FS_COMPARISON_DATASETS)})"
+            )
         raise ValueError(f"unknown feature-selection dataset: {instance}")
 
     template = json.loads(_base_template_path().read_text(encoding="utf-8"))
@@ -293,6 +314,57 @@ def list_fs_runs(
 
     rows.sort(key=lambda item: item["run_id"] or "")
     return rows
+
+
+def get_fs_live_status(instance: str, algorithm: str, results_dir: Path | None = None) -> dict[str, Any] | None:
+    """Read a live-ish progress snapshot straight off disk.
+
+    Mirrors the shape of RunProgress.to_dict() so the frontend's job-polling UI
+    (progress bar, live convergence, live feature mask) works even for batches
+    started outside the API — e.g. by a standalone script — where there is no
+    in-memory job to poll. Returns None if there's nothing in-progress to show.
+    """
+    from optimize.api.services.results_reader import results_root
+
+    root = results_dir or results_root()
+    batch = get_fs_batch(instance, algorithm, results_dir=root)
+    if batch is None or batch.done:
+        return None
+
+    experiment_dir = root / batch.experiment_id
+    current_run_index = batch.completed_runs + 1
+    current_run_id = f"{algorithm}_run_{current_run_index:03d}"
+
+    current_best_objective: float | None = None
+    convergence_path = experiment_dir / "convergence" / f"{current_run_id}.csv"
+    if convergence_path.exists():
+        try:
+            with convergence_path.open(encoding="utf-8") as handle:
+                rows = list(csv.DictReader(handle))
+            if rows:
+                value = rows[-1].get("best_objective")
+                if value:
+                    current_best_objective = float(value)
+        except (OSError, ValueError):
+            pass
+
+    return {
+        "job_id": "external",
+        "status": "running",
+        "job_type": "experiment",
+        "experiment_name": f"fs_{instance.lower()}_{algorithm}",
+        "current_algorithm": algorithm,
+        "current_run_index": current_run_index,
+        "total_runs": FS_RUNS,
+        "completed_runs": batch.completed_runs,
+        "current_run_id": current_run_id,
+        "current_best_objective": current_best_objective,
+        "experiment_dir": batch.experiment_id,
+        "message": f"Running {current_run_id} (started outside the dashboard)",
+        "error": None,
+        "log": [],
+        "progress_percent": round(100 * batch.completed_runs / FS_RUNS, 1),
+    }
 
 
 def write_fs_config_file(instance: str, algorithm: str) -> Path:

@@ -1,0 +1,984 @@
+--- PAGE 1 ---
+Empirical analysis of metaheuristic search techniques for
+the parameterized dynamic slope scaling procedure
+Weili Zhang, Charles D. Nicholson
+Department of Industrial and Systems Engineering, University of Oklahoma, 202 West Boyd, Room 449,
+Norman, OK, 73019-1022, USA {weili.zhang-1@ou.edu,cnicholson@ou.edu}
+Abstract: The dynamic slope scaling procedure is an approximation method successfully
+which solves the ﬁxed charge network ﬂow (FCNF) problem by iteratively linearizing the ﬁxed
+cost. The parameterized dynamic slope scaling procedure adds an additional ψ parameter
+to the procedure which can signiﬁcantly improve the solution quality. Finding the optimal
+value of ψ for a given problem is non-trivial. This paper employs multiple metaheuristic
+techniques, including simulated annealing, tabu search, and particle swarm optimization,
+to guide the search for good parameter values. In rigorous testing, we examine the search
+results, compare the improvement eﬃciencies among the techniques, and evaluate the ﬁnal
+solution quality of the FCNF problem. The experiments show that the solution improvement
+is robust with respect to these metaheuristics and the complexity of FCNF problem.
+Key words: network optimization, dynamic slope scaling, ﬁxed-charge network ﬂow, meta-
+heuristics
+History: TBD
+1. Introduction
+The ﬁxed charge network ﬂow problem (FCNF) was ﬁrst proposed by Hirsch and Dantzig
+(1954). The FCNF problem has many variants such as the ﬁxed charge transportation
+problem (FCTP) (Balinski 1961), the lot sizing problem (Steinberg and Napier. 1980), and
+facility location problem (Nozick 2001). Each of these have common characteristics with the
+FCNF, namely the link between nodes in a given graph have both variable and ﬁxed costs.
+The nodes have supply or demand amounts and the objective is to choose links and ﬂow
+values on links to transfer commodities from supply nodes to demand nodes at a minimum
+cost. Given its wide spread application on many problem types (e.g. Jarvis et al. 1978,
+Lederer and Nambimadom 1998, Armacost et al. 2002, Zhang and Wang 2017, Zhang et al.
+2018, ZHANG and ZHAO 2010, Zhang and Nicholson 2016a, Zhang and Yao 2010, Zhang
+1
+arXiv:1808.10264v1  [math.OC]  11 Aug 2018
+--- PAGE 2 ---
+et al. 2017, Zhang and Wang 2016), the FCNF has been the focus of signiﬁcant research for
+many years.
+The FCNF problem is NP-hard and thus no eﬃcient solution techniques exist which
+guarantee optimality (Garey and Johnson 1979). Branch-and-bound (B&B) (Land and Doig
+1960) is commonly employed to solve the FCNF problem exactly (Driebeek 1966, Kennington
+and Unger 1976, Barr et al. 1981, Cabot and Erenguc 1984, Palekar and Zionts 1990). B&B
+is in general a very important algorithm in integer programing. The algorithm ﬁnds solutions
+by iteratively solving various relaxations of the problem to ﬁnd integer feasible solutions. At
+each iteration the lower bounds on the objective value (based on linear relaxations) and
+upper bounds (based on feasible solutions) may be updated. As the gap between the bounds
+decreases, the B&B approaches an optimal solution. However, such a technique is ineﬃcient
+in solving FCNF instances which lack tight bounds (e.g. due to high ﬁxed costs). Therefore,
+many researchers are interested in developing approximate methods for the FCNF problem.
+Sun et al. (1998) combined Tabu Search with the simplex on a graph method (Kennington
+1980) to solve the FCTP. To help avoid local minima, their tabu implementation used both
+recency and frequency based memories and the simplex method was used to guide the .
+Adlakha and Kowalski (2010) developed a heuristic algorithm based on Balinski’s work
+(1961). This algorithm proposed a simple way to obtain valid upper bounds by solving related
+simple linear programs. This method is eﬃcient with small sized problems. Monteiro et al.
+(2011) proposed a hybrid heuristic, using ant colony optimization to search broadly and as
+well as a local search method. Molla-Alizadeh-Zavardehi et al. (2011) proposed an artiﬁcial
+immune algorithm and a genetic algorithm based on the spanning tree and pr¨ ufer number
+representation to solve the FCTP in a two-stage supply chain network. Antony Arokia
+Durai Raj and Rajendran (2012) applied genetic algorithm two scenarios of transportation
+problems, the ﬁrst one was the FCTP and the second one considered opening costs of the
+distribution centers. Machine learning based approach is ﬁrst developed by Zhang and
+Nicholson (2016b), Nicholson and Zhang (2016), Zhang and Nicholson (????) which makes
+a signiﬁcant contribution to the ﬁeld.
+Kim and Pardalos (1999) developed the dynamic slope scaling procedure (DSSP) from
+the viewpoint of marginal cost and applied it solving the FCNF problem. The main idea is to
+linearize the objective function and to solve the problem iteratively, adapting the linearization
+at each step. DSSP removes the binary variables and incorporates the variable cost and ﬁxed
+cost into the cost coeﬃcient, which is updated by the previous linear programing solution.
+2
+--- PAGE 3 ---
+DSSP has been improved by combining with other methods : trust interval techniques (Kim
+and Pardalos 2000), intensiﬁcation/diversiﬁcation mechanisms (Crainic et al. 2004), Tabu
+Search (Kim et al. 2006, Gendron et al. 2003) and parameterized DSSP (Nicholson and
+Barker 2014). Several types of FCNF variants, including concave piecewise linear network
+ﬂow problem (Kim and Pardalos 2000), multicommodity location problem (Gendron et al.
+2003), multicommodity FCNF (Crainic et al. 2004), stochastic integer programming problem
+(Shiina 2012).
+This paper extends the work of Nicholson and Barker (2014) to explore a variety of
+metaheuristics search implementation for the parametrized dynamic slope scaling procedure
+(Ψ-DSSP). The contribution in this paper is three-fold: (1) to explore the potential increase
+in the FCNF heuristic solution quality by using more precise parameter values for Ψ-DSSP
+than have been examined to-date, (2) compare multiple well-known search metaheuristics
+applied to this problem with respect to solution quality and eﬃciency, and (3) evaluate so-
+lution eﬃcacy by technique and parameter reﬁnement across a spectrum of diﬃcult FCNF
+instances. The remainder of this paper is organized as follows: Section 2 brieﬂy provides
+the background knowledge of ﬁxed charge network ﬂow problem and parameterized dynamic
+slope scaling procedure; Section 3 details three metaheuristics techniques and the correspond-
+ing implementations with respect to Ψ-DSSP; Section 4 describes the experimental design
+to verify the new approach; Section 5 analyzes the results from experiments and Section 6
+summarizes the ﬁndings.
+2. Background
+2.1 FCNF Problem Description
+The single-commodity, uncapacitated, ﬁxed charge network ﬂow problem can be deﬁned on
+a directed graph D = (N,A ), where N is the set of nodes and A is the set of arcs ( i,j ).
+Each node i∈ N has a commodity requirement value Ri (Ri > 0 for supply nodes, Ri < 0
+for demand nodes, Ri = 0 for transshipment nodes). Each arc ( i,j )∈ A has an associated
+ﬁxed and variable costfij andcij, respectively. The decision variable xij denotes the ﬂow on
+arc (i,j )∈A. The ﬁxed cost on arc ( i,j ) is the cost of using the arc for any positive ﬂow,
+xij > 0. The binary decision variables yij for all (i,j )∈A are used to model which arcs are
+selected for commodity ﬂow. The aim of the FCNF is to select a subset of arcs to be opened
+and determine the ﬂow on the arcs such that the supply in the network is routed to meet
+3
+--- PAGE 4 ---
+the demand at a minimal total cost. The FCNF is formulated as a traditional mixed binary
+programing problem as follows:
+min
+∑
+(i,j)∈A
+(cijxij +fijyij) (1)
+s.t.
+∑
+(i,j)∈A
+xij−
+∑
+(j,i)∈A
+xji =Ri ∀i∈N (2)
+0≤xij≤Mijyij ∀(i,j )∈A (3)
+yij∈{ 0, 1} ∀ (i,j )∈A (4)
+The objective in (1) is nonlinear. The constraints in (2) ensure that the inﬂow and outﬂow
+of a node satisfy the supply/demand at node i∈ N. Mij is an arc capacities (artiﬁcial or
+real) are used in the constraints (3) to ensure that the ﬁxed cost fij is incurred whenever
+there is a positive ﬂow on arc ( i,j ). If any arc (i,j ) is not capacitated, then Mij can be set
+to a suﬃciently large value to not inhibit feasible ﬂow. The constraints in (4) deﬁne yij as
+binary for all (i,j )∈A.
+2.2 Parameterized Dynamic Slope Scaling Procedure
+The dynamic slope scaling procedure replaces the variable cost and ﬁxed cost with a lin-
+earized cost coeﬃcient, which is updated iteratively by the marginal ﬁxed cost. Let ˜ xk
+ij
+denote the ﬂow value of arc (i,j ) at solution iteration k,
+˜xk
+ij =
+{
+xk
+ij xk
+ij > 0
+˜xk−1
+ij xk
+ij = 0 ∀(i,j )∈A.
+Let ¯ck+1
+ij denote the linearized cost coeﬃcient of arc ( i,j ) at iteration k + 1,
+¯ck+1
+ij =cij + fij
+˜xk
+ij
+The FCNF objective can be formulated at each iteration k:
+min
+∑
+(i,j)∈A
+(
+cij + fij
+˜xk−1
+ij
+)
+xk
+ij
+The algorithm stops when no more improvements can occur, or equivalently when
+˜xk−1
+ij = ˜xk
+ij ∀(i,j )∈A.
+4
+--- PAGE 5 ---
+The objective value associated with the original problem formulation (1) is computed at
+each iteration. The objective associated with the best solution across all DSSP iterations is
+returned (e.g. not necessarily the last iteration).
+Nicholson and Barker (2014) provided solid evidence that a small modiﬁcation of the
+linearizion technique can considerably alter the algorithm’s search path and signiﬁcantly
+enhance the solution quality over the DSSP. The revised algorithm is parameterized by a
+valueψ such that the corresponding problem formulation for the kth iteration of Ψ-DSSP is
+min
+∑
+(i,j)∈A
+(
+cij +ψ fij
+˜xk−1
+ij
+)
+xk
+ij (5)
+s.t.
+∑
+(i,j)∈A
+xk
+ij−
+∑
+(j,i)∈A
+xk
+ji =Ri ∀i∈N (6)
+0≤xk
+ij≤Mij ∀(i,j )∈A (7)
+In their work they examined various values of ψ ∈ (0, 2) and ultimately tested solution
+quality on diﬃcult FCNF problems for ﬁve ﬁxed values, ψ ={0.25, 0.5, 0.75, 1, 1.25}. The
+results were promising with maximum improvements of Ψ-DSSP over DSSP nearing 30%.
+The paper establishes the sensitivity of solution quality with respect to the ψ parameter
+and also demonstrates there is no clear pattern relating ψ with solution eﬃcacy for diﬀerent
+problem instances.
+3. Metaheuristics for Searching ψ Values
+Since the best ψ values vary among instances and aﬀect the solution signiﬁcantly, in this
+study metaheuristics are employed as a search procedure to ﬁnd goodψ values which improve
+the solution quality of the FCNF problem in reasonable time. While several techniques are
+possible, we choose two classic single-solution based metaheuristic algorithms, simulated
+annealing (Kirkpatrick et al. 1983) and tabu search (Glover 1986), and one population-
+based metaheuristic algorithm, particle swarm optimization (Kennedy et al. 1995). The
+details of each implementation are discussed below. For notational convenience, let z =
+DSSP(ψ) denote the best objective value from all iterations in the Ψ-DSSP approach for the
+parameter value equal to ψ.
+5
+--- PAGE 6 ---
+3.1 Simulated Annealing
+Simulated annealing (SA) is a well known and eﬀective stochastic search algorithm useful on
+non-linear and discontinuous problems spaces (Kirkpatrick et al. 1983, Henderson et al. 2003).
+While SA was originally developed for discrete problems, it has been successfully extended to
+continuous optimization problems (e.g. Bohachevsky et al. 1986, Dekkers and Aarts 1991).
+This technique is inspired by the physical annealing process in which a crystalline solid is
+heated and cooled slowly in such a way to improve the structural integrity of the material.
+Essentially, at the beginning of the process, the high temperatures allows the atoms to move
+freely and move to a state of minimum energy during the cooling process. Similarly for
+optimization problems, SA allows for a diverse search at the beginning of the process which
+may include very poor solutions. This diversity allows the process to escape local minima.
+At later iterations, as the “temperature” decreases, the search becomes more restrictive and
+focused on solutions which improve the objective value. For this investigation we will employ
+the Boltzmann annealing (Van Laarhoven and Aarts 1987) and very fast annealing (L. 1989)
+implementations to ﬁnd appropriate values for ψ. A brief explanation of the procedure
+follows.
+Letψ0 denote the initial value for the DSSP parameter and z0 denote the corresponding
+best solution value for that parameter setting. Let the valueT0 denote the initial temperature
+in the simulated annealing method. At each iteration i, choose a value ψc∈
+[
+ψi− ϵ
+2,ψi + ϵ
+2
+]
+as a candidate parameter in the “neighborhood” of ψi, where ϵ > 0 is the range of the
+neighborhood. (The method for choosing ψc from the neighborhood is detailed below.)
+Evaluate the candidate parameter and compare the solution quality with that of the solution
+found using ψi. If zc≤zi, then the candidate parameter is “accepted” by setting ψi+1 =ψc.
+Otherwise, the candidate solution is accepted with probability
+p = exp
+
+
+1−
+(
+zc
+zi
+)
+Ti
+
+ (8)
+where Ti is updated by diﬀerent functions based on the SA annealing implementation:
+Boltzmann: Ti = T0
+log(1 +i) (9)
+Very Fast Annealing: Ti =T0e( −i
+e ). (10)
+In equation (8), the probability computed is proportional to the percent change between
+zc and zi. This ensures the acceptance criteria for a given temperature setting is the same
+6
+--- PAGE 7 ---
+for a candidate objective value which is 10% higher than current objective, regardless of the
+magnitude of the objectives. Also note in equations (9) and (10) various factors are available
+to further tune the search procedure. We have set these factors to 1 for simplicity.
+If the candidate solution is not accepted, the procedure evaluates up to a pre-speciﬁed
+number of other candidate values (denotedidwell) before continuing to the next iteration and
+decreasing the temperature value. Selecting a value ψc from the neighborhood of ψi is exe-
+cuted diﬀerently depending on the implementation. For ui chosen randomly and uniformly
+on (0, 1) and for vi randomly selected from the standard normal distribution, the neighbor
+values are chosen as follows:
+Boltzmann: ψc =
+
+
+
+ψi + 1
+2vi
+√Ti if√Ti < 2
+3
+ψi + 1
+3vi otherwise
+Very Fast Annealing: ψc =
+
+
+
+ψi +Ti
+[(
+1 + 1
+Ti
+)|2ui−1|
+− 1
+]
+if ui < 0.5
+ψi−Ti
+[(
+1 + 1
+Ti
+)|2ui−1|
+− 1
+]
+otherwise
+Pseudo code for Ψ-DSSP combined with simulated annealing is shown in Figure 1. The
+stopping criterion are based on maximum iterations (imax) or maximum total runtime (tmax).
+3.2 Tabu Search
+Tabu Search (TS) was developed by Glover (1977, 1986, 1989, 1990). The algorithm improves
+on basic hill-climbing (a greedy method which always seeks improved solutions) by allowing
+the search to move away from good solutions in attempt to escape local optima. Once the
+search moves to a new solution in the neighborhood, the previous solution is added to a tabu
+list which forbids the search to return the previous states for a certain number of iterations.
+TS is an eﬀective approach for combinatorial problems such as graph coloring (Dubois and
+De Werra 1993) and the linear ordering problem (Duarte et al. 2011). The algorithm has
+been extended to continuous optimization problems by developing a paradigm of concentric
+hyperspheres (Siarry and Berthiau 1997) or hypercubes (Chelouah and Siarry 2000) to deﬁne
+the neighborhood of a solution.
+The implementation of TS for the Ψ-DSSP problem is for a one dimensional, continuous
+search space. We employ the neighborhood deﬁnition of Siarry and Berthiau (1997) as
+7
+--- PAGE 8 ---
+Data: Ψ-DSSP instance, imax,tmax,T 0,ψ 0
+Result: ψbest,zbest
+begin
+z0← DSSP(ψ0)
+zbest←z, ψbest←ψ0
+i← 0,t← 0
+while i<i max and t<t max and early termination is false do
+i←i + 1
+j← 0,t← total runtime
+update Ti
+while j <idwell and ψi̸=ψc do
+j←j + 1
+ψc← choose neighbor of ψi
+zc← DSSP(ψc)
+if zc <z best then
+zbest←zc,ψbest←ψc
+zi←zc, ψi←ψc
+else
+generate u∼U(0, 1)
+p← exp
+[
+1−
+(
+zc
+zi
+)
+Ti
+]
+if u<p then
+ψi←ψc
+Set early termination boolean value
+return ψbest,zbest
+Figure 1: Simulated Annealing for Ψ-DSSP Implementation
+8
+--- PAGE 9 ---
+−h3 −h2 −h1 −h0 h3h2h1h0
+ψi ψi,1ψi,2 ψi,3
+Figure 2: Partition of the ψi neighborhood when k = 3
+a series of k concentric intervals. For each iteration i, the neighborhood of ψi are the k
+concentric bands B ={B1,B 2,...,B k}, where
+Bj ={ψc|hj−1≤∥ψc−ψi∥≤hj} (11)
+and h0,h 1,...,h k is an increasing positive sequence of values. The value for hk is chosen as
+the maximum absolute diﬀerence between a given solution and its furthest neighbor. The
+valueshj are determined according to a geometric series
+hk−j = hk
+2j for j = 1, 2,...,k − 1
+The valueh0 is the smallest positive value in the sequence, but is not related directly to hk.
+It is used in the algorithm to specify the minimum distance between two ψ values for those
+two values to be considered distinct.
+In iteration i, the k neighbors of ψi are selected by randomly choosing one point from
+eachBj for j ={1, 2,...,k }. An example with k = 3 is depicted in Figure 2. The neighbor
+value ψi,1 is selected from the set of intervals closest to ψi, the value ψi,2 is selected from
+the second closest set of intervals, and so on. Pseudo code for Ψ-DSSP combined with tabu
+search is provided in Figure 3.
+3.3 Particle Swarm Optimization
+Artiﬁcial life (Adami 1998) simulates natural biotic system behavior with the help of com-
+puter or other abiotic system (Wilke and Adami 2002). One main branch of artiﬁcial intelli-
+gence is evolutionary computing (Back et al. 1997) inspired by Darwin’s theory of evolution.
+Another important branch is swarm intelligence (Bonabeau et al. 1999) inspired by social
+group behavior. Swarm optimization is similar to evolutionary algorithms (e.g. genetic
+algorithm) in that it is a stochastic population-based metaheuristic. Swarm optimization
+diﬀers in that the same population persists throughout many iterations and the members of
+the population adapt their behavior based on their own history and from “learning” from
+other members. In particle swarm optimization (PSO) (Kennedy et al. 1995, Eberhart and
+9
+--- PAGE 10 ---
+Data: Ψ-DSSP instance, imax,tmax,k,n,h 0,hk,ψ 0
+Result: ψbest,zbest
+begin
+z0← DSSP(ψ0)
+zbest←z0, ψbest←ψ0
+i← 0,t← 0
+tabulist← Null
+while i<i max and t<t max and early termination is false do
+Form concentric bands{B1,...,B k} around ψi using h0,...,h k
+for j = 1,...,k do
+randomly select ψi,j from Bj s.t.∥ψi,j−ψtabu∥>h 0∀ψtabu∈tabulist
+index← arg min
+j∈{1,2,...,k}
+DSSP(ψi,j)
+zbestcandidate← DSSP(ψi,index)
+ψi←ψi,index
+if zbestcandidate <z best then
+zbest←zbestcandidate
+ψbest←ψi
+add ψi to end of tabulist
+if |tabulist|>n then
+remove the ﬁrst tabu element
+i←i + 1,t← total runtime
+Set early termination boolean value
+return ψbest,zbest
+Figure 3: Tabu Search for Ψ-DSSP Implementation
+10
+--- PAGE 11 ---
+ψu,i ψu,i+1 ψpbestuψgbest
+particle best inﬂuence
+vu,i
+swarm inﬂuence
+Figure 4: Particle Swarm Optimization on a Line
+Kennedy 1995), particles“ﬂy” through the solution space analogous to how birds ﬂock or ﬁsh
+swarm. In PSO, each particle has a position vector, velocity vector, and ﬁtness value. The
+particle’s position is a point in the solution space, the velocity determines (with stochasti-
+cally) which solution the particle will move to next, and the ﬁtness vis the objective value
+of the current solution. Each particle maintains a record of the value and position of its
+individual best historical ﬁtness value. The also swarm maintains the global best historical
+ﬁtness value and position. The algorithm uses these pieces of information to inform all par-
+ticles and update their positions. Figure 4 graphically depicts the particle inﬂuences during
+a single iteration. The ﬁnal updated position derives from a linear combination of inﬂuences
+from its own iteration history, the swarm history, and the particle’s current velocity vector.
+PSO has been empirically shown to outperform genetic algorithms with respect ot speed of
+convergence and in some cases quality of the solutions (Angeline 1998, Hassan et al. 2005).
+Furthermore, PSO has fewer parameters to reﬁne than competing evolutionary algorithms
+which makes this approach even more appealing.
+Let n denote the total number of particles and ψu,i denote the position of particle u in
+iteration i. Let imax denote the maximum number of iterations. In iteration i, the ﬁtness of
+particle u iszu,i and is computed by solving Ψ-DSSP with ψu,i. The best historical position
+and objective for a given particle is maintained as ψpbestu andzpbestu, respectively. Similarly,
+ψgbest and zgbest denote the global best historical values for particle positions and objective
+values for the swarm. Let vu,i denote the velocity of particle u at iteration i and at the end
+of iteration i, vu,i is updated according to
+wi =wmax− i
+imax
+(wmax−wmin) (12)
+vu,i+1 =wivu,i +c1r1(ψpbestu−ψu,i) +c2r2(ψgbest−ψu,i) (13)
+wherewmax,wmin,c 1, andc2 are control the “inertia” and “acceleration” of the particles and
+are useful in tuning the search. The inertia parameter wi in (12) decreases linearly with
+11
+--- PAGE 12 ---
+respect to the total number of permissible iterations, beginning at wmax and ending atwmin.
+This encourages a diverse search during the beginning iterations and convergence in the
+later iterations. The values for c1 andc2 are constants which reﬂect the movement inﬂuence
+associated with a given particle’s historical best position and the swarm’s best historical
+position. The parameters r1 and r2 are two uniformly random numbers between 0 and 1.
+Then the updated position for particle u is computed by equation(14),
+ψu,i+1 =ψu,i +vu,i+1. (14)
+Pseudo code for Ψ-DSSP combined with particle swarm optimization to solve FCNF is
+provided in Figure 5.
+12
+--- PAGE 13 ---
+Data: Ψ-DSSP instance, imax,tmax,n,w max,wmin,vmax,c 1,c 2
+Result: ψgbest,z gbest
+begin
+for u = 1,...,n do
+generate ψu,0∼U(0, 2)
+generate vu,0∼U(−vmax,vmax)
+ψpbestu←ψu,0
+zpbestu←∞
+zgbest←∞ ,ψgbest← Null
+i← 0,t← 0
+while i<i max and t<t max and early termination is false do
+for u = 1,...,n do
+zu,i← DSSP(ψu,i)
+if zu,i≤zpbestu then
+zpbestu←zu,i
+ψpbestu←ψu,i
+if zu,i≤zgbest then
+zgbest←zu,i
+ψgbest←ψu,i
+wi←wmax− i(wmax−wmin)
+imax
+for u = 1,...,n do
+generate r1,r 2∼U(0, 1)
+vu,i+1←wivu,i +c1r1(ψpbestu−ψu,i) +c2r2(ψgbest−ψu,i)
+ψu,i+1←ψu,i +vu,i+1
+i←i + 1,t← total runtime
+Set early termination boolean value
+return ψg,zg
+Figure 5: Particle Swarm Optimization for Ψ-DSSP Implementation
+13
+--- PAGE 14 ---
+4. Computational Experiments Design
+4.1 Network Characteristics
+In order to evaluate the eﬃciency and solution quality from the various metaheuristic ap-
+proaches to the Ψ-DSSP problem, the experimental design includes tests on a variety of
+network sizes, each which has characteristics corresponding to diﬃcult FCNF problem in-
+stances (e.g. high ﬁxed to variable cost ratio). The tests includes networks with 25, 50,
+and 100 nodes. For each level of node quantity n, we generate 60 feasible FCNF instances
+in which the number of arcs m, is randomly selected. Speciﬁcally, we randomly choose
+n−1≤ m
+2 ≤ n(n−1)
+2 and create a connected network instance where each of the m
+2 undirected
+arcs is replaced by two directed arcs.
+According to Nicholson and Barker (2014), the gap between the na¨ ıve DSSP objective
+and optimal value is related to the network characteristics. In our experimentation we fo-
+cus on the instances in which DSSP performed poorly as identiﬁed in their work. We also
+use the same network characteristics measures and instance speciﬁcation as Nicholson and
+Barker (2014). The percentage of supply, demand, and transshipment nodes are respectively
+randomly selected with approximate probabilities 0.2, 0.2 and 0.6. The probabilities are ap-
+proximate in that adjustments are made to ensure an instance is feasible. The variable costs
+and ﬁxed costs for each link are randomly assigned on U(0, 20) andU(20000, 60000), respec-
+tively. The total requirements for each supply node is randomly assigned on U(1000, 2000).
+The total requirements of supply node is distributed randomly as negative requirements to
+the demand nodes. Gurobi 5.6 is used to solve the linear programing problems.
+To describe the network characteristics let d = m
+2(n
+2) denote the density of the network,
+S denote the total supply, and ρs and ρd represent the percentage of supply and demand
+nodes, respectively. Let θ = S
+ns
+indicate the average supply for each supply node. Let φ
+denote the overall network ratio of ﬁxed to variable costs,
+φ =
+∑
+(i,j)∈A
+fij
+∑
+(i,j)∈A
+cij
+where fij and cij denote the ﬁxed cost and variable cost of arc ( i,j ). Let γ = θ
+φ be a
+characteristic designed to provide an apriori estimate of the ratio of the cost components of
+a feasible solution. That is, since θ is proportional to the magnitude of arc ﬂow in a feasible
+14
+--- PAGE 15 ---
+Table 1: Network Characteristics
+Variable mean std.dev min max skewness
+d 0.5 0.3 0.03 1.0 0.2
+ρs 31.8% 6.4% 20.0% 56.0% 0.4
+ρd 20.3% 5.2% 4.0% 36.0% 0.2
+θ 1020.9 342.0 118.8 1760.2 0.2
+φ 3994.7 136.8 3552.1 5093.7 2.7
+γ 0.3 0.1 0.0 0.5 0.2
+solution, then
+γ = θ
+φ =
+∑
+(i,j)∈A
+θcij
+∑
+(i,j)∈A
+fij
+is deﬁned so that if γ≫ 1, variable costs are likely more important than ﬁxed costs; and if
+γ≪ 1, then ﬁxed costs are likely to have a larger inﬂuence on the optimal solution.
+Table 1 summarizes the network characteristics (mean, standard deviation, minimum,
+maximum, and skewness) for the test instances. Figure 6 shows the corresponding histograms
+of each characteristic. The least dense instance ( d = 0.03) is composed of 100 nodes and
+316 arcs, whereas the most dense network is composed of 100 nodes and 9690 arcs. The
+test cases include network instances with 6% to 56% of nodes as supply nodes, and from 5%
+to 36% as demand nodes. The supply quantity per supply node ranges from about 120 to
+nearly 1,800. The ﬁxed to variable network cost ratio averages to about 4,000. The value
+for γ ranges from nearly 0 to 0.5.
+4.2 Parameters Setting in Metaheuristics
+For any metaheuristic implementation, the speciﬁc tuning parameters and stopping criterion
+play a signiﬁcant role in the eﬃcacy of the technique. Our testing does not evaluate the full
+range of the manifold possibilities, however we have attempted to deﬁne reasonable and
+comparable settings for the techniques we use. Three stopping criterion are employed in
+all the techniques. We classify these as hard criteria or early termination criteria. The
+hard criterion is twofold: (i) maximum time limit tmax (1 hour) and (ii) the maximum
+number of allowable iterations imax (which is set equal to tmax divided by the time it takes
+15
+--- PAGE 16 ---
+0
+10
+20
+30
+40
+0.0 0.4 0.8
+Density
+Observations
+0
+20
+40
+60
+80
+0.2 0.3 0.4 0.5 0.6
+Percentage of Supply Nodes
+0
+20
+40
+60
+80
+0.0 0.1 0.2 0.3 0.4
+Percentage of Demand Nodes
+Observations
+0
+20
+40
+60
+0 500 1000 1500 2000
+Average Supply
+0
+20
+40
+60
+80
+3500 4000 4500 5000
+Fixed to Variable Cost Ratio
+Observations
+0
+20
+40
+60
+0.0 0.2 0.4
+γ Characteristic
+Figure 6: Distribution of Network Characteristics
+16
+--- PAGE 17 ---
+Table 2: Metaheuristic Settings
+Metaheuristic Parameter Settings
+Simulated Annealing max iterations at a given temperature: idwell = 3
+initial temperature: T0 = 0.25
+Tabu Search
+minimum neighbor distance: h0 = 0.01
+maximum neighbor distance: hk = 0.2
+maximum length of tabulist: n = 5
+quantity of neighbors: k = 5
+Particle Swarm Optimization number of particles: n = 10
+maximum velocity: vmax = 1
+inertia weight: wmin = 0.4,wmax = 0.9
+acceleration coeﬃcients: c1 =c2 = 2
+to solve the network instance using na¨ ıve DSSP). The imax and tmax are two hard stop
+criteria, but we can not compare the eﬃciency of diﬀerent algorithms by these criteria since
+the best solution maybe found before meeting imax or tmax. An early termination criterion
+is employed which stops the search when the objective value is not improved for several
+iterations. After extensive experimentation and suggestions from literature in section 3, we
+set the metaheuristic parameters as listed in Table 2.
+5. Results Analysis
+In this section, we report the correlation between solution quality performance and network
+characteristics, correlation between ψ value and improvement, and the time eﬃciency of the
+diﬀerent approaches: simulated annealing using the Boltzmann annealing (SAB), simulated
+annealing using “very fast annealing” (SAVF), tabu search on continuous space using con-
+centric bands (TS), and particle swarm optimization (PSO). Figure 7 shows the histograms
+of the best empirical ψ values across all 180 instances for each method. The best identiﬁed
+parameter value spans nearly the entire search space on [0 , 2].
+LetzDSSP denote the best objective value resulting from the na¨ ıve DSSP, andzSAB,zSA VF,
+zTS, zPSO denote the best objective value resulting from Ψ-DSSP and the associated search
+technique. Let zgap denote the percentage improvement of a given test approach compared
+17
+--- PAGE 18 ---
+0
+5
+10
+15
+0.0 0.5 1.0 1.5 2.0
+Parameter
+Observations
+SAB
+0
+5
+10
+15
+0.0 0.5 1.0 1.5 2.0
+Parameter
+SAVF
+0
+5
+10
+15
+0.0 0.5 1.0 1.5 2.0
+Parameter
+Observations
+TS
+0
+5
+10
+15
+0.0 0.5 1.0 1.5 2.0
+Parameter
+PSO
+Figure 7: Distribution of Best Parameter Value
+18
+--- PAGE 19 ---
+0
+25
+50
+75
+100
+125
+0 10 20
+Gap (%)
+Observations
+Figure 8: Distribution of Gap
+to DSSP. That is, zgap is the percent decrease in the objective value
+zgap = zDSSP−zx
+zDSSP
+× 100%.
+where zx is one of zSAB, zSA VF, zTS, or zPSO. The parameterized DSSP using metaheuristic
+search outperforms na¨ ıve DSSP in 680 (94.37%) cases with an overall mean improvement
+of 11.83%. Figure 8 shows the gap distribution for zgap > 0. The improvement percentage
+ranges from 0.2% to 24.2%. 24% is the maximum....
+Table 3 reports the percentage of instances in which Ψ-DSSP outperforms DSSP, and the
+corresponding mean, min, and max zgap overall and for each metaheursitic search approach
+for each level of nodes for the FCNF instances. The results between diﬀerent metaheuristics
+are quite close. The average improvement overall and for each individual approach is around
+10%. The percentage of cases in which Ψ-DSSP with metaheuristics outperforms DSSP
+increases with the number of nodes and achieves 100% when the number of nodes equals to
+100. However, the magnitude of the gap itself for instances withzgap > 0 shows no statistical
+diﬀerence with respect to the number of nodes ( p-value = 0.91). Furthermore, there is no
+signiﬁcant diﬀerence in the average solution gap by search technique. Figure 9 shows the
+gap distribution by number of nodes for the problem instances with improvement.
+19
+--- PAGE 20 ---
+ 25  50 100
+0
+10
+20
+30
+40
+0 10 20 0 10 20 0 10 20
+Gap(%)
+Observations
+Figure 9: Distribution of Gap by Number of Nodes
+Table 3: Gap Statistics
+Nodes
+25 50 100 Overall
+Overall
+zgap > 0 (%) 86.0 98.3 100.0 94.9
+mean zgap 10.7 10.3 9.6 10.2
+max zgap 24.2 23.9 22.0 24.2
+SAB
+zgap
+SAB > 0 (%) 86.7 98.3 100.0 95.0
+mean zgap
+SAB 10.7 10.5 9.6 10.2
+max zgap 23.9 23.9 17.0 23.9
+SAVF
+zgap
+SA VF> 0 (%) 86.7 98.3 100.0 95.0
+mean zgap
+SA VF 10.4 10.0 10.0 10.1
+max zgap 24.2 22.5 22.0 24.2
+TS
+zgap
+TS > 0 (%) 86.7 98.3 100.0 95.0
+mean zgap
+TS 10.8 10.1 9.4 10.1
+max zgap 24.2 23.7 20.3 24.2
+PSO
+zgap
+PSO > 0 (%) 85.0 98.3 100.0 94.4
+mean zgap
+PSO 10.9 10.5 9.5 10.3
+max zgap 23.1 23.9 20.3 23.9
+20
+--- PAGE 21 ---
+Table 4: Correlation Analysis
+Variable zgap
+SAB zgap
+SA VF zgap
+TS zgap
+PSO
+Cor p-value Cor p-value Cor p-value Cor p-value
+d 0.31 1.86E-05 0.26 4.87E-04 0.23 1.80E-03 0.24 1.07E-03
+ρs -0.09 0.21 -0.10 0.20 -0.07 0.33 -0.10 0.19
+ρd -0.06 0.40 -0.02 0.78 -0.10 0.20 -0.09 0.24
+θ 0.01 0.94 -0.05 0.48 -0.03 0.68 -0.04 0.59
+φ -0.05 0.54 -0.08 0.30 -0.06 0.39 -0.07 0.37
+γ 0.01 0.90 -0.05 0.54 -0.03 0.73 -0.04 0.64
+The Pearson correlations listed in Table 4 show that only density of the network has a
+statistically signiﬁcant positive correlation withzgap. As the density increases, the complexity
+of the FCNF rises and the zgap increases regardless of the search method employed. No
+signiﬁcant correlations exist between the gap and the remaining descriptors. That is, with
+the exception of network density, the improvement attainable from using search techniques is
+relatively robust with respect to the range of network characteristics evaluated in this study.
+There is also no correlation between zgap and the parameter value itself (pearson correlation
+coeﬃcient = 0.004). Figure 10 plots the 720 ψ values and solution gap pairs. The best ψ
+value varies with diﬀerent problem instances.
+The various search implementations with Ψ-DSSP each produce notable improvements
+over DSSP. To compare the techniques we consider three elements: zgap, CPU time, and
+total iterations. Each technique was allowed to run for a maxmimum of 1 hour, however
+some criteria allow for early termination. Terminating early is a good quality assuming the
+solution is also good. However, early termination due to quick convergence to relatively
+poor local optimum is not a desirable feature. To account for this we all report the aver-
+age solution quality per algorithm iteration. Speciﬁcally, let s denote the total number of
+parameterized DSSP solutions evaluated for a given search procedure. Let rx represent the
+solution eﬃciency deﬁned as the solution gap per iteration, rx = zgap
+x
+sx
+, and tx denote the
+CPU time for each search technique x∈{ SAB, SAVF, TS, PSO}. For example, a typical
+Ψ-DSSP with PSO search might use 10 particles with 100 updates each, resulting in 1,000
+DSSP solutions. If this procedure produced a gap of 15%, then rPSO = 15
+1000 = 0.015.
+Table 5 reports the average CPU time and average gap per iteration ( rx) for each of the
+solution approaches for each level of nodes. The Tukey HSD tests results are reported if the
+21
+--- PAGE 22 ---
+0
+5
+10
+15
+20
+25
+0.0 0.5 1.0 1.5 2.0
+Parameter
+Gap(%)
+Figure 10: Scatter Plot of ψ Value and Gap
+p-value of the ANOVA test is smaller than 0 .05. For the problem instances with 25 nodes,
+the swarm optimization outperformed the other methods, although the average time for all
+methods was relatively small. Statistically, all four methods had identical performance for
+the problem instances with 50 nodes. For the largest problem sizes, on average both PSO
+and TS converged after about 30 minutes of runtime. This was signiﬁcantly faster than
+either of the two simulated annealing implementations (48 minutes for SAB; 1 hour and 9
+minutes for SAVF).
+22
+--- PAGE 23 ---
+Table 5: ANOVA and Tukey Test
+Node Level Metric Mean Tukey Result
+SAB SAVF TS PSO
+25 CPU time (sec) 14 16 11 7 tPSO <t TS <t SAB =tSA VF
+r (×10−4) 22 17 25 43 rPSO >r TS >r SAB =rSA VF
+50 CPU time (sec) 249 282 166 249 no signiﬁcant diﬀerence
+r (×10−4) 8 7 9 8 no signiﬁcant diﬀerence
+100 CPU time (sec) 2889 4114 1934 1597 tPSO =tTS <t SAB <t SA VF
+r (×10−4) 3 2 3 5 rPSO >r TS =rSAB =rSA VF
+6. Conclusions
+The FCNF problem is a classically NP-hard problem with many real-world applications. Due
+to it’s complexity, many techniques have been developed to approximate solutions quickly.
+The dynamic slope scaling procedure and the more general parameterized variation, Ψ-
+DSSP are two such approaches. In this study we address three questions with respect to
+these two techniques. First, using a highly reﬁned parameter setting, we quantify reasonable
+expectations for solution improvement of Ψ-DSSP over DSSP. Empirically we ﬁnd solution
+quality to be improved by a statistically signiﬁcant 10% on average, and up to 24% as
+a maximum across various sized network problems. Approximately 95% of the instances
+beneﬁt from a reﬁned parameter value.
+Secondly, we evaluate the performance of multiple metaheuristic search algorithms with
+regard to this problem class. Implementations of simulated annealing, tabu search, and
+particle swarm optimization all ultimately ﬁnd equally good parameter values for Ψ-DSSP
+in our testing. In terms of eﬃciency, there are diﬀerences. PSO on average converges faster
+than the competing techniques (e.g. about half of the time as simulated annealing) and has
+the highest average “improvement per iteration”.
+Finally, we ﬁnd that the solution quality of Ψ-DSSP is relatively robust with respect to a
+wide spectrum of FCNF network characteristics for each search technique. Each method is
+tested on 180 diﬀerent network instances with various quantities of nodes, arcs, commodity
+supplies and demands, and values for ﬁxed and variable costs. Arc density is the only feature
+with a statistically signiﬁcant correlation to solution quality, i.e. as the density increases,
+there is evidence that Ψ-DSSP further outperforms na¨ ıve DSSP.
+23
+--- PAGE 24 ---
+We conclude that employing a metaheuristic strategy, especially PSO, as a search tech-
+nique to accompany Ψ-DSSP is a reasonable approach. There is no obvious relationship
+between network characteristics and an optimal ψ value for the parameterized DSSP. How-
+ever, the improvement in solution quality is notable and most complex FCNF instances
+beneﬁt from a reﬁned parameter setting.
+24
+--- PAGE 25 ---
+References
+Adami, C. 1998. Introduction to artiﬁcial life , vol. 1. Springer.
+Adlakha, V., K. Kowalski. 2010. A heuristic algorithm for the ﬁxed charge problem.Opsearch
+47(2) 166–175.
+Angeline, P.J. 1998. Evolutionary optimization versus particle swarm optimization: Philos-
+ophy and performance diﬀerences. Evolutionary Programming VII . Springer, 601–610.
+Antony Arokia Durai Raj, K., C. Rajendran. 2012. A genetic algorithm for solving the
+ﬁxed-charge transportation model: Two-stage problem. Computers & Operations Research
+39(9) 2016–2032.
+Armacost, A.P., C. Barnhart, K.A. Ware. 2002. Composite variable formulations for express
+shipment service network design. Transportation science 36(1) 1–20.
+Back, T., D.B. Fogel, Z. Michalewicz. 1997. Handbook of evolutionary computation . IOP
+Publishing Ltd.
+Balinski, M.L. 1961. Fixed-cost transportation problems. Naval Research Logistics Quarterly
+8(1) 41–54.
+Barr, R.S., F. Glover, D. Klingman. 1981. A new optimization method for large scale ﬁxed
+charge transportation problems. Operations Research 29(3) 448–463.
+Bohachevsky, I., M. Johnson, M. Stein. 1986. Generalized simulated annealing for function
+optimization. Technometrics 28 209–217.
+Bonabeau, E., M. Dorigo, G. Theraulaz. 1999. Swarm intelligence . Oxford.
+Cabot, A.V., S.S. Erenguc. 1984. Some branch-and-bound procedures for ﬁxed-cost trans-
+portation problems. Naval Research Logistics Quarterly 31(1) 145–154.
+Chelouah, R., P. Siarry. 2000. Tabu search applied to global optimization. European Journal
+of Operational Research 123(2) 256–270.
+Crainic, T.G., B. Gendron, G. Hernu. 2004. A slope scaling/lagrangean perturbation heuris-
+tic with long-term memory for multicommodity capacitated ﬁxed-charge network design.
+Journal of Heuristics 10(5) 525–545.
+25
+--- PAGE 26 ---
+Dekkers, A., E. Aarts. 1991. Global optimization and simulated annealing. Mathematical
+Programming 50 367–393.
+Driebeek, N.J. 1966. An algorithm for the solution of mixed integer programming problems.
+Management Science 12(7) 576–587.
+Duarte, A., M. Laguna, R. Mart´ ı. 2011. Tabu search for the linear ordering problem with
+cumulative costs. Computational Optimization and Applications 48 697–715.
+Dubois, N., D. De Werra. 1993. Epcot: an eﬃcient procedure for coloring optimally with
+tabu search. Computers & Mathematics with Applications 25(10) 35–45.
+Eberhart, R., J. Kennedy. 1995. A new optimizer using particle swarm theory.Micro Machine
+and Human Science, 1995. MHS’95., Proceedings of the Sixth International Symposium
+on. IEEE, 39–43.
+Garey, M. R., David S. Johnson. 1979. Computers and Intractability: A Guide to the Theory
+of NP-Completeness . W. H. Freeman, New York, NY.
+Gendron, B., J.Y. Potvin, P. Soriano. 2003. A tabu search with slope scaling for the multi-
+commodity capacitated location problem with balancing requirements. Annals of Opera-
+tions Research 122(1-4) 193–217.
+Glover, F. 1977. Heuristics for integer programming using surrogate constraints. Decision
+Sciences 8(1) 156–166.
+Glover, F. 1986. Future paths for integer programming and links to artiﬁcial intelligence.
+Computers & Operations Research 13(5) 533–549.
+Glover, F. 1989. Tabu searchpart i. ORSA Journal on computing 1(3) 190–206.
+Glover, F. 1990. Tabu searchpart ii. ORSA Journal on computing 2(1) 4–32.
+Hassan, R., B. Cohanim, O. De Weck, G. Venter. 2005. A comparison of particle swarm
+optimization and the genetic algorithm. Proceedings of the 1st AIAA multidisciplinary
+design optimization specialist conference. 18–21.
+Henderson, D., S. Jacobson, A. Johnson. 2003. The theory and practice of simulated anneal-
+ing. F. Glover, G. Kochenberger, eds., Handbook of Metaheuristics , International Series
+in Operations Research & Management Science , vol. 57. Springer US, 287–319.
+26
+--- PAGE 27 ---
+Hirsch, W.M., G.B. Dantzig. 1954. The ﬁxed charge problem. Tech. rep., DTIC Document.
+Jarvis, J.J., R.L. Rardin, V.E. Unger, R.W. Moore, C.C. Schimpeler. 1978. Optimal design
+of regional wastewater systems: A ﬁxed-charge network ﬂow model. Operations Research
+26(4) 538–550.
+Kennedy, J., R. Eberhart, et al. 1995. Particle swarm optimization. Proceedings of IEEE
+international conference on neural networks , vol. 4. Perth, Australia, 1942–1948.
+Kennington, J., E. Unger. 1976. A new branch-and-bound algorithm for the ﬁxed-charge
+transportation problem. Management Science 22(10) 1116–1126.
+Kennington, R.V., J.and Helgason. 1980. Algorithms for Network Programming. John Wiley
+& Sons, Inc., New York, NY, USA.
+Kim, D., X. Pan, P.M. Pardalos. 2006. An enhanced dynamic slope scaling procedure with
+tabu scheme for ﬁxed charge network ﬂow problems. Computational Economics 27(2-3)
+273–293.
+Kim, D., P. M. Pardalos. 1999. A solution approach to the ﬁxed charge network ﬂow problem
+using a dynamic slope scaling procedure. Operations Research Letters 24 195–203.
+Kim, D., P.M. Pardalos. 2000. Dynamic slope scaling and trust interval techniques for solving
+concave piecewise linear network ﬂow problems. Networks 35(3) 216–222.
+Kirkpatrick, S., C. Gelatt, M. Vecchi. 1983. Optimization by simulated annealing. Science
+220 671–680.
+L., Ingber. 1989. Very fast simulated re-annealing. Mathematical and Computer Modelling
+12 967–973.
+Land, A. H., A. G. Doig. 1960. An automatic method of solving discrete programming
+problems. Econometrica: Journal of the Econometric Society 497–520.
+Lederer, P.J., R.S. Nambimadom. 1998. Airline network design. Operations Research 46(6)
+785–804.
+Molla-Alizadeh-Zavardehi, S., M. Hajiaghaei-Keshteli, R. Tavakkoli-Moghaddam. 2011. Solv-
+ing a capacitated ﬁxed-charge transportation problem by artiﬁcial immune and genetic
+27
+--- PAGE 28 ---
+algorithms with a pr¨ ufer number representation.Expert Systems with Applications 38(8)
+10462–10474.
+Monteiro, M.S.R., D. B.M.M. Fontes, F.A.C.C. Fontes. 2011. An ant colony optimization
+algorithm to solve the minimum cost network ﬂow problem with concave cost functions.
+GECCO. 139–146.
+Nicholson, C., K. Barker. 2014. Parameterized dynamic slope scaling for ﬁxed-charge network
+ﬂows. in processing .
+Nicholson, C., W. Zhang. 2016. Optimal network ﬂow: A predictive analytics perspective on
+the ﬁxed-charge network ﬂow problem. Computers & Industrial Engineering 99 260–268.
+Nozick, L.K. 2001. The ﬁxed charge facility location problem with coverage restrictions.
+Transportation Research Part E: Logistics and Transportation Review 37(4) 281–296.
+Palekar, M.H., U.S.and Karwan, S. Zionts. 1990. A branch-and-bound method for the ﬁxed
+charge transportation problem. Management Science 36(9) 1092–1105.
+Shiina, T. 2012. Dynamic slope scaling procedure for stochastic integer programming prob-
+lem. International Journal of Economics and Management Sciences 6.
+Siarry, P., G. Berthiau. 1997. Fitting of tabu search to optimize functions of continuous
+variables. International Journal for Numerical Methods in Engineering 40(13) 2449–2457.
+Steinberg, E., H.A. Napier. 1980. Optimal multi-level lot sizing for requirements planning
+systems. Management Science 26(12) 1258–1271.
+Sun, M., J. E. Aronson, P. G. McKeown, D. Drinka. 1998. A tabu search heuristic procedure
+for the ﬁxed charge transportation problem. European Journal of Operational Research
+106(2) 441–456.
+Van Laarhoven, P.J.M., E.H.L. Aarts. 1987. Simulated annealing. Springer.
+Wilke, C.O., C. Adami. 2002. The biology of digital organisms. Trends in Ecology &
+Evolution 17(11) 528–532.
+Zhang, W., P.i Lin, N. Wang, C. Nicholson, X. Xue. 2018. Probabilistic prediction of post-
+disaster functionality loss of community building portfolios considering utility disruptions.
+Journal of Structural Engineering 144(4) 04018015.
+28
+--- PAGE 29 ---
+Zhang, W., C. Nicholson. ???? Objective scaling ensemble approach for integer linear
+programming. Under review by Heuristics .
+Zhang, W., C. Nicholson. 2016a. A multi-objective optimization model for retroﬁt strategies
+to mitigate direct economic loss and population dislocation. Sustainable and Resilient
+Infrastructure 1(3-4) 123–136.
+Zhang, W., C. Nicholson. 2016b. Prediction-based relaxation solution approach for the ﬁxed
+charge network ﬂow problem. Computers & Industrial Engineering 99 106–111.
+Zhang, W., N. Wang. 2016. Resilience-based risk mitigation for road networks. Structural
+Safety 62 57–65.
+Zhang, W., N. Wang. 2017. Bridge network maintenance prioritization under budget con-
+straint. Structural safety 67 96–104.
+Zhang, W., N. Wang, C. Nicholson. 2017. Resilience-based post-disaster recovery strategies
+for road-bridge networks. Structure and Infrastructure Engineering 13(11) 1404–1413.
+Zhang, W., Z. Yao. 2010. A reformed lattice gas model and its application in the simulation of
+evacuation in hospital ﬁre. Industrial Engineering and Engineering Management (IEEM),
+2010 IEEE International Conference on . IEEE, 1543–1547.
+ZHANG, W., L. ZHAO. 2010. Lattice gas model for simulating pedestrian evacuation in the
+dormitory ﬁre [j]. Journal of Safety and Environment 1 045.
+29

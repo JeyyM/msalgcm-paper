@@ -214,9 +214,11 @@ Fill in before splitting work. Check `documentation v1.md` and `audit_checklist.
 TSP is already complete; nothing there needs to be rerun. **JSP and FS are now also tuned and
 frozen** (as of 2026-08-07 — see `documentation v1.md`), so all three domains are ready for the
 final 30-run comparison benchmarks: `config/examples/jsp_ft10_comparison.json` on
-ta31/ta51/ta71, and `config/examples/fs_breastew_comparison.json` on
-BreastEW/WineEW/LymphographyEW/SpectEW/MadelonEW. Use `optimize list` to see everything
-available. Do not touch the tuning instances/datasets (ft10, ta01, ta21 for JSP; ZooEW,
+ta31/ta51/abz5/ta02/ta22, and `config/examples/fs_breastew_comparison.json` on
+BreastEW/WineEW/LymphographyEW/SpectEW. Use `optimize list` to see everything
+available. The dashboard lists four FS datasets and five JSP comparison instances
+(abz5, ta02, ta22, ta31, ta51) — tuning sets, MadelonEW, and ta71 are hidden. Do not touch the tuning
+instances/datasets (ft10, ta01, ta21 for JSP; ZooEW,
 IonosphereEW, SonarEW for FS) for final comparisons — those were used to pick the frozen
 parameters and would leak tuning effort into the reported results.
 

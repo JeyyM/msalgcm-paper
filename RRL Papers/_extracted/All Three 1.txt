@@ -1,0 +1,839 @@
+--- PAGE 1 ---
+Progress In Electromagnetics Research B, V ol. 28, 1–18, 2011
+HYBRID OF PAR TICLE SW ARM OPTIMIZATION, SIM-
+ULA TED ANNEALING AND T ABU SEARCH FOR THE
+RECONSTRUCTION OF TWO-DIMENSIONAL T AR-
+GETS FROM LABORA TOR Y-CONTROLLED DA T A
+B. Mhamdi, K. Grayaa, and T. Aguili
+Communication Systems Laboratory
+Engineer School of Tunis, Belvedere BP 37, Tunis 1002, Tunisia
+Abstract—Recently, the use of the particle swarm optimization
+(PSO) technique for the reconstruction of microwave images has
+received increasing interest from the optimization community due to
+its simplicity in implementation and its inexpensive computational
+overhead. However, the basic PSO algorithm is easily trapping into
+local minimum and may lead to the premature convergence. When a
+local optimal solution is reached with PSO, all particles gather around
+it, and escaping from this local optima becomes diﬃcult. To overcome
+the premature convergence of PSO, we propose a new hybrid algorithm
+of particle swarm optimization (PSO), simulated annealing (SA) and
+tabu search algorithm (TS) for solving the scattering inverse problem.
+The incorporation of tabu search (TS) and simulated annealing (SA)
+as local improvement approaches enable the hybrid algorithm to
+overleap local optima and intensify its search ability in local regions.
+Reconstructions of dielectric scatterers from experimental inverse-
+scattering data are ﬁnally presented to demonstrate the accuracy and
+eﬃciency of the hybrid technique.
+1. INTRODUCTION
+The objective of microwave imaging is to reconstruct the geometrical
+and/or physical properties of unknown objects belonging to an
+inaccessible domain and probed by a set of known incident microwaves.
+This is performed from measurements of the ﬁeld scattered by
+the object under various conditions of illumination. Microwave
+Received 29 November 2010, Accepted 4 January 2011, Scheduled 17 January 2011
+Corresponding author: Bouzid Mhamdi (bouzid.mhamdi@isetgf.rnu.tn).
+--- PAGE 2 ---
+2 Mhamdi, Grayaa, and Aguili
+tomography has shown great potential in several application areas,
+notably biomedical imaging [1–3], non destructive testing [4–6],
+imaging of buried objects and geosciences [7–9]. Certainly, one of
+the most challenging tasks in deﬁning a microwave-imaging method
+is to implement a reliable numerical procedure for the inversion of
+scattered data. In this framework, microwave imaging techniques
+have been widely investigated in recent years, but they have some
+intrinsic drawbacks related to the nature of the inverse scattering
+problems and to the complexity of the hardware setup required to
+collect the necessary ﬁeld measures. It is well known that the
+exact inverse electromagnetic scattering problem, i.e., the quantitative
+reconstruction of the complex permittivity of a scatterer from
+measurements of the scattered ﬁeld for a number of known incident
+ﬁelds is ill-posed and non linear [10]. The main problem in this respect
+is instability: in the presence of noise on the data, the reconstructions
+tend to be very diﬀerent from the actual permittivity proﬁle. As a
+result, the non-linear inverse scattering problem is reformulated as
+an optimization problem and solved by iteratively minimizing a cost
+function. Diﬀerences between methods then come from the nature
+of the criterion and the type of minimization algorithm. Generally
+speaking, two main kinds of approaches have been developed. The ﬁrst
+is based on gradient search approach such as the Newton-Kantrovitch
+method [11], modiﬁed gradient method [12], Levenberg-Marguart
+algorithm [13] and contrast source inversion method [14] since these
+approaches apply the gradient search method to ﬁnd the extreme of
+the cost function. In general, during the search of the global minimum,
+these techniques only converge to the exact solution under certain
+conditions, otherwise, they may be trapped into a local extreme or even
+diverge. To bypass the diﬃculties, global stochastic methods such as
+the genetic algorithm (GA) and simulated annealing (SA) have become
+attractive alternatives to reconstruct microwave images [15–17]. The
+neuronal models were also employed to cure the previously quoted
+disadvantages [18]. The particle swarm optimization (PSO) technique
+is a relatively new technique for antennas and microwave communities.
+It has received a huge attention and popularity due to its algorithmic
+simplicity and eﬀectiveness for solving design problems such as antenna
+design [19, 20]. Recently, the application of PSO has been extended to
+the reconstruction of microwave images and excellent results have been
+reported in the literature [21–23]. One of the main advantages of PSO
+over other stochastic optimization methods such as GA or SA, lies in
+the ease with which it can be tuned and implemented, using only a
+velocity operator to drive the search through out the hyperspace [24].
+Although PSO is a good and fast search algorithm to the reconstruction
+--- PAGE 3 ---
+Progress In Electromagnetics Research B, V ol. 28, 2011 3
+of microwave images, there are still many complex situations where the
+PSO has premature convergence and tends to converge to local optima,
+especially in a complex high dimensional problem space. In the worst
+case, when the best solution found by the group and the particles are
+all located at the same local minimum, it is almost impossible, due to
+the velocity update equation, for particles to ﬂy out and do farther
+searching.
+Besides using meta-heuristics as stand alone approaches for solving
+hard combinatorial optimization problems, during the last years, the
+attention of researchers has shifted to consider another type of high
+level algorithms, namely hybrid algorithms. The rationale behind
+the hybridization resides in the “ No Free Lunch Theorem ” [25, 26]
+stating that “all algorithms that search for an extremum of a cost
+function perform exactly the same, when averaged over all possible
+cost functions. In particular, if algorithm A outperforms algorithm B
+on some cost functions, then loosely speaking there must exist exactly
+as many other functions where B outperforms A”. Essentially, the
+theorem states that there is no any search method for optimization
+which outperforms all other search methods. All these clearly illustrate
+the need for hybrid evolutionary approaches where the main task is to
+optimize the performance of the direct evolutionary approach.
+Thus, this paper develops a new hybrid technique which combines
+PSO algorithm with the simulated annealing algorithm (SA) and
+tabu search (TS) and apply it to solve the scattering inverse
+problem. SA and TS are powerful optimization procedures that have
+been successfully applied to a number of combinatorial optimization
+problems. They have the ability to avoid convergence to local minima.
+By integrating SA and TS to the PSO, the new algorithm, which we
+call it PSO-SA-TS can not only escape from local minimum trap in the
+later phase of convergence, but also simplify the implementation of the
+algorithm. In other words, PSO contributes to the hybrid approach
+in a way to ensure that the search converges faster, while the SA and
+TS make the search to jump out of local optima due to their strong
+local-search ability. To the best of our knowledge, there is still no
+investigation on using hybrid technique based on PSO, SA and TS to
+reconstruct the permittivity proﬁle of dielectric scatterers in free space.
+The remaining sections of this paper are organized as follows:
+Section 2 states the theoretical formulation for the electromagnetic
+imaging. Section 3 describes the implementations of PSO, SA and TS
+in the proposed PSO-SA-TS hybrid algorithm. Numerical results for
+various objects of diﬀerent permittivity proﬁles are given in Section 4.
+Section 5 is the conclusion.
+--- PAGE 4 ---
+4 Mhamdi, Grayaa, and Aguili
+2. PROBLEM FORMULA TION
+Electromagnetic inversion using optimization techniques is achieved
+by solving out for the proﬁle which minimizes the error between the
+observed data and the synthetic one which is obtained by solving the
+forward problem. The forward problem is introduced ﬁrst. Let us
+consider two-dimensional (2-D) geometry as shown in Figure 1.
+Source
+ E inc
+Receivers
+x
+R
+Ω
+Γ
+εr
+σ
+Uy
+Ux
+Uz
+y
+Figure 1. Geometrical conﬁguration of the problem.
+A z-oriented cylindrical object of arbitrary cross section in the
+(x, y) plane is embedded in investigation domain Ω. Only stationary,
+linear, isotropic and non-dispersive materials are considered. The
+cylinder is assumed inﬁnite long in z direction, while the cross-section
+of the cylinder is arbitrary. The material properties of the dielectric
+scatterer which do not vary along the z-axis are modeled by the
+contrast function c(r), deﬁned as
+c(r) = εr(r) − 1 + j σ(r)
+2Πf ε0
+(1)
+where f indicates the working frequency and ε0 the dielectric
+permittivity of the vacuum, while εr is the relative dielectric
+permittivity and σ the electric conductivity. The cylindrical
+object domain is illuminated by a set of V TM-polarized incident
+electromagnetic plane waves (since the incident electric ﬁeld is
+polarized in the z-axis, ( ⃗ ev
+inc = ev
+inc⃗z). Therefore, the scattering
+problem is reduced to two dimensional. We assume that the time
+dependence of the ﬁeld is harmonic with the factor exp( −jωt). Under
+--- PAGE 5 ---
+Progress In Electromagnetics Research B, V ol. 28, 2011 5
+these considerations, the scattered ﬁeld ⃗ ev
+s = ev
+s⃗z and total ﬁeld
+⃗ ev = ev⃗z are also parallel to the z-axis considering the scalar nature
+of the problem. The forward problem which consists of computing the
+scattered ﬁeld from the knowledge of the object permittivity proﬁle
+is solved thanks to a boundary integral equation using the Kirchhoﬀ
+Helmholtz formula. This leads to two coupled contrast-source integral
+equations. The ﬁrst-kind Fredholm integral equation, the so-called
+observation Equation (2), relates the scattered ﬁeld ev
+s to Huygens-
+type sources induced within the target by the incident wave, i.e., to
+the product of the total ﬁeld ev by the contrast (or object) function
+c(r) representative of the target electromagnetic parameters deﬁned in
+Ω and null outside:
+ev
+s(r) = K2
+0
+∫ ∫
+Ω
+g(r, r′)c(r′)ev(r′)dr′, r ∈ Γ (2)
+where, K0 is the free-space wave number. Γ being the observation
+domain external to Ω. g(r, r′) denotes the two-dimensional Greens
+function for the background medium. The second Equation (3),
+denoted as the coupling (or state) equation, is the Lippmann-Schwinger
+equation. It relates the internal total ﬁeld ev in Ω to the induced
+sources, i.e., to itself and to the contrast c:
+ev(r) = ev
+inc(r) + K2
+0
+∫ ∫
+Ω
+g(r, r′)c(r′)ev(r′)dr′, r ∈ Ω (3)
+In numerical practice, discrete versions of the above equations are
+considered. The method of moments (MoM) with pulse-basis functions
+and point matching [27] is then applied to compute the total ﬁeld ev
+for each excitation. The investigation domain Ω under consideration is
+divided into N homogeneous elementary squares cells. The pixels are
+selected small enough in order to consider the ﬁeld and the contrast
+function as constant over each of them. Once the total ﬁeld ev is
+obtained, secondary quantiﬁes of interest such as the scattered ﬁeld
+can be computed. Therefore, (2) and (3) can be transformed into
+matric equations as follow:
+Ev = ( I − GΩC)−1Ev
+inc (4)
+Ev
+s = GΓC(I − GΩC)−1Ev
+inc (5)
+where Ev and Ev
+inc are N × V matrices, theirs v-th columns vectors
+represent the N elements of the total and incident ﬁelds on the test
+domain Ω correspond to the v-th incidence, respectively. Ev
+s is M × V
+matrix, its v-th column vector denotes the scattered ﬁelds at the M
+receivers located in measurement domain Γ. GΩ is N ×N square matrix
+representing the integrated Greens function in the test domain Ω. GΓ
+is M × N matrix representing the integrated Greens function between
+--- PAGE 6 ---
+6 Mhamdi, Grayaa, and Aguili
+Ω and Γ. I is the identity N ×N matrix, while C is the diagonal N ×N
+matrix whose elements are the values of contrast at each pixel of Ω.
+As it mentioned previously, the resolution of the forward
+problem consists in determining the scattered ﬁeld by knowing the
+object function and the incident ﬁeld. The computation of inverse
+solution refers to the procedure of ﬁnding the spatial distribution
+of electromagnetic properties of the scatterer assuming that the
+permittivity of the embedding medium, the incident ﬁeld and the
+values of the measured scattered ﬁeld at receivers are known. In this
+study, the scattering inverse problem is reformulated as a nonlinear
+global optimization problem and is solved by the application of a
+hybrid particle swarm optimization. By starting from a deﬁned
+residual as the diﬀerence between the calculated scattered ﬁeld, Ev
+s
+and the measured scattered ﬁeld, Ev
+meas. The dielectric permittivity
+and electric conductivity proﬁles are determined in an iterative manner
+in order to minimize a cost functional which gives the normalized
+deviation between the computed ﬁeld and the measured ﬁeld. In
+the inversion procedure, the hybrid algorithm is used to minimize the
+following cost function:
+F (X = [εr,1, εr,2, . . . , εr,N , σ1, σ2, . . . , σN ])
+=
+(
+1
+V
+V∑
+v=1
+∥Ev
+meas − Ev
+s ∥2
+∥Evmeas∥2
+) 1
+2
+(6)
+The objective of the optimization inversion algorithm is to ﬁnd the
+most suitable vector X which corresponds to the global minimum of the
+error function given in Equation (6). The value of X which minimizes
+the error function is supposed to reconstruct the electromagnetic
+properties proﬁles close to the original proﬁles.
+3. HYBRID OF PSO, SA AND TS (PSO-SA-TS)
+The proposed hybrid algorithm PSO-SA-TS combines PSO with SA
+and TS. Due to combination of diﬀerent search mechanisms, not only
+the PSO operators can keep diversity, but also SA and TS can keep the
+balance of global search and local search, so the entire search ability of
+the algorithm can be improved. In this section, PSO, SA and TS are
+introduced ﬁrst, followed by a detailed description of PSO-SA-TS.
+3.1. Related Algorithms
+Particle swarm optimization (PSO) is a population based stochastic
+optimization technique developed by Kennedy and Eberhart in
+--- PAGE 7 ---
+Progress In Electromagnetics Research B, V ol. 28, 2011 7
+1995 [28], inspired by social behavior patterns of organisms. The
+traditional PSO model consists of a number of particles moving
+around in the search space. In a space of D dimensions, each
+particle in the swarm is represented by the following characteristics:
+Xi = [ Xi1, Xi2, . . . , XiD]: The current position of the particle;
+Vi = [ Vi1, Vi2, . . . , ViD]: The current velocity of the particle; Pi =
+[Pi1, Pi2, . . . , PiD]: The personal best position of the particle. The
+personal best position of particle i is the best position visited by
+particle i so far. The position of a particle i is inﬂuenced by
+the local best position Pi visited by itself, i.e., its own experience
+and the position Pg of the global best particle in the swarm. The
+performance of each particle is measured using a ﬁtness function that
+varies depending on the optimization problem. PSO algorithm starts
+with a group of NP random (or not) particles (solutions) and then
+searches for optima by updating each generation. In each iteration,
+the velocity and position of each particle are updated according to its
+best encountered position and the best position encountered by any
+particle, in the following way:
+Vi,d(t + 1) = ωVi,d(t) + c1r1(Pi,d(t) − Xi,d(t))
++c2r2(Pg,d(t) − Xi,d(t)) (7)
+Xi,d(t + 1) = Vi,d(t + 1) + Xi,d(t) (8)
+where ω is the inertia weight. c1 and c2 are the acceleration coeﬃcients
+and the parameters r1 and r2 are two random numbers distributed
+uniformly in [0, 1]. ω dynamically reduces during a run which facilitates
+a balance in the exploration and exploitation of the search space.
+Concerning the Simulated annealing algorithm(SA), it was
+proposed by Kirkpatrik et al. in 1983 [29]. It was one of the
+ﬁrst minimization stochastic methods applied to electromagnetic
+imaging [17]. SA is a probabilistic variant of the local search method,
+but it can, in contrast, escape local optima. A standard SA procedure
+begins by generating an initial solution at random. At initial stages,
+a small random change is made in the current solution Xc. Then the
+objective function (representing the cost functional F ) value of the
+new solution Xn is calculated and compared with that of the current
+solution. The probability p of accepting a new solution which called
+Metropolis law is given as follows:
+p =
+{ 1, if F (Xn) < F (Xc),
+exp
+(
+−|F (Xn−F (Xc|
+T
+)
+, otherwise , (9)
+The calculation of this probability relies on a parameter T , which
+is referred to as temperature, since it plays a similar role as the
+temperature in the physical annealing process. To avoid getting
+--- PAGE 8 ---
+8 Mhamdi, Grayaa, and Aguili
+trapped at a local minimum point, the rate of T reduction should
+be slow. In our case, T decrease as follow:
+T (n + 1) = βT (n) (10)
+where the annealing rate satisﬁes 0 < β < 1.
+In this paper, the initial temperature is determined by the
+following empirical formula:
+T0 = − Fmax − Fmin
+ln 0.1 (11)
+where Fmax and Fmin denote the maximum and minimum objective
+values of the solutions in the initial swarm, respectively.
+Thus, at the start of SA most worsening moves may be accepted,
+but at the end only improving ones are likely to be allowed. This can
+help the procedure jump out of a local minimum.
+As a third algorithm, it is the Tabu search (TS) was invented
+by Glover in 1986 [30], and has been used to solve a wide range of
+hard optimization problems. TS starts with a random solution and
+evaluate the ﬁtness function for the given solution. Then all possible
+neighbors of the given solution are generated and evaluated. TS has
+two main features: (1) the capability to avoid local optimization. TS
+uses a tabu list (TL) to memory the better local neighbors which
+have been searched and will be neglected; (2) the capability to ﬁnd
+better resolution. TS uses an aspiration rule to exploit a prohibited
+resolution. During a situation that all the resolution in the TL
+is prohibited, the aspiration can make the whole search processing
+continue. In this work, the following aspiration criterion was employed
+when all available moves are classiﬁed tabu: a tabu move that loses
+its tabu status by the least increase in the value of current iteration is
+freed from the tabu list.
+3.2. The Proposed PSO-SA-TS Hybrid Approach
+In PSO algorithm, particles always chase the current overall optimal
+point and history optimal point found heretofore [31]. Then the
+particle speed closes to 0 quickly and can not escape from local
+minimum. In order to avoid earliness convergence, the algorithm
+must escape from local minimum and search in other solution space,
+until solve overall optimal solution. SA and TS algorithms accept
+a worse solution, it has the ability of escaping from local optimal
+solution and can restrain earliness convergence, increase the diversity of
+PSO. The new developed hybrid technique, called PSO-SA-TS, consists
+in a strong cooperation of PSO, SA and TS, since it maintains the
+integration of the three techniques for the entire run. The proposed
+--- PAGE 9 ---
+Progress In Electromagnetics Research B, V ol. 28, 2011 9
+hybrid algorithm makes full use of the exploration ability of PSO and
+the exploitation ability of SA and TS and oﬀsets the weaknesses of each
+other. Consequently, through introducing SA and TS to PSO, PSO-
+SA-TS is capable of escaping from a local optimum. The algorithm
+starts with a population of particles generated randomly and every
+particle Xi searches its local best Xi,lbest using SA or TS algorithms
+to update individual personal best Pi and the global Pg. The particles
+are then subjected to PSO for further reﬁnement. The PSO algorithm
+handles the global search for the solution while SA and TS facilitates
+the local search. The driving parameter of the PSO-SA-TS algorithm
+is the hybridization coeﬃcient (HC) beteween SA and TS; it expresses
+the percentage of population that in each iteration is evolved with SA:
+so HC = 0 means the procedure is a pure TS (the whole population
+is updated according to TS operators), HC = 1 means pure SA,
+while 0 < HC < 1 means that the corresponding percentage of the
+population is developed by SA, the rest with TS. So, for HC = 0
+the hybridization is carried out only between PSO and TS and the
+algorithm will be named PSO-TS. If HC = 1, the hybridization is
+carried out only between PSO and SA and the algorithm will be named
+PSO-SA. The steps of PSO-SA-TS are given below:
+Step 1 : Randomly initialize the population of Np particles within the
+variable constraint range.
+Step 2 : Evaluate each particle in the population from the ﬁtness
+function F .
+Step 3 :
+• Select randomly the particles in population that are evolved with
+SA.
+• Every selected particle Xi generates a new neighbor X ′
+i in its
+local area and then according to the accepting rule of SA decides
+whether to accept the new solution or not. After L iterations,
+every particle ﬁnds its local best solution Xi,lbest.
+• Calculate the new temperature T speciﬁed in Equation (10).
+Step 4 :
+• The rest of the population is evolved with TS. Every particle ﬁnds
+its local best solution Xi,lbest by applying a TS procedure.
+• Update the tabu list (TL).
+Step 5 : Update personal best Pi and the global best Pg. For each
+particle, the adaptive ﬁtness value F (Xi,lbest) is compared with one of
+the historical best position Pi, if the adaptive value is better than one
+of Pi. Then, Xi,lbest is consider as the best position Pi, otherwise, Pi
+--- PAGE 10 ---
+10 Mhamdi, Grayaa, and Aguili
+remain unchanged.
+Pi =
+{
+Xi,lbest, if F (Xi,lbest) < F (Pi),
+Pi, otherwise , (12)
+After updating every particles personal best value, we can get the new
+global best value Pg.
+Step 6 : Update the position and velocity of each particle by PSO
+operators according to (7) and (8).
+Step 7 : Repeat Steps 2–6 until a stopping criterion, such as a
+suﬃciently good solution being discovered or a maximum number of
+generations being completed, is satisﬁed.
+4. NUMERICAL RESULTS
+In this section, we discuss reconstruction results using experimental
+data. We illustrate the performance of the proposed inversion hybrid
+algorithm and its sensitivity to random noise in the scattered ﬁeld. The
+hybrid algorithm is applied to two diﬀerent dielectric objects embedded
+in the free space. The experimental setup under consideration, from
+Institut Fresnel (Marseille, France), and the experimental data used
+to test the retrieval algorithm are described in [32]. For these objects,
+time harmonic multi-frequency and multi-bistatic data are measured
+at 241 measurement points ( M = 241) on a circle with a radius R
+of 1.67 m and for diﬀerent emitter positions on a circle with a same
+radius around the target. Relative to a ﬁxed emitting antenna at 0,
+the receiving antenna is rotated in a limited angular range from 60
+to 300 with a 1 stepping. For all the reconstructions, we exploited
+the experimental data witch corresponding to the frequency 4 GHz.
+The investigation domain Ω of 0 .15 × 0.15m2 inside is partitioned into
+20 × 20 ( N = 400) square cells.
+As far as the PSO-based method for the retrieval process is
+concerned, the following conﬁguration of parameters has been adopted
+according to the guidelines in the related literature [33, 34] and to the
+heuristic study carried out in [35]. The size of population NP and
+the maximum iteration Nmax are set to 300 and 400, respectively.
+The cognitive coeﬃcients c1 and c2 represent the weightings that pull
+each particle toward pbest and gbest. Low values let particles wander
+around their local neighborhood, while high values cause particles
+to ﬂy toward, or pass, optimal solutions [28]. Thus, we have set
+c1 = c2 = 2 suggested by [33] and [34] for the sake of convergence.
+To further accelerate the convergence, a time-varying inertial weight,
+ω, is utilized and varies from 0.9 at the beginning to 0.4 toward the
+end of the optimization [35]. Therefore, in each iteration i, ω is set to
+--- PAGE 11 ---
+Progress In Electromagnetics Research B, V ol. 28, 2011 11
+0.9 − i × (0.9 − 0.4)/Nmax. For the TS algorithm, TL is an essential
+component, and stores points where the last label positions have been
+changed. In some applications a simple choice of TL size in a range
+centered around 7 seems to be quite eﬀective [36]. In our case, the TL
+size is set to 5. The temperature decrement cooling factor β is set to
+a constant value of 0.9.
+To evaluate the quality of the reconstructions, a relative error
+ξεr of dielectric permittivity between the reconstructed proﬁle and the
+original one is deﬁned as:
+ξεr =
+(
+1
+N
+N∑
+n=1
+|εtrue
+r,n − εcal
+r,n|2
+|εtruer,n |2
+) 1
+2
+(13)
+where the superscript cal and true stand for the reconstructed proﬁle
+and the true one, respectively.
+In what follows, some reconstructions using the experimental data
+are presented.
+The ﬁrst object consists of two purely dielectric targets: the ﬁrst
+target is a foam cylinder of diameter = 80 mm, its relative permittivity
+was estimated to be εr = 1 .45 ± 0.15. The second target is a plastic
+cylinder of diameter = 31 mm, its relative permittivity was estimated
+to be εr = 3 ±0.3. The dielectric cylinders being close together (see [32]
+for more details on the experimental setup, in which the target under
+test is referred therein as F oamDielExt).
+Before performing further numerical assessments with diﬀerent
+test examples, it is worth analyzing the impact of the choice of
+hybridization coeﬃcient HC . Toward this aim, several reconstructions
+of the ﬁrst object have been performed. Figure 2 shows the variation
+of the permittivity error ξεr according to HC parameter. It is quite
+0 0.2 0.4 0.6 0.8 1
+0
+0.5
+1
+1.5
+2
+2.5
+3
+3.5
+4
+4.5
+5
+HC
+ξεr (%)
+Figure 2. The permittivity error ξεr vs. hybridization coeﬃcient HC .
+--- PAGE 12 ---
+12 Mhamdi, Grayaa, and Aguili
+clear that ξεr is minimal for HC values close to 0.5. Consequently,
+0.5 will be selected as optimal value of HC and the employment of
+PSO-SA-TS will indicate implicitly that HC = 0.5.
+The reconstructed proﬁles using the standard PSO and the
+others three versions of hybrid algorithms (PS0-TS, PSO-SA and
+PSO-SA-TS) are shown in Figure 3. It is quite remarkable that
+the reconstructions are close to the exact original proﬁle of the
+F oamDielExtobject. However, it is clear that the best reconstructing
+quality is obtained by the new hybrid algorithm PSO-SA-TS, indeed
+the permittivity error ξεr is of 0.105, 0.047, 0.024 and 0.003 for PSO,
+PSO-TS, PSO-SA and PSO-SA-TS, respectively. The convergence
+status of the cost functional F for diﬀerent generations corresponding
+to the best particle in the swarm is shown in Figure 4. It is evident
+from this ﬁgure that the hybridization of PSO, SA and TS has much
+better eﬀect on the speed of convergence.
+5 10 15 20
+5
+10
+15
+20
+1.5
+2
+2.5
+5 10 15 20
+5
+10
+15
+20
+1
+1.5
+2
+2.5
+3
+5 10 15 20
+5
+10
+15
+20
+1
+1.5
+2
+2.5
+3
+5 10 15 20
+5
+10
+15
+20
+1
+1.5
+2
+2.5
+3
+5 10 15 20
+5
+10
+15
+20
+1.5
+2
+2.5
+(a)
+(e)(d)(c)
+(b)
+Figure 3. Reconstructions of the F oamDielExt. (a) Original object.
+(b) Reconstruction using standard PSO. Reconstruction for diﬀerent
+value of HC , (c) HC = 0, (d) HC = 1 and (e) HC = 0.5.
+The conductivity proﬁle was found more or less homogeneous
+inside the search domain and close to zero. Therefore, it is not
+presented.
+As a second example, we considered an object consisted of
+two plastic cylinders and a Foam cylinder which have the same
+characteristics as those of the ﬁrst example but placed in a diﬀerent
+conﬁguration. The experimental data are fully described in [32] and
+--- PAGE 13 ---
+Progress In Electromagnetics Research B, V ol. 28, 2011 13
+the target is referred therein as F oamTwinDiel. The gray-level
+representations of the retrieved proﬁles as well as a cut of these proﬁles
+in the object medium along the x axis are reported in Figures 5 and 6,
+respectively. If we compare Figure 5(b) with Figure 5(c), the latter
+provides a clear estimate of the shape of the F oamTwinDielobject
+as well as of the inhomogeneity of this scatterer.
+In the ﬁnal generation, the permittivity error ξεr is about 5.62
+and 0.64 for PSO and PSO-SA-TS, respectively. We note that the
+reconstructed proﬁles of the conductivity which are not represented
+here are almost found homogenous and practically tend towards zero.
+A signiﬁcant performance criterion of an optimization algorithm is
+the computing times. The inversion using standard PSO and PSO-SA-
+TS takes 72 minutes 23 seconds and 26 minutes 43 seconds, respectively.
+In order to investigate the robustness of the imaging algorithm
+against random noise, an additive white Gaussian noise of zero mean
+is added into the experimental electric ﬁelds. Several values of the
+signal to noise ratio (SNR) are used to reconstruct F oamTwinDiel.
+0 500 1000 1500 2000 2500 3000 3500 40000
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+Number of generations
+Fitness function F(X)
+PSO
+PSO-TS (HC = 0)
+PSO-SA (HC = 1)
+PSO-SA-TS (HC = 0.5)
+Figure 4. Fitness function F at diﬀerent generations in inversion of
+F oamDielExtusing both hybrid algorithms and standard PSO.
+5 10 15 20
+5
+10
+15
+20
+5 10 15 20
+5
+10
+15
+20
+5 10 15 20
+5
+10
+15
+20
+1
+1.5
+2
+2.5
+3
+0.5
+1
+1.5
+2
+2.5
+3
+1.5
+2
+2.5
+(b) (c)(a)
+Figure 5. Reconstructions of F oamTwinDiel. (a) Original object.
+Reconstruction using: (b) Standard PSO, (c) PSO-SA-TS.
+--- PAGE 14 ---
+14 Mhamdi, Grayaa, and Aguili
+-0.06 -0.04 -0.02 0 0.02 0.04 0.06
+0.5
+1
+1.5
+2
+2.5
+3
+3.5
+X
+εr
+Original profil
+Obtained by PSO
+Obtained by PSO-SA-TS
+Figure 6. Permittivity proﬁles of F oamTwinDielalong the x axis.
+0 10 20 30 40 50 60
+0
+5
+10
+15
+20
+25
+SNR (dB)
+ξε r
+ (%)
+PSO
+PSO SA TS
+Figure 7. Eﬀect of noise.
+Figure 7 shows the eﬀect of random noise on PSO and PSO-SA-TS for
+reconstructing the second example. From this ﬁgure, one concludes
+that the hybrid algorithm is much more robust against noise than the
+standard PSO.
+Comparing the obtained simulation results by PSO-SA-TS with
+those obtained by classic PSO, it is found that the PSO-SA-TS shows
+a much higher level of robustness than standard PSO.
+5. CONCLUSION
+In this study, we have proposed a new optimization technique based
+on the hybridization of the Particle Swarm Optimization with the
+Simulated Annealing and Tabu Search to solve an inverse scattering
+problem from laboratory-controlled data. The forward problem is
+computed using the method of moments.
+--- PAGE 15 ---
+Progress In Electromagnetics Research B, V ol. 28, 2011 15
+The inverse problem is reformulated in to an optimization one,
+and then the global searching scheme PSO-SA-TS is employed to
+reconstruct the dielectric targets from experimental data. The
+comparisons with standard PSO, demonstrate the superiority of
+PSO-SA-TS in higher convergence accuracy and fewer cost function
+evaluations. Numerical results have been carried out and good
+reconstruction has been obtained even in the presence of additive
+white Gaussian noise in experimental data. Future work will
+involve evaluating the algorithm using 3D simulations and using an
+experimental data.
+REFERENCES
+1. Zhou, H., T. Takenaka, J. Johnson, and T. Tanaka, “A breast
+imaging model using microwaves and a time domain three dimen-
+sional reconstruction method,” Progress In Electromagnetics Re-
+search, Vol. 93, 57–70, 2009.
+2. Zhang, H., S. Y. Tan, and H. S. Tan, “A novel method for
+microwave breast cancer detection,” Progress In Electromagnetics
+Research, Vol. 83, 413–434, 2008.
+3. Guo, B., Y. Wang, J. Li, P. Stoica, and R. Wu, “Microwave
+imaging via adaptive beamforming methods for breast cancer
+detection,” Journal of Electromagnetic Waves and Applications ,
+Vol. 20, No. 1, 53–63, 2006.
+4. Kharkovsky, S. and R. Zoughi, “Microwave and millimeter wave
+nondestructive testing and evaluation — overview and recent
+advances,” IEEE Instrum. and Meas. Mag. , Vol. 10, 26–38,
+Apr. 2007.
+5. Thomas, V., J. Yohannan, A. Lonappan, G. Bindu, and
+K. T. Mathew, “Localization of the investigation domain in
+electromagnetic imaging of buried 2-D dielectric pipelines with
+circular cross section,” Progress In Electromagnetics Research ,
+Vol. 61, 111–131, 2006.
+6. Benedetti, M., M. Donelli, G. Franceschini, M. Pastorino, and
+A. Massa, “Eﬀective exploitation of the a-priori information
+through a microwave imaging procedure based on the SMWfor
+NDE/NDT applications,” IEEE Trans. Geosci. Remote Sens. ,
+Vol. 43, No. 11, 2584–2592, Nov. 2005.
+7. Zhang, Z. Q. and Q. H. Liu, “Applications of the BiCGS-FFT
+method to 3-D induction well logging problems,” IEEE Geosci.
+Remote Sensing , Vol. 41, 856–869, May 2003.
+8. Catapano, I., L. Crocco, R. Persico, M. Pieraccini, and
+--- PAGE 16 ---
+16 Mhamdi, Grayaa, and Aguili
+F. Soldovieri, “Linear and nonlinear microwave tomography
+approaches for subsurface prospecting: Validation on real data,”
+IEEE Antennas Wireless Propag. Lett. , Vol. 5, 49–53, Dec. 2006.
+9. Crocco, L., M. D’Urso, and T. Isernia, “The contrast source-
+extended born model for 2D subsurface scattering problems,”
+Progress In Electromagnetics Research B , Vol. 17, 343–359, 2009.
+10. Hofmann, B. and O. Scherzer, “Factors inﬂuencing the
+illposedness of nonlinear problems,” Inverse Problems , Vol. 10,
+1277–1297, 1994.
+11. Qing, A. and L. Jen, “A novel method for microwave imaging of
+dielectric cylinder in layered media,” Journal of Electromagnetic
+Waves and Applications , Vol. 11, No. 10, 1337–1348, 1997.
+12. Van Den Berg, P. M. and M. van der Horst, “Nonlinear inversion
+in induction logging using the modiﬁed gradient method,” Radio
+Sci., Vol. 30, 1355–1369, 1995.
+13. Hettlich, F., “Two methods for solving an inverse conductive
+scattering problem,” Inverse Problems , Vol. 10, 375–385, 1994.
+14. Van Den Berg, P. M. and R. E. Kleinman, “A contrast source
+inversion method,” Inverse Problems , Vol. 13, 1607–1620, 1997.
+15. C.-L., Liu, C.-C. Chiu, T.-C. Tu, and M.-F. Tasi, “Electro-
+magnetic transverse electric-wave inverse scattering of an im-
+perfectly conducting cylinder by genetic algorithms,” Journal of
+Microwaves, Optoelectronics and Electromagnetic Applications ,
+Vol. 7, 1–15, Jun. 2008.
+16. Chien, W., “Inverse scattering of an un-uniform conductivity
+scatterer buried in a three-layer structure,” Progress In
+Electromagnetics Research, Vol. 82, 1–18, 2008.
+17. Garnero, L., A. Franchois, J. P. Hugonin, C. Pichot, and
+N. Joachimowicz, “Microwave imaging-complex permittivity
+reconstruction-by simulated annealing,” IEEE Trans. Microw.
+Theory Tech., Vol. 39, 1801–1807, 1991.
+18. Brovko Alexander, V., K. Murphy Ethan, and V. Yakovlev Vadim,
+“Waveguide microwave imaging: Neural network reconstruction
+of functional 2-D permittivity proﬁles,” IEEE Trans. Microw.
+Theory Tech., Vol. 57, No. 2, Feb. 2009.
+19. Boeringer, D. W. and D. H. Werner, “Particle swarm optimization
+versus genetic algorithms for phased array synthesis,” IEEE
+Trans. Antennas Propagat., Vol. 52, 771–779, Mar. 2004.
+20. Li, W.-T., X.-W. Shi, and Y.-Q. Hei, “An improved particle swarm
+optimization algorithm for pattern synthesis of phased arrays,”
+Progress In Electromagnetics Research, Vol. 82, 319–332, 2008.
+--- PAGE 17 ---
+Progress In Electromagnetics Research B, V ol. 28, 2011 17
+21. Huang, C.-H., C.-C. Chiu, C.-L. Li, and K.-C. Chen, “Time
+domain inverse scattering of a two-dimensional homogenous
+dielectric object with arbitrary shape by particle swarm
+optimization,” Progress In Electromagnetics Research , Vol. 82,
+381–400, 2008.
+22. Donelli, M., D. Franceschini, P. Rocca, and A. Massa,
+“Three dimensional microwave imaging problems solved through
+an eﬃcient multiscaling particle swarm optimization,” IEEE
+Geoscience and Remote Sensing , Vol. 47, 1467–1481, 2009.
+23. Emad Eldin, A. M., E. A. Hashish, and M. I. Hassan, “Inversion
+of lossy dielectric proﬁles using particle swarm optimization,”
+Progress In Electromagnetics Research M , Vol. 9, 93–105, 2009.
+24. Kennedy, J. and R. C. Eberhart, Swarm Intelligence , Morgan
+Kaufmann, San Francisco, 2001.
+25. Wolpert, D. H. and W. G. Macready, “No free lunch theorems for
+optimization,” IEEE Trans. Evolutionary Comp. , Vol. 1, 67–82,
+1997.
+26. Fulginei, F. R. and A. Salvini, “Comparative analysis between
+modern heuristics and hybrid algorithms,” COMPEL: Int.
+Journal for Comp. and Mathematics in Electrical and Electronic
+Engineering, Vol. 26, 259–268, 2007.
+27. Harrignton, R. F., Field Computation by Moments Methods , IEEE
+Press, Piscataway, NJ, 1993.
+28. Kennedy, J. and R. C. Eberhart, “Particle swarm optimization,”
+Proc. IEEE International Conference on Neural Networks , Vol. 4,
+1942–1948, IEEE Service Center, Piscataway, 1995.
+29. Kirkpatrick, S., C. D. Gelatt, Jr. and M. P. Vecchi, “Optimization
+by simulated annealing,” Journal of Science , Vol. 220, 671–680,
+1983.
+30. Glover, F., “Tabu search: Part 1,” ORSA Journal on Computing ,
+Vol. 1, No. 3, 190–206, 1989.
+31. Pan, H. and X. Han, “BP network learning algorithm research
+and application of PSO algorithm,” Computer Engineering and
+Application, Vol. 44, No. 9, 67–69, 2008.
+32. Geﬀrin, J.-M., P. Sabouroux, and C. Eyraud, “Free space
+experimental scattering database continuation: Experimental set-
+up and measurement precision,” Inverse Problems , Vol. 21, 117–
+130, 2005.
+33. Jin, N. and Y. Rahmat-Samii, “Advances in particle swarm
+optimization for antenna designs: Real-number, binary, single-
+objective and multiobjective implementations,” IEEE Transac-
+--- PAGE 18 ---
+18 Mhamdi, Grayaa, and Aguili
+tions on Antennas and Propagation , Vol. 55, 556–567, 2007.
+34. Robinson, J. and Y. Rahmat-Samii, “Particle swarm optimization
+in electromagnetics,” IEEE Transactions on Antennas and
+Propagation, Vol. 52, 771–778, 2004.
+35. Caorsi, S., M. Donelli, D. Franceschini, and A. Massa, “A new
+methodology based on an iterative multiscaling for microwave
+imaging,” IEEE Trans. on Microwave Theory Tech. , Vol. 51,
+1162–1173, 2003.
+36. Sudhakaran, M. and P. Ajay-D-Vimal Raj, “Integrating genetic
+algorithms and tabu search for unit commitment problem,”
+International Journal of Engineering, Science and Technology ,
+Vol. 2, 57–69, 2010.

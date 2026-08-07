@@ -77,7 +77,12 @@ class ExperimentRunner:
         iterations = 0
 
         last_written_evaluations = -1
-        live_route_interval = 5
+        # feature_selection's serialize_solution() re-runs a full k-fold CV plus a
+        # held-out test evaluation (multiple classifier fits) on every call, unlike
+        # tsp/scheduling where it's a cheap distance/makespan recomputation. Writing
+        # a live snapshot every 5 evaluations there was adding a real, avoidable
+        # compute tax on top of the (already budgeted) search evaluations themselves.
+        live_route_interval = 5 if problem_domain != "feature_selection" else 100
 
         try:
             algorithm.initialize(problem, algo_config, seed)

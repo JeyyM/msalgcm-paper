@@ -25,7 +25,7 @@ from optimize.api.services.results_reader import (
 from optimize.config.loader import load_experiment_config
 from optimize.experiments.runner import ExperimentRunner
 
-app = FastAPI(title="MSALGCM Optimize API", version="0.1.1")
+app = FastAPI(title="MSALGCM Optimize API", version="0.1.3")
 
 app.add_middleware(
     CORSMiddleware,
@@ -53,6 +53,8 @@ def health() -> dict[str, str]:
 
 @app.get("/api/dashboard")
 def dashboard() -> dict:
+    from optimize.api.services.comparison_dashboard import comparison_dashboard
+
     experiments = list_experiments()
     studies = list_studies()
     jobs = job_manager.list_jobs()
@@ -60,7 +62,15 @@ def dashboard() -> dict:
         "experiments": experiments[:20],
         "studies": studies[:10],
         "active_jobs": [job for job in jobs if job["status"] in {"pending", "running"}],
+        "comparison": comparison_dashboard(),
     }
+
+
+@app.get("/api/dashboard/comparison")
+def api_comparison_dashboard() -> dict:
+    from optimize.api.services.comparison_dashboard import comparison_dashboard
+
+    return comparison_dashboard()
 
 
 @app.get("/api/experiments")
@@ -214,6 +224,16 @@ def api_jsp_runs(instance: str, algorithm: str) -> list[dict]:
     return list_jsp_runs(instance, algorithm)
 
 
+@app.get("/api/domains/scheduling/live-status")
+def api_jsp_live_status(instance: str, algorithm: str) -> dict:
+    from optimize.api.services.jsp_catalog import get_jsp_live_status
+
+    status = get_jsp_live_status(instance, algorithm)
+    if status is None:
+        raise HTTPException(status_code=404, detail="no active batch outside the dashboard")
+    return status
+
+
 @app.post("/api/domains/scheduling/run")
 def api_start_jsp_run(body: JspRunRequest) -> dict:
     from optimize.api.services.jsp_catalog import JSP_ALGORITHMS, prepare_jsp_launch, write_jsp_config_file
@@ -241,6 +261,16 @@ def api_fs_runs(instance: str, algorithm: str) -> list[dict]:
     from optimize.api.services.fs_catalog import list_fs_runs
 
     return list_fs_runs(instance, algorithm)
+
+
+@app.get("/api/domains/feature-selection/live-status")
+def api_fs_live_status(instance: str, algorithm: str) -> dict:
+    from optimize.api.services.fs_catalog import get_fs_live_status
+
+    status = get_fs_live_status(instance, algorithm)
+    if status is None:
+        raise HTTPException(status_code=404, detail="no active batch outside the dashboard")
+    return status
 
 
 @app.post("/api/domains/feature-selection/run")

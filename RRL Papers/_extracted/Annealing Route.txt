@@ -1,0 +1,313 @@
+--- PAGE 1 ---
+ScienceDirect
+Available online at www.sciencedirect.com
+Procedia Computer Science 149 (2019) 95–101
+1877-0509 © 2019 The Authors. Published by Elsevier B.V .
+This is an open access article under the CC BY-NC-ND license (http://creativecommons.org/licenses/by-nc-nd/4.0/)
+Peer review under responsibility of the scientific committee of the ICTE in Transportation and Logistics 2018 (ICTE2018).
+10.1016/j.procs.2019.01.112
+10.1016/j.procs.2019.01.112
+© 2019 The Authors. Published by Elsevier B.V .
+This is an open access article under the CC BY-NC-ND license (http://creativecommons.org/licenses/by-nc-nd/4.0/)
+Peer review under responsibility of the scientific committee of the ICTE in Transportation and Logistics 2018 (ICTE2018).
+1877-0509
+Available online at www.sciencedirect.com
+ScienceDirect
+Procedia Computer Science 00 (2019) 000–000 
+www.elsevier.com/locate/procedia 
+1877-0509 © 2019 The Authors. Published by Elsevier B.V.  
+This is an open access article under the CC BY-NC-ND license (http://creativecommons.org/licenses/by-nc-nd/4.0/)
+Peer review under responsibility of the scie ntific committee of the ICTE in Transportati on and Logistics 2018 (ICTE2018).      
+ICTE in Transportation and Logistics 2018 (ICTE 2018)
+The application of simulated annealing method for optimal route 
+detection between objects  
+Peter Grabustsa,*, Jurijs Musatovsa, Vladimir Golenkovb
+aRezekne Academy of Technologies, Atbrivoshanas al. 115, Rezekne, LV-4601, Latvia 
+bBelarusian State University of Informatics and Radioelectronics, Minsk, st. Platonov 39,  Belarus 
+Abstract 
+A shortcut search between different objects  is one of the classic optimization goals. Simulated Annealing algorithms are often 
+used for optimization purposes. The Simula ted Annealing method is applied in comb inatorial optimization tasks. Simulated 
+Annealing is a stochastic optimi zation method that can be used to minimize th e specified cost function given a combinatorial 
+system with multiple degrees of freedom. The application of Simulated Annealing method and Travelling Salesman Problem is 
+demonstrated in this paper and an experiment aimed to find th e shortest route between Belarusian processing enterprises is 
+performed. The paper also provides mapping of these objects using GPS location. The ma in goal of the paper is to show the 
+possibilities of applying mathematical models in solving practica l tasks - to determine the shortest route between the differen t
+objects.
+© 2019 The Authors. Published by Elsevier B.V.   
+This is an open access article under the CC BY-NC-ND license (http://creativecommons.org/licenses/by-nc-nd/4.0/)
+Peer review under responsibility of the scientific committee of the ICTE in Transportation and Logistics 2018 (ICTE2018). 
+Keywords: Logistic; Optimization; Thermal equilibrium; Travelling salesman problem; Simulated annealing 
+1. Introduction 
+Simulated Annealing (SA) is a stochastic optimization method used for the optimization of objective function 
+(energy). It allows to find the global extreme for the function that has local minimums. SA principle was introduced 
+in the classical work [1] and further developed in works [2] - [5]. SA is based on analogy with statistical mechanics, 
+* Corresponding author. Tel.: +371-26593165. 
+E-mail address: peteris.grabusts@rta.lv 
+Available online at www.sciencedirect.com
+ScienceDirect
+Procedia Computer Science 00 (2019) 000–000 
+www.elsevier.com/locate/procedia 
+1877-0509 © 2019 The Authors. Published by Elsevier B.V.  
+This is an open access article under the CC BY-NC-ND license (http://creativecommons.org/licenses/by-nc-nd/4.0/)
+Peer review under responsibility of the scie ntific committee of the ICTE in Transportati on and Logistics 2018 (ICTE2018).      
+ICTE in Transportation and Logistics 2018 (ICTE 2018)
+The application of simulated annealing method for optimal route 
+detection between objects  
+Peter Grabustsa,*, Jurijs Musatovsa, Vladimir Golenkovb
+aRezekne Academy of Technologies, Atbrivoshanas al. 115, Rezekne, LV-4601, Latvia 
+bBelarusian State University of Informatics and Radioelectronics, Minsk, st. Platonov 39,  Belarus 
+Abstract 
+A shortcut search between different objects  is one of the classic optimization goals. Simulated Annealing algorithms are often 
+used for optimization purposes. The Simula ted Annealing method is applied in comb inatorial optimization tasks. Simulated 
+Annealing is a stochastic optimi zation method that can be used to minimize th e specified cost function given a combinatorial 
+system with multiple degrees of freedom. The application of Simulated Annealing method and Travelling Salesman Problem is 
+demonstrated in this paper and an experiment aimed to find th e shortest route between Belarusian processing enterprises is 
+performed. The paper also provides mapping of these objects using GPS location. The ma in goal of the paper is to show the 
+possibilities of applying mathematical models in solving practica l tasks - to determine the shortest route between the differen t
+objects.
+© 2019 The Authors. Published by Elsevier B.V.   
+This is an open access article under the CC BY-NC-ND license (http://creativecommons.org/licenses/by-nc-nd/4.0/)
+Peer review under responsibility of the scientific committee of the ICTE in Transportation and Logistics 2018 (ICTE2018). 
+Keywords: Logistic; Optimization; Thermal equilibrium; Travelling salesman problem; Simulated annealing 
+1. Introduction 
+Simulated Annealing (SA) is a stochastic optimization method used for the optimization of objective function 
+(energy). It allows to find the global extreme for the function that has local minimums. SA principle was introduced 
+in the classical work [1] and further developed in works [2] - [5]. SA is based on analogy with statistical mechanics, 
+* Corresponding author. Tel.: +371-26593165. 
+E-mail address: peteris.grabusts@rta.lv 
+--- PAGE 2 ---
+96 Peter Grabusts et al. / Procedia Computer Science 149 (2019) 95–101
+ Author name / Procedia Computer Science 00 (2019) 000–000
+and in particular with solid state physics elements. A practical example can be drawn from metallurgy - what 
+happens to the atomic structure of the body when it is ra pidly cooled and its temperature is lowered. Sharp decrease 
+in temperature may lead to the system's non-symmetric structure, in other words to a non-optimal state (with errors). 
+Cooling eventually leads to a condition where the system gets stuck or freezes and thermal equilibrium sets up. SA 
+differs from other gradient rollout optimization procedures by the fact that it does not “shrink” in the local minimum 
+found. Even though SA is a relatively slow procedure, it guarantees the finding of a global optimal solution. 
+SA method is widely used in many combinatorial optimization tasks. It is utilized in graph theory (graph division, 
+graph coloring), in integral circuit simulation [2], in neural network applications [6] and others. In the application of 
+the SA algorithm, a well-known combinatorial task will be employed - Travelling Salesman Problem (TSP). 
+The task of the TSP is to find the shortest route between N cities - entering into each city only once and in the end 
+returning to the original city. This is a combinatorial task that can be solved with a variety of combinatorics or graph 
+theory techniques. In literature TSP solving methods with the SA algorithm are also viewed [6] - [8]. 
+This paper demonstrates the application of the SA method in the combinatorial analysis TSP and an experiment 
+aimed to find the shortest route between 8 Belarusian milk and meat processing companies is performed.  
+2. Simulated annealing process 
+The so-called Metropolis procedure [1 ] determines iterative steps controlling the best solution to be achieved. 
+This algorithm is used in atomic equilibrium simulation at the given temperature. In each step of the algorithm, the 
+atom is raised by a small probabilistic movement (shifting):   ߫and system energy change ܧ߂is calculated. 
+ If൏ Ͳ , then the movement is accepted and the configurati on with the changed atomic states is used as the 
+initial state in the next step 
+ If൐Ͳ  , then the probability when a new state is accepted, is:    
+݁
+ିοா
+௞்                                                                                  (1) 
+where ݇Boltzmann’s constant, ܶtemperature parameter 
+Using the energy system as a target function and defining the states of the system with {௜}, it can be seen that 
+the Metropolis procedure generates a series of states for the given optimization problem at a certain temperature. 
+To use the SA method practically, the following must be specified: 
+ The target function W (analogous to energy surface) with minimization as the purpose of this procedure 
+  A possible set of solutions according to the energy surface or the physical state of the system 
+  Configuration conditions, the variation generator 
+  The control parameter ܶwhich characterizes an artificial system temperature, and the cooling mode (annealing 
+schedule) that describes how the temperature will be lowered 
+The SA algorithm is based on the Boltzmann’s probability distribution: 
+݁
+ିா
+௞்                                                               (2)
+This expression determines that if the system is in thermal equilibrium at a temperature ܶits energy may be split 
+between all different energy states ܧEven at low temperatures, there is a possibility that the system may be in a 
+high energy state. The system has an adequate probability of switching from the state with local energy minimum to 
+a better, more global minimum.  
+To understand the essence of SA, the following analogy can be suggested. As sume a space of states is set as a 
+basket of apples where each state is being represented as an apple. At each step one apple is drawn out and 
+weighted. How to find the biggest apple? In the deterministic (full) searching an apple is drawn out of the basket, is 
+--- PAGE 3 ---
+ Peter Grabusts et al. / Procedia Computer Science 149 (2019) 95–101 97 Author name / Procedia Computer Science 00 (2019) 000–000   
+weighted and is not put back to the basket. The best apple is kept aside. In the SA method, an apple is weighted and 
+put back to the basket. Hence, it can be drawn out and weighted several times. 
+The SA algorithm can be written as follows: 
+��� �;
+While (��� ������)
+         Do until (Thermal Equilibrium is reached) { 
+                      choice (Config. � -> Config. �);
+                      if (��� �� ) then 
+                         accept changes (Config. �);
+                      else 
+                         �=random number [0,1); 
+                         if (������
+����)>r) then 
+                             accept changes (Config. ��;
+                           else 
+                               ignore changes (Config. ��;}
+              �����
+�;}
+where 
+      �
+� = initial temperature; 
+      ��	= current configuration; 
+      �� = choice configuration; 
+						��= temperature variation coefficient; 
+      ������������ = Boltzmann's factor. 
+3. The Travelling Salesman problem 
+The methods that solve combinatorial optimization problems can be divided into two groups: deterministic and 
+stochastic. Deterministic methods not only require larg e computing resources, but also do not guarantee the 
+sufficient accuracy in finding the global minimum. Stochastic methods use statistical data with stochastic parameters 
+that influence the optimization process and solve the problem from a point of probability. 
+Stochastic methods are characterized by two phases: 
+ General phase - where the purpose of the functions is rated as a set of model points 
+ Local phase - where the set is restored in the direction of the local search 
+Moreover, in many methods these two phases are not strictly separable. 
+In general terms [2], the problem of combinatorial optimization can be formalized as ��� �), where �-state
+space, �- the target function, �� ��� � . The problem is to find a state in which � accepts the minimum value, i.e. 
+the state �
+� satisfies the following condition: 
+���� �� �� � ��������																																																						 																																																(3)    
+where ����	indicates the optimum (minimum) value. Then, the Metropolis algorithm can be used to generate 
+series of states ���� among which ����� could be. 
+TSP task is to find the minimum route between N cities - visiting each city only once and in the end returning to 
+the departure city. This is a combinatorial task that ca n be solved with various combinatorial or graph theory 
+methods. Literature also provides TSP solving methods using the SA algorithm [6] - [8]. 
+--- PAGE 4 ---
+98 Peter Grabusts et al. / Procedia Computer Science 149 (2019) 95–101
+ Author name / Procedia Computer Science 00 (2019) 000–000
+In the n-city TSP, a distance matrix   � � �� ���� �� �� � ���� � �  is given.   ���  denotes the distance between 
+cities � and �.  A tour through the � cities is defined as a closed walk vis iting each city only once. Each tour can be 
+represented by an element � of the set of all cyclic permutations of the n cities � � ������ � , if � is defined as  �����
+� � � ����  is the successor of city � in the tour. Thus, the set of configurations consists of all cyclic permutations of  
+� � ������ �  (there are  ���� � ���  such permutations for a TSP with a symm etric distance matrix ) and the cost of a 
+permutation is defined as the length of the corresponding tour: 
+���� � ∑ ������
+�
+���                                                                                                     (4) 
+The task of TSP is to minimize the target function in all possible permutations. If � cities are created in the 2-
+dimensional Euclide space, then ��� is Euclidean distance between cities � and �, then ��� is the shortest route for 
+given distance matrix �.
+The paper [2] provides some numerical expressions for the estimation of routes: 
+������
+����
+���
+√� ��                                                                                                         (5) 
+ where � � ������ .
+To use the SA algorithm for this type of tasks, some concepts need to be introduced. Each route can define a 
+neighbor as a set of routes that can be reached from the current route during one transition. Such a neighboring 
+structure mechanism for TSP is called �-opt transition. In the simplest case, th e 2-opt transition is based on the fact 
+that 2 cities are selected on the current route and the sequence of visiting these cities is reversed (see Fig. 1). 
+Fig. 1. Route: (a) the current route; (b) after reversing the sequence between � and �.
+Route neighbors are now defined as a set of cities that  can be reached from the current route through 2-opt 
+transitions (are  ���� � ���  such neighbors). 
+For cooling mode, the temper ature change coefficient �� is 0.925 [2]. In this cas e, the execution time of each 
+transition will be commensurate with �������� where ��� � � , and the total execution time of the algorithm is 
+commensurate with ������, where � ��� ��� .
+4. The shortest route determination between Belarusian dairy companies 
+State Association Holding managing company “Concern Brestmiasomolprom” is one of the largest corporations 
+in the meat and dairy industry in th e Republic of Belarus. The enterprise s of the concern have accumulated many 
+years of experience in the production of meat and dairy products. Annual processing capacities - about 2 million 
+tons of milk and up to 250 thousand tons of livestock. For today the corporation has around 13 thousand employees. 
+
+--- PAGE 5 ---
+ Peter Grabusts et al. / Procedia Computer Science 149 (2019) 95–101 99 Author name / Procedia Computer Science 00 (2019) 000–000   
+One of the main directions of the group's activities is the constant expansion of the products' range, the 
+introduction of advanced technologies and new types of equipment that allow to mechanize and automate 
+production processes (http://brestmmp.by/en/about-us). 
+The group consists of 8 dairy companies. Their brief characteristics are described below. 
+Joint public company “Liakhovichi Milk Factory” was founded in August 1945. Every year the factory produces 
+up to 1700 tons of butter, 1200 tons of industrial casein, more than 14000 tons of whole milk products. More than 
+half of the total output is sold for export (http://www.molzavod.by/index_en.html). 
+The joint Belarusian-Russian open joint stock company 
+“Belovezhskaya Cheese” brings joy and health to people 
+creating high-quality and environmentally friendly produc ts. The organization seeks to create the value of the 
+products for the buyer. The modification of products, new forms of cheese, a new package design improve consumer 
+product properties and increase its attractiveness in the eyes of the buyers (http://belcheese.by/en/). 
+Open joint stock company 
+“Berioza Cheese-Producing Plant” is a company with a rich history. Today the plant is 
+one of the leaders in dairy industry with a wide and varied range (https://www.cheese.by/en). 
+Open joint stock company “Baranovitchi Dairy Integrated Plant ” is a modern enterprise which offers only high-
+quality dairy products. Wide manufacturing capabilities, strict  quality control and professional management help to 
+earn confidence of customers and business partners (http://www.ranitsamilk.by/en/). 
+At joint stock company “Savushkin Product” the main law is - the company's products must be natural, useful 
+and, at a great degree, qualitative. “Savushkin Product” is 99% plant – machine based. In the production process the 
+milk has no contact with the external environment or people and it guarantees a maximum safety of dairy products 
+and provides a high quality finished product (http://www.savushkin.by/en/). 
+The production in the open joint stock company 
+“Pruzhany Milk Mill” meets the requirements of the market and 
+the high quality criteria, with up to 65% of the output being sold for export (http://www.prjmilk.by/en). 
+Joint stock company “Luninets dairy factory” has long traditions and wide experience in the production of milk 
+and natural dairy products. Quality of products is closel y monitored at all stages of the production process, from 
+receipt of raw milk and tracking temperature of storage till test control of finished product samples, which are 
+constantly tested in the laboratory of the factory. 70% of production is exported (http://eng.lncmilk.by/). 
+“Kobrin Butter and Cheese making Factory” complies with the requirements of the modern market and European 
+standards of quality. 70 percent of the produced cheese is exported to the commercial enterprises in Moscow and to 
+the various Russian regions (http://www.kobrincheese.com/en/). 
+The list of dairy enterprises (further in the text referred  to as objects) and their GPS coordinates are shown in 
+Table 1.  
+     Table 1. Denotation and GPS coordinates of objects. 
+Name of object Latitude Longitude 
+“Liakhovichi Milk Factory” 53,031017 26,257463 
+“Belovezhskaya Cheese” 52,372727 23,369195 
+“Berioza Cheese-Producing Plant” 52,542828 24,988239 
+“Baranovitchi Dairy Integrated Plant” 
+“Savushkin Product” 
+“Pruzhany Milk Mill” 
+“Luninets dairy factory” 
+“Kobrin Butter and Cheese making Factory” 
+53,115339 
+52,112929 
+52,550889 
+52,245241 
+52,211610 
+25,94968 
+23,765061 
+24,458614 
+26,846835 
+24,327513 
+For logistics purposes, a study was conducted: to find the shortest route between the given objects. It was a 
+requirement to solve the TSP-8 task using the SA method, i. e. to determine the shortest route between 8 Belarusian 
+dairy companies. The SA algor ithm, in this case, was applied in 20 steps. As a result of the experiment, it can be 
+concluded that the thermal equilibrium state is reached at the 20th step (see Fig. 2).  
+The shortest route computed by means of the SA algorithm was 648 km (see Fig. 3).  
+--- PAGE 6 ---
+100 Peter Grabusts et al. / Procedia Computer Science 149 (2019) 95–101
+ Author name / Procedia Computer Science 00 (2019) 000–000
+There is a possibility to remove individual objects from Table 1 and recalculate the route that allows efficiently 
+planning transport logistics. 
+Fig. 2. Thermal equilibrium attainment. 
+Fig. 3. The shortest route between the objects by means of the SA algorithm.
+
+--- PAGE 7 ---
+ Peter Grabusts et al. / Procedia Computer Science 149 (2019) 95–101 101 Author name / Procedia Computer Science 00 (2019) 000–000   
+It can be concluded that the SA algorithm can be successf ully applied in various optimization tasks, since SA is 
+widely used in engineering design problems because due to its ability to find global optimum solutions [9] - [10]. 
+5. Conclusion 
+This paper describes an optimization method called Simulated Annealing. The Simulated Annealing method is 
+widely applied in various combinatorial optimization tasks. Simulated Annealing is a stochastic optimization 
+method that can be used to minimize the specified cost function given a combinatorial system with multiple degrees 
+of freedom. This method enables one to find a global extremum for a function that has local minimums.  
+In this paper the application of the Simulated Annealing method to a well - known task of combinatorial analysis, 
+Travelling Salesman Problem, is demonstrated and an experiment aimed to find the shortest route between 8 
+Belarusian milk and meat processing companies is performed using the GPS coordinates. 
+In this research the software that allows to find the shortest route between different objects with a purpose to 
+optimize and determine the shortest route has been developed. 
+We proposed that our simulation result is relatively simp le, but in case it was needed to exclude an object from 
+the existing network, it would allow to model overlapping of objects on the map and determine potentially shortest 
+route to the chosen objects. 
+References 
+[1] Kirkpatrick, S., Gelatt, C. D., and Vecchi, M.P. (1983) “Optimization by Simulated Annealing.” Science, vol. 220: 671-680. 
+[2] Laarhoven, P.J.M., and Aarts, E.H.L. (1987) “Simulated Annealing: Theory and Applications.” D. Reidel Publishing Company, Holland.  
+[3] Otten, R. H.,and Ginneken, L. P. (1989) “The Annealing Algorithm.” Kluwer Academic Publishers. 
+[4] Granville, V., Krivanek, M., and Rasson, J-P. (1994) “Simulated annealing: A proof of convergence.” IEEE Transactions on Pattern Analysis 
+and Machine Intelligence, 16(6), 652–656. 
+[5] Ingber, L. (1993) “Simulated annealing: Practice versus theory.” Math. Comput. Modelling, 18: 29–57. 
+[6] Coughlin, J.P., and Baran, R.H. (1985) “Neural Computation in Hopfield Networks and Boltzmann Machines.” University of Delaware Press. 
+[7] Cook, W.J. (2011) “In Pursuit of the Traveling Salesman.” Princeton: Princeton University Press, USA. 
+[8] Applegate, D.L., Bixby, R., Chvátal, V. , and Cook, W. (2006) “The Traveling Salesm an Problem: A Computational Study.” Princ eton
+University Press. 
+[9] Aarts, E. and Korst, J. (1989) “Simul ated Annealing and Boltzmann Machines: A stoc hastic approach to combinatorial optimiza tion and 
+neural computing.” John Wiley and Sons. 
+[10] Maxwell, B. (2015) “Advanced Simulated Annealing.” Clanrye International. 
+Peter Grabusts received his Dr. sc. ing. de gree in Information Technology from Riga 
+Technical University in 2006. Since 1996, he has been working at Rezekne Academy of 
+Technologies. Since 2014, he is a Professor at the Faculty of Engineering. His research 
+interests include data mining technologies, neural networks and clustering methods. His 
+current research interests include artificial intelligence and ontologies. Contact him at 
+peteris.grabusts@rta.lv    

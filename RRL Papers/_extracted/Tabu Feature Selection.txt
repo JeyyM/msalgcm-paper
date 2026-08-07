@@ -1,0 +1,951 @@
+--- PAGE 1 ---
+/p16This work was supportedby the National Natural Science
+FoundationofChina(69675007)andBeijingMunicipalNatural
+ScienceFoundation (4972008).
+*Correspondingauthor. Tel.: #86-10 68907155.
+E-mail address:zhb@public.bta.net.cn(H.Zhang).
+PatternRecognition35 (2002) 701}711
+Feature selectionusing tabu search method
+Hongbin Zhang*/p11/p16, Guangyu Sun
+ComputerInstitute of Beijing Polytechnic University,West San HuanNorth Road 56, 6/p679 Beijing 100044, People'sRepublic of China
+Received9 February1999; received in revisedform 6 July 2000; accepted 5 December 2000
+Abstract
+Selectinganoptimalsubsetfromoriginallargefeaturesetinthedesignofpatternclassi "erisanimportantanddi $cult
+problem.Inthispaper,weusetabusearchtosolvethisfeatureselectionproblemandcompareitwithclassicalgorithms,
+suchassequentialmethods,branchandboundmethod,etc.,andmostothersuboptimalmethodsproposedrecently,such
+asgeneticalgorithm andsequentialforward(backward) #oating search methods.Based on the results of experiments,
+tabusearchisshowntobeapromisingtoolforfeatureselectioninrespectofthequalityofobtainedfeaturesubsetand
+computation e$ciency. The e!ects of parameters in tabu search are also analyzed by experiments./p72001 Pattern
+RecognitionSociety. Publishedby Elsevier Science Ltd. All rights reserved.
+Keywords: Featureselection; Tabu search; Patternclassi"er; Searchmethods;Curse of dimensionality
+1. Introduction
+The problem of feature selection is important in de-
+signing pattern classi"er, whose goal is to acquire an
+e$cient subset so as to reduce the dimension of the
+featureset.Whenthenumberofinitialfeaturesbecomes
+too large, not only the cost of collecting features in-
+creases, but the performance of designed classi"er will
+notbeguaranteedinthecaseofsmallsamplesize.From
+the standpoint of Bayesian decision rules there are no
+`badafeatures,i.e.,theperformanceofaBayesclassi "er
+cannot be improved by eliminating a feature. But in
+practice, the assumptions in designing Bayes classi"er
+are usually not satis"ed. As a consequence, for a given
+amountofsamples,reducingthenumberoffeaturesmay
+resultin improvinga non-ideal classi"er'sperformance.
+In applications, there are two forms of feature selec-
+tion,eachformaddressesaspeci "cobjectiveandleadsto
+adistincttypeofoptimization.The "rstformisto "ndan
+optimal subset having a prede"ned number of features
+and yield the lowest error rate of a classi"er. This is
+a non-constrained combinatorial optimal problem. An-
+other form of feature selection is aimed at seeking the
+smallest subset of features for which error rate is below
+a given threshold. This is a constrained combinatorial
+optimalproblem,inwhichtheerrorrateservesasacon-
+straintandthesmallestsubsetoffeaturesistheprimary
+search criterion.
+Let F"/p43f
+1,f2,2,f/p76/p44betheinitialsetoffeatureswith
+cardinality n. Sisasubsetof F. /p34S/p34representssubsetsize,
+i.e., the number of inclusive features in the subset. Let
+m denote the required subset size in the 1st-form of
+featureselectionproblemand tthetolerablethresholdin
+the2nd-formoffeatureselectionproblem.Let error(S)be
+therelevanterrorrateorsomeothermeasuresofperfor-
+mance such as class separability (e.g., Mahalanobis dis-
+tance), whenS is used to design the classi"er. The two
+formsoffeatureselectionproblemcanberepresentedas
+follows:
+1st-formof feature selection:
+min J(S)"error(S)
+s.t. SLF, /p34S/p34"m, m(n.
+2nd-formof feature selection:
+min J(S)"/p34S/p34
+s.t. S-F, error(S)(t.
+0031-3203/01/$22.00 /p72001 Pattern RecognitionSociety. Publishedby Elsevier Science Ltd.All rights reserved.
+PII: S0031-3203(01)00046-2
+--- PAGE 2 ---
+Theoretically, both forms of feature selection are
+NP-hard problems. So the optimal solution cannot be
+guaranteed to be acquired except for doing exhaustive
+searchinthesolutionspace[1].Butexhaustivesearchis
+feasible only for smalln. For a biggern, the explosive
+computationalcostmakestheexhaustivesearchimprac-
+ticable.Thebranchandboundsearchscheme(BB)intro-
+duced by Narendra and Fukunaga is more e$cient by
+means of pruningalot of`infeasibleasolutions[2]. On
+theassumptionthattheobjectivefunctionismonotonic,
+this algorithm is potentially capable of examining all
+feasiblesolutionssothatitisanoptimalmethod.Unfor-
+tunately,monotonicconditionisseldomsatis "ed.More-
+over,evenif99.9%computationalcostsavingisdoneby
+BB, the computationalcomplexityremains exponential.
+Thus,BBoritsimprovedversion *relaxedBB(byintro-
+ducing the concept of approximate monotonicity)
+[3]*arestill unavailablefor a largen.
+Theneedoftrade-o !betweentheoptimalityande $-
+ciency of algorithms for NP-problems was recognized
+early, and the main stream of feature selection research
+was thus directed toward suboptimal but e$cient and
+robustmethods.Thepreliminaryworksonfeatureselec-
+tion was started in the early 60s. The approaches of
+featureselectionatthattimewerebasedonprobabilistic
+measuresofclassseparabilityandonentropies.Insome
+methodsthe independenceof featureswas assumedand
+thefeatureswereselectedonthebasisoftheirindividual
+merits.Suchmethodsignoretheinteractionsamongfea-
+tures.Asaresult,theselectedsubsetsarenotsatisfactory.
+Aswas pointedoutbyCover,the besttwoindependent
+featuresdonothavetobethetwobest[4].Thesequen-
+tialforwardselectionmethod(SFS),sequentialbackward
+selection method (SBS), and their generalized versions
+GSFS,GSBSinventedlaterbelongtogreedyalgorithms
+inessence.These algorithmsbeginwith afeaturesubset
+andsequentially add or remove features until some ter-
+minationcriterionismet.Butthesemethodssu !erfrom
+the so-called`nesting e!ecta. It means that the features
+discardedcannotbere-selected,andthefeaturesselected
+cannot be removed later. Since these algorithms do not
+examineallpossiblefeaturesubsets,theyarenotguaran-
+teedtoproducetheoptimalresult.Theplus ltakeaway
+r(PTA)methodswasproposedtopreventthe `nestinga
+e!ect. But there is no theoreticalguidance to determine
+theappropriatevalueof land r.Max }min(MM)method
+proposed by Backer and Shipper is a computationally
+e$cientmethod[5].Itonlyevaluatestheindividualand
+pairwise merits of features. The experiments made by
+manyresearchersshowthatthismethodgivesthepoor-
+est results [6,7]. This con"rms that it is not possible to
+selectafeaturesubsetinahigh-dimensionalspacebased
+on onlytwo-dimensionalinformationmeasures without
+a substantialinformation loss.
+Inrecentyears,therehavebeensomedevelopmentsin
+theproblemoffeatureselection.SiedleckiandSklansky
+introduced the use of genetic algorithm (GA) for this
+problemandobtainedgoodresults[8,9].Buttheprema-
+ture phenomena in GA seem to be di$cult to avoid
+and it needs to carefully select and test the parameters
+in GA. Pudil et al. improved the sequential methods
+by introducing sequential forward #oating selection
+(SFFS) and sequential backward #oating selection
+(SBFS) [10]. These two methods can be understood
+asplus1-minus xandminus1-plus x,where xisdynam-
+ically changed according to the backtrack e!ect. SFFS
+and SBFS avoid the problem of prede"ning l and r
+in PTA, and have a mechanics to control the depth of
+backtrack. According to the experimental results of
+Jain and Zongker [7], SFFS and SBFS achieve results
+comparable to the optimal algorithm (BB) but are
+fasterthan BB.
+Toconclude,despitesomeprogresshasbeenobtained,
+theavailablefeatureselectiontechniquesforlargefeature
+set are not yet completely satisfactory. They are either
+computationally feasible but far from optimal, or they
+areoptimaloralmostoptimalbutcannotcopewiththe
+computationalcomplexityof feature selection problems
+ofrealisticsize.Recently,therehasbeenaresurgenceof
+interestinapplyingfeatureselectionmethodsduetothe
+application needs. In the application of information
+fusion of multiple sensors' data, integration of multiple
+models and data mining, the number of features is usu-
+allyquitelarge.Insomecases,itmaybeover100[7].Itis
+necessarytoresearchmorepowerfulmethodsforfeature
+selection,whichshouldgiveverygoodresultsandshould
+becomputationallymoree $cient.InRef.[11],Sklansky
+stated that when the initial set contains 20 or more
+features and the selected subset contains 10 or fewer
+features, the problem of selecting a best or near-best
+subset can be quite di$cult because we must search a
+large*often astronomically large*space of subsets of
+candidatefeatures,anddeterminea "gureofmeritforan
+optimum or near-optimum classi"er operating on each
+subset in this space. He referred to such problems as
+large-scale feature selection. Nowadays along with the
+upgradingofcomputerperformance,thefeatureselection
+containingabout20featureshasbecomeeasier,andthe
+feature selection problem including 20}49 features has
+changedtoso-called `medium-sizedaproblem.Butfora
+classi"er based on personal computer, the feature selec-
+tionincludingafewdozensorover100offeaturesisstill
+ad i$cultandchallengingproblem.
+Ithas beenarguedthatsincefeatureselectionistypi-
+cally done in an o!-line manner, the execution time of
+aparticularalgorithmisofmuchlessimportantthanits
+ultimate classi"cation. While this is generally true for
+featuresetsofappropriatesize.However,ifthenumberof
+featuresreachesafewdozenorevenmore,theexecution
+timebecomesextremelyimportantasitmaybeimpracti-
+caltorunsomealgorithmsevenonceonsuchlargedata
+sets.
+702 H. Zhang,G. Sun/Pattern Recognition 35 (2002) 701}711
+--- PAGE 3 ---
+Inarecentpaper[12],KudoandSklanskycarriedout
+acomparativestudyofalgorithmsforlarge-scalefeature
+selection (where the number of features is over 50). Un-
+fortunately, their comparative study does not include
+tabusearchmethod.In thispaper,weintroducetheuse
+oftabusearchmethodforfeatureselection,andcompare
+the performance of tabu search with some other algo-
+rithms. In the following section, a brief description of
+tabu search is presented. In Section 3, experimental re-
+sultsof tabu searchare shown, providing alsocompari-
+sons to other methods. The parameters in tabu search
+will be discussed in Section 4, and a short conclusion
+followsin Section 5.
+2. Tabu search
+Thetabusearch,proposedbyGlover[13,14],isameta
+heuristicmethodthatcanbeusedtosolvecombinatorial
+optimizationproblem.Ithasreceivedwidespreadatten-
+tion recently.Its #exible control framework and several
+spectacular successes in solving NP-hard problems
+causedrapidgrowthinitsapplication.Itdi !ersfromthe
+local search technique in the sense that tabu search
+allowsmovingtoanewsolutionwhichmakestheobjec-
+tive function worse in the hope that it will not trap in
+local optimal solutions. Tabu search uses a short-term
+memory,calledtabulist,torecordandguidetheprocess
+ofthesearch.Inadditiontothetabulist,wecanalsouse
+along-termmemoriesandotherpriorinformationabout
+thesolutionstoimprovetheintensi "cationand/ordiver-
+si"cationof the search.
+The tabu search scheme can be outlined as follows:
+start withan initial(current) solutionx, calleda con"g-
+uration,evaluatethecriterionfunctionforthatsolution.
+Then,followacertainsetofcandidatemoves,calledthe
+neighborhood N(x)ofthecurrentsolution x.Ifthebestof
+thesemovesisnottabu(i.e.,notinthetabulist)orifthe
+best is tabu, but satis"es the aspirationcriterion, which
+will be explained below, then pick that move and con-
+siderittobethenewcurrentsolution.Repeattheproced-
+ure for a certain number of iterations. On termination,
+the best solution obtained so far is the solution of the
+tabu search. Note that the solution that is picked at
+certainiteration is put in the tabu list (¹¸) so that it is
+notallowedtobereversedinthenext literations,i.e.,this
+solutionistabu.The listhesizeof ¹¸.Whenthelength
+oftabulistreachesthatsize,thenthe "rstsolutiononthe
+¹¸isfreedfrombeingtabuandthenewsolutionenters
+thatlist.Theprocesscontinues.The ¹¸actsasashort-
+termmemory.Byrecordingthehistoryofsearches,tabu
+searchcancontrolthedirectionofthefollowingsearches.
+The aspiration criterion could re#ect the value of the
+criterion function, i.e., if the tabu solution results in
+a value of the criterion function that is better than the
+best known so far, then the aspiration criterion is satis-
+"edandthetaburestrictionisrelieved,andmovetothis
+solutionis allowed.
+Let S/p64denotethebestsolutionobtainedsofar, ¹¸the
+tabulist.Thealgorithmicdescriptionofthe tabusearch
+can be summarizedas follows:
+(1) Initialize. Generate an initial solutionx. And let
+S/p64"x. k"1, ¹¸"/afii9818.
+(2) Generate candidate set.Randomly pick out a cer-
+tainnumberofsolutionsfromtheneighborhoodof xto
+form the candidatesetN(x).
+(3)Move.(a)If N(x)"/afii9818,Gobacktostep2toregener-
+ate the candidate set. Otherwise,"nd out the best solu-
+tion yinN(x).(b)If y3TL,i.e.,it is tabu,and ydoesnot
+satisfy the aspiration criterion, let N(x)"N(x)!/p43y/p44.
+Thengoto3(a).Otherwise,let x"y.Andlet S/p64"yif yis
+betterthan S/p64.
+(4) Output. If termination condition is satis"ed, stop
+andoutputthe S/p64.Otherwise,let TL"TL/p54/p43x/p44.(Addthe
+new solution to the tail ofTL. And if the length ofTL
+exceeds a prede"ned size, remove the head item of the
+list.).Let k"k#1 and go back to step 2.
+The above paragraph has outlined the basic steps of
+the tabu search for solving combinatorial optimization
+problems.Formoredetailsonthetabusearchaswellas
+a list of successfulapplication, the reader is encouraged
+torefertoGlover[13 }15].Inthenextsection,wedevel-
+op a new method for feature selection based on tabu
+search technique.
+3. Application of tabu search to feature selection
+Inthissection,wepresentourtabusearch-basedalgo-
+rithms for the two forms of feature selection problem,
+compare the performance of tabu search with that of
+other algorithms, such as classical sequential methods,
+branchandboundmethod,geneticmethodandsequen-
+tial #oatingmethods by experiments.
+3.1. Featureselectionbasedonmisclassi xcationerrorrate
+The 2nd-form feature selection stated in Section 1 is
+a constrained optimization problem. Generally, a con-
+strained optimization problem can be converted into
+a relevant non-constrained optimization problem by
+transformingtheconstraintintoapenaltyfunction.The
+optimization problem of the 2nd-form feature selection
+can be convertedinto the following forms:
+Min J(S)"/p34S/p34#p(e(S))
+s.t. S-F,
+where p(e(S)) is the penalty function. We adopt
+the penalty function used by Siedlicki and Sklansky
+H. Zhang,G. Sun/Pattern Recognition 35 (2002) 701}711 703
+--- PAGE 4 ---
+[9],i.e.,
+p(e)"exp((e!t)/m)!1
+exp(1)!1 ,
+where eistheerrorrate, tthetoleranterrorrate,and m
+a scale factor. This penalty function is monotonic with
+respect to e. p(e) is negative whene(t, and p(t)"0,
+p(t#m)"1. As e approaches to zero, p(e) slowly
+approachesits minimal value:
+p(0)"exp(!t/m)!1
+exp(1)!1
+'! 1
+exp(1)!1.
+For greater value ofe than t#m, the penalty function
+quickly rises toward in"nity. According to the above
+properties, this penalty function is suitable for the
+2nd-formfeatureselectionproblem.Inthefollowingex-
+periments, we prefer to uset"0.20 andm"0.01 after
+severaldi !erentsettings were tested.
+In an ideal experimental situation, it would be desir-
+abletotesttabusearch-basedfeatureselectionprocedure
+onagroupofrealdatasetsderivedfromvariousapplica-
+tions,becausethatwouldgivetheresultsofsuchtesting
+credibilityandstatisticalvalidity.However,forpractical
+reasonsanyextensive testinginvolving real datais pro-
+hibitive.Therefore,wefollowthepathusedbySiedlecki
+and Sklansky [9]. To simulate the conditions encoun-
+tered by feature selection in practice, they replaced the
+true error rate function with a model of the classi"er's
+error rate which is a function of the feature selection
+vector, accounting for various interactions among the
+featuresandvariousdefectsoftheclassi "ertrainingpro-
+cedures, but without assuming any forms of underlying
+distributions in the data. The error rate model is as
+follows:
+e"e/p15# /p9
+/p71
+/p16/p112/p11/p71/p73
+w/p71/p16/p112/p11/p71/p73/afii9825/p21/p71/p162/afii9825/p21/p71/p73#/afii9830# /p81/p9
+/p72/p14/p16
+v/p72/afii9825( /p71/p162/afii9825( /p71/p66,
+where /afii9825"(/afii9825/p16, /afii9825/p17,2, /afii9825/p76) denotes a feature selection
+vectorwhichrepresentsafeaturesubsetina n-dimension
+featurespace. /afii9825/p71"1meansthatthe ithfeaturebelongsto
+the subset and/afii9825/p71"0 means that theith feature is not
+includedinthesubset. e/p15isaconstantrepresentingbase
+error rate. w/p71/p16/p112/p11/p71/p73is a value re#ecting the error for
+eliminating featuresi1,2, i/p73. /afii9830is used to simulate the
+trainingdefects,whichhasanormaldistribution N(0, /afii9830/p15).
+The last item in the above model is called local defect,
+which is associated with speci"c subsets of features. In
+thisitem /afii9825( /p71canstandfor /afii9825/p71, /afii9825/p21/p71,ora `don'tcarecase a.For
+more detailsrefer to Ref.[9].
+Forthe2nd-formfeatureselectionproblem,weimple-
+mentedtabu search as follows:
+(1) Feature selection vector is represented by a 0/1 bit
+string.Initial solution is randomlygenerated.
+(2) Theneighborhoodof a solutionvector xis a setof
+solutions, which are generated through adding or
+deletinga featureon x.
+(3) Use all or randomly selected part of the neighbor-
+hoodofthecurrentsolutionascandidatesolutions.
+(4) Termination condition is a prede"ned number of
+iterations.
+Weimplementedandtestedthetabusearchdescribed
+abovetosolvea30-dimensionfeatureselectionproblem
+based on the above error rate model. The experimental
+resultsareshowninTable1.Resultsofotheralgorithms
+suchasSFS,SBS,GSFS,GSBS,PTA,SFFS,SBFS,GA,
+etc.are also shownin the same table for comparison.
+The GA used in the experiments is implemented as
+follows:
+(1) Randomly generate a certain number of chromo-
+somes toconstruct an initial populationset.
+(2) The calculation method of"tness function is the
+same as that usedin Ref. [9], that is
+f(x/p71)"(1#/afii9830)max
+/p86
+/p72/p90/afii9811
+J(x/p72)!J(x/p71),
+where x/p71isafeatureselectionvector, /afii9811isthepopulation
+offeatureselectionvectors, /afii9830isasmallpositiveconstant
+which assures that minf(x/p71)'0, i.e., even the least"t
+solutionis givena chanceto reproduce.
+(3) Crossover.Select chromosomeswith aprobability
+proportionaltotheir "tnessvalue,respectively,tobuild-
+upamatingset.Eachchromosomecanbeselectedmore
+than once. Pair the chromosomes in the mating set
+stochastically,thenexchangetheirgeneticinformationat
+a randomly selected point called crossover point. The
+two produced o!spring are accepted with a prede"ned
+probabilitycalled crossoverrate.
+(4) Mutation. Change at random each bit in each
+o!spring with another prede"ned probability called
+mutationrate.
+(5)Selectthebestchromosomesofthepopulationsize
+amongtheoldpopulationandtheo !springtoformthe
+new populationof the next generation.
+Thefollowingconclusionscanbedrawnbasedonthe
+empiricalresults:
+(1) ThecomputationcostoftheSFSorSBSalgorithms
+is muchlower thanthat of other algorithms.How-
+ever, the obtained feature subset is poor compared
+to other algorithms' results. GSFS(n) andGSBS(n)
+givemoreattractiveresultswhile nincreases.Mean-
+while,thecomputationcostincreasesexponentially
+to n.Moreover,thenestinge !ectremainsin GSFS(n)
+andGSBS(n) as in SFS and SBS.
+(2) The PTA method outperforms the SFS and SBS
+methods, but the results are still far from satisfac-
+tory.
+704 H. Zhang,G. Sun/Pattern Recognition 35 (2002) 701}711
+--- PAGE 5 ---
+Table1
+Performanceof variousalgorithmson a 30-dimensiondata set/p0
+Algorithm Experiment
+times
+Criterionfunction Error rate Numberof
+selectedfeatures
+Computation
+cost/p1
+Best Mean Worst
+(mean)
+SFS 1 13.89 0.214 12 465
+GSFS(2) 1 13.76 0.195 14 2600
+GSFS(3) 1 13.16 0.211 12 12,255
+GSFS(4) 1 12.74 0.208 12 54,280
+SBS 1 14.02 0.200 14 465
+GSBS(2) 1 13.96 0.199 14 2600
+GSBS(3) 1 13.52 0.182 14 12,255
+GSBS(4) 1 12.93 0.199 13 54,280
+PTA(2,1) 1 12.98 0.200 13 1333
+PTA(3,1) 1 13.89 0.214 12 885
+PTA(3,2) 1 12.98 0.200 13 2139
+PTA(1,2) 1 13.03 0.210 12 1333
+PTA(1,3) 1 13.03 0.210 12 885
+PTA(2,3) 1 12.95 0.199 13 2139
+SFFS 1 12.98 0.200 13 3063
+SBFS 1 12.75 0.195 13 3345
+GA/p2 20 12.41 12.88 13.24 0.198 12 &13 3000
+Tabu/p3 20 12.22 12.69 13.11 0.201 12 &13 1800
+/p0WetestedanumberofsettingsofparametersinGAandtabusearch.Theresultslistedabovearecomparativelygoodones.Inthe
+Section 4 of this paper, the relationshipbetweenthe parameters and the performance of tabusearch will be discussed.
+/p1Thecomputationcostismeasuredbythenumberofevaluationtimesofthecriterionfunction,sincethecostofdesigningaclassi "er
+and estimatingthe relevant error rate is far more than thatof a particularfeature selection algorithm.
+/p2The parameters in GA: population60, crossover rate 100%, mutationrate 5%,generations 50.
+/p3The parameters in tabu search:tabu list length30, candidateset size 30, iteration60.
+(3) The #oating methods SFFSand SBFSyield rather
+good results. Additionally, the e$ciency of these
+algorithms is rather high. Note that the computa-
+tion cost varies in di!erent particular problem.
+However, each backtrack will contribute to give
+more attractive feature subset in certain level. The
+defect of these sequential#oating methods is that
+they are still likely to trap into a local optimal
+solutioneven ifthe criterion function is monotonic
+and the scale of the problem is quite small. Fig.1
+shows an example of this defect, where SFFS will
+search along the path: 0001P0011P0111P1111
+(shown by bold arrows), which is the same as the
+resultofSFS.But `0011aismerelythethirdoneof
+the best solutionswith subset size 2.
+(4) Under the condition of approximately equal com-
+putationalcost with SFFS and SBFS, running GA
+20 times, the best result is superior to SFFS and
+SBFS, and the average value of the criterion func-
+tionsis near to that of SFFS andSBFS.
+(5) During 20 times of running, the tabu search algo-
+rithm obtained the best solution among all algo-
+rithms tested (the criterion function value is 12.22).
+Theaveragecriterionfunctionvalueisbetteraswell.
+Andthecomputationalcostismuchlowerthanthat
+of GA, SFFS and SBFS.
+Fig. 2 shows the variations of the criterion function
+value,thenumberofselectedfeaturesanderrorrateinone
+runoftabusearch.Fromthecurves,itcanbeseenthatthe
+tabu search rapidly converged to the feasible/infeasible
+regionborder,wherethesizeoffeaturevectorsisbetween
+13and15,errorratebetween0.18and0.22,andintensi "-
+cation search are concentrated on the region where the
+optimalsolutionmostlikelyexists.Therefore,tabusearch
+is more e$cient and shows good performance.
+In order to test the performance of tabu search for
+large-scale feature selection, we also implemented the
+proposedtabusearchmethodona60-anda100-dimen-
+sionfeatureselectionproblemsbasedontheaboveerror
+rate model. The experimental results are shown in
+Tables2 and 3, respectively.
+From Tables 2 and 3, we see that for 60- and 100-
+dimension feature selection problems, tabu search also
+obtained satisfactory results. During a few runs, tabu
+search method generally has a high possibility to"nd
+bettersolutionsthatcannotbe foundbyotherselection
+algorithms.
+H. Zhang,G. Sun/Pattern Recognition 35 (2002) 701}711 705
+--- PAGE 6 ---
+Fig.1. AnexampleshowingthatSFFStrapsintolocaloptimal
+solution.Eachnoderepresentsasolutionvector,andthe0/1bit
+strings represent the solutions. Each digit within the circles
+representstherankoftheerrorrateinthesamesubsetsizelevel.
+SFFS will search along the path emphasized by bold arrows.
+SBFS'ssearch path isthe reverse of that of SFFS.
+Fig. 2. Criterionfunction value, numberof features selectedand error rate in 1 run of tabusearch.
+3.2. Feature selection based on Mahalanobisdistance
+In this section we use Mahalanobis distance as the
+objectivefunctiontosolvethe1st-formfeatureselection
+problem.WehavetakenthesameexperimentsasKittler
+[6], Pudil [10] and Jain [7], in order to compare the
+performance of tabu search with that of sequential
+methods,sequential #oatingmethods,GA,etc.Thedata
+set used is a 20-dimensional, 2-class set, and the 2-class
+conditional densities are Gaussian, with mean vectors
+/afii9839/p16and /afii9839/p17,respectivelyandacommoncovariancematrix
+/afii9814. Under Gaussian class conditional densities, the
+probability of error is inversely proportional to the
+Mahalanobisdistance.SotheMahalanobisdistancecan
+beusedtoassessthe `goodnessaofafeaturesubset.That
+is,
+J/p43"(/afii9839/p16!/afii9839/p17)/p50/afii9814/p92/p16(/afii9839/p16!/afii9839/p17).
+The Mahalanobis distance is monotonically with the
+featuresubset, i.e.,
+J/p43(A/p54B)'J/p43(A),
+where J/p43(A) is the Mahalanobis distance of the two
+classes under feature subsetA. The monotonic relation
+between Mahalanobis distance and the probability of
+error can be representedas
+J/p43(A)'J/p43(B)=Nerror(A)(error(B),
+whereerror(A),error(B)denotetheclassi "er'serrorrates
+usingsubset AandB, respectively.
+TakingMahalanobisdistanceasthecriterionfunction,
+weusetabusearchtosolvethe1st-formfeatureselection
+problem,i.e.,selectanoptimalfeaturesubsetofacertain
+number of features that yields the lowest error rate of
+aclassi "er.TomaketabusearchandGAsuitableforthis
+problem,we needsome modi"cationto them.
+706 H. Zhang,G. Sun/Pattern Recognition 35 (2002) 701}711
+--- PAGE 7 ---
+Table2
+Performanceof variousalgorithmson a 60-dimensiondata set
+Algorithm Experiment
+times
+Criterionfunction Error rate
+(mean)
+Numberof selected
+features
+Computation
+cost/p0
+Best Mean Worst
+SFS 1 20.72 0.197 21 1830
+GSFS(2) 1 18.90 0.199 19 19,375
+SBS 1 20.52 0.193 21 1830
+GSBS(2) 1 20.51 0.203 21 19,375
+PTA(2,1) 1 18.58 0.195 19 37,820
+PTA(1,2) 1 19.65 0.196 20 37,820
+SFFS 1 18.03 0.200 18 11,225
+SBFS 1 18.63 0.196 19 17,240
+GA/p1 20 18.73 19.25 20.08 0.198 19 &20 7200
+Tabu/p2 20 18.19 19.09 19.55 0.200 18 &20 7200
+/p0Thecomputationcostismeasuredbythenumberofevaluationtimesofthecriterionfunction,sincethecostofdesigningaclassi "er
+and estimatingthe relevant error rate is far more than thatof a particularfeature selection algorithm.
+/p1The parameters in GA: population120, crossoverrate 100%,mutationrate 5%, generations60 (without local search).
+/p2Theparametersintabusearch:tabulistlength120,candidatesetsize60,iteration120.Among20runs,theinitialfeaturesubsetsare:
+one timeis nullset, one timethe full featureset, and the others are randomlyselected subsets.
+Table3
+Performanceof variousalgorithmson a 100-dimensiondata set
+Algorithm Experiment
+times
+Criterionfunction Error rate
+(mean)
+Numberof selected
+features
+Computation
+cost/p0
+Best Mean Worst
+SFS 1 40.82 0.196 41 5050
+GSFS(2) 1 38.97 0.199 39 87125
+SBS 1 44.34 0.201 44 5050
+GSBS(2) 1 38.85 0.197 39 87125
+PTA(2,1) 1 38.89 0.200 39 171700
+PTA(1,2) 1 39.05 0.200 40 171700
+SFFS 1 38.58 0.197 39 31950
+SBFS 1 38.49 0.196 39 43045
+GA/p1 20 38.61 39.73 41.75 0.199 39 &42 20000
+Tabu/p2 20 38.24 39.39 40.10 0.200 38 &40 20000
+/p0Thecomputationcostismeasuredbythenumberofevaluationtimesofthecriterionfunction,sincethecostofdesigningaclassi "er
+and estimatingthe relevant error rate is far more than thatof a particularfeature selection algorithm.
+/p1The parameters in GA: population200, crossoverrate 100%,mutationrate 5%, generations100 (without local search).
+/p2Theparametersintabusearch:tabulistlength200,candidatesetsize100,iteration200.Among20runs,theinitialfeaturesubsetsare:
+one timeis nullset, one timethe full featureset, and the others are randomlyselected subsets.
+Tabu search 's implementation is modi "ed as
+follows.
+(1) The initial solution remains being generated ran-
+domly,butitmusthaveexactlytherequirednumber
+of features.
+(2) The objective function value of a feature subset
+equals tothe Mahalanobis distancefor this feature
+subset.
+(3) The neighborhood of a solution is generated by
+removing a feature meanwhile adding another fea-
+ture randomly.
+Other steps are the same as that in Section 3.1.
+The modi"cationto GA is as below:
+(1) All the initial solutions should have the required
+subsetsize.
+(2) The Mahalanobis distance is used as the"tness
+functionof the featuresubsets.
+(3) Thecrossoveroperationisimplementedbyrandom-
+lychoosingtherequirednumberoffeaturesfromthe
+unionset of the two mating chromosomes.
+(4) Mutation should be modi"ed as adding a feature
+andeliminatinganother feature simultaneously.
+H. Zhang,G. Sun/Pattern Recognition 35 (2002) 701}711 707
+--- PAGE 8 ---
+Table4
+ComparisonofvariousalgorithmsusingMahalanobisdistance
+as criterionfunction
+Algorithm Experiment
+times
+Output Mahalanobis
+distance
+m"10 m"12
+BB 1 38.16 67.23
+SFS 1 29.72 42.86
+GSFS(2) 1 29.72 47.30
+GSFS(3)/p0 1 29.27 49.62
+SBS 1 30.00 41.39
+GSBS(2) 1 30.00 62.92
+GSBS(3) 1 30.00 41.39
+SFFS 1 38.16 54.33
+SBFS 1 34.51 62.92
+GA/p1 20 38.06 /p2 56.48/p3
+Tabu/p4 20 38.16 /p5 58.22/p6
+/p0GSFS(3) cannot get the solution form"10 directly. Here
+GSFS(3) is"rst used to obtain a solution form"9, then take
+a step of SFS to get the solution form"10. The situation of
+GSBS(3)is similar.
+/p1The parameters of GA: population 40, crossover rate 100%,
+mutationrate 25%, generations 30.
+/p2Meanof20runs 'results:18timesamongthe20runsgetthe
+optimal solution whose Mahalanobis distance value is 38.16,
+1timeobtainsMahalanobisdistanceof36.77,anotherrungets
+Mahalanobisdistance of 37.55.
+/p3Mean of 20 runs' results; the largest Mahalanobis distance
+achievedis67.23,thesmallestvalueis43.87.7timesoftheruns
+getthe optimalvalue.
+/p4Theparametersoftabusearch:tabulistlength40,candidate
+set size 40, iterations30.
+/p5Allofthe20runsgettheoptimalsolutionwhoseMahalanobis
+distancevalue is 38.16.
+/p6Mean of 20 runs' results: 7 times among the runs get the
+optimalsolutionwhoseMahalanobisdistanceis67.23,1timeof
+therunsoutputsMahalanobisdistanceof62.92,11timesofthe
+runsoutputMahalanobisdistanceof52.59,anotherrunoutputs
+52.44.
+Inaninitial20-dimensionalfeaturespace,wetested11
+algorithms for selectingm"10 and 12 features. The
+experimental results are shown in Table 4. We also use
+exhaustivesearchtogettheMahalanobisdistanceofall
+feasible solutions. The distribution of the Mahalanobis
+distances of all the solutions that include exactly 12
+features is shown in Fig. 3. The positions of several
+algorithms'resultsarepointedoutinFig.3aswell.Note
+thatthebestandtheworstresultsduring20 runsofTS
+andGA are also shown.
+The following conclusions can be drawn from the
+empiricalresults:
+(1) TheSFS and SBS algorithmhavecomparable per-
+formance.Buttheirresultsarefarfromtheoptimal
+solutionobtainedby BB.
+(2) At m"10, GSFS(2), GSFS(3), GSBS(2), GSBS(3) do
+notoutperformSFS andSBS whiletheir computa-
+tion cost increases considerably. For m"12,
+GSBS(3)getthesame solutionasSBS. GSFS(2)and
+GSFS(3) getlittle better solutions,butthese remain
+farfromtheoptimalsolution.Only GSBS(2)achieves
+anearoptimalsolutionfor m"12.Wecanalsosee
+that GSFS(n), GSBS(n) do not always get a better
+solution with increasingn. The performance even
+degradesin somecase.
+(3) The SFFS, SBFS algorithms obtained rather satis-
+factory results for bothm"10 and 12. Specially,
+SFFSobtainedthe optimal solution form"10.
+(4) The GA algorithm performs well form"10. 18
+times of the 20 runs obtainedthe optimal solution.
+In the worst case, it still obtained a near optimal
+solution.For m"12,7timesoftherunsGAreach
+the global optimal solution. But in the worst case,
+the resultis comparable to that of SFS.
+(5) For m"10, the tabu search algorithm obtained
+global optimal feature subset in all 20 runs. For
+m"12, the probability that TS obtained the opti-
+mal feature subset at each run is approximately
+equaltothatofGAusingthementionedparameters,
+undersuchsettingthetwoalgorithmhavecompara-
+ble computation cost (tabu search is a little more
+e$cient). The tabu search algorithm is superior to
+GAinthattheworstresultobtainedbyTSisnotice-
+ablybetterthanwhatisgivenoutbyGA,themean
+of the resulted criterion function of tabu search is
+higher than that of GA.
+4. The e4ect of parameters in tabu search
+Asmentionedabove,wehaveexperimentedanumber
+of di!erent parameter settings in tabu search. In this
+section,thee !ectoftheseparametersontheperformance
+of tabu search will be discussed, and the best values
+obtainedforthembyourextensiveparametricstudyare
+also analyzed.
+4.1. Tabulist size
+Tabu list embodies the short-term memory function
+fortabusearch.Itforcesthealgorithmnottoreverseto
+thelast l(tabulistsize)moves.Therefore,thesizeoftabu
+list determines how many solutions one would like the
+search not to reverse back. A large tabu list size allows
+more diversi"cation and forces the new solution to be
+a father point. On the contrary, a small tabu list size
+makes the search more intensive within the neighbor-
+hoodofthecurrentsolution.Inpractice,weneedtouse
+anappropriatesize of tabu list.
+Wetesteddi !erenttabulistlengthsvariedfrom2to90
+(at interval of 2) for the 2nd-form feature selection
+708 H. Zhang,G. Sun/Pattern Recognition 35 (2002) 701}711
+--- PAGE 9 ---
+Fig.3. Thedistribution ofMahalanobisdistanceof all thesolutionsthat include12featuresandthepositions ofseveralalgorithms '
+results.Apoint( x,y)inthecurveindicatesthenumberofsolutions,whoseMahalanobisdistancevaluesareintheinterval[ x!1,x#1].
+Table5
+Comparisonof di!erentsizes of tabu list
+Tabulist length Thenumber of tests
+whichget the same
+solutionas when
+tabu list size is 90
+Criterionfunc-
+tion (mean)
+2 10 13.06
+4 12 13.00
+6 16 12.92
+8 19 12.81
+10 20 12.74
+12 20 12.74
+14 20 12.74
+16&90 21 12.66
+problem.Themaximumnumberofiterationswassetto
+90. Each search process with di!erent tabu list length
+startedfromacommoninitialsolution.Werepeatedthe
+test21timesforeachdi !erentinitialsolution.Theresults
+arelistedinTable5.Note thatifthe algorithmreverses
+to the best solution obtained previously, then stop the
+search since that wouldrepeat the previous path.
+From Table 5, we observed that as the tabu list size
+reachesacertainvalue,continuouslyincreasingthetabu
+listsizewillnotimprovetheperformancefurther.Inour
+experiments, the tabu search did not get better result
+whenthetabulistsizeexceeds16.Notethat16isapprox-
+imatelythe half of 30, the initialfeaturenumber.
+The appropriate length of tabu list should be deter-
+mined jointly with other parameters in tabu search.
+Additionally,thedistributionoffeasiblesolutionsinpar-
+ticularproblemsshouldalsobeconsidered.Generally,it
+issuggestedthattheregionof[ n/2,3n]fortabulistsize
+wouldbeagoodchoice,where nisthenumberofinitial
+features.
+4.2. Candidateset size
+This parameter controls the number of trial
+solutions to be generated from a current solution.
+We tested various values of the candidate set size for
+the 2nd-form problem of feature number 30, and tabu
+list size 30. The candidate set size was set to vary
+from 30 (whole neighborhood)down to 4. To make the
+computational cost approximately equal, as the candi-
+date set size decreased, the number of iteration should
+increaseproperly.Inonetest,eachsearchusingdi !erent
+candidatesetsize startedfromthe sameinitialsolution,
+andwerepeatedthistest20timeswithdi !erentrandom-
+ly generated initial solutions. The results are given in
+Table6.
+FromTable6,wecanseethatthelargerthecandidate
+setsizeis,thebetterthemeanobjectivefunctionvalueis,
+becauseonehasmorechoicestoselectfrom.Table6also
+showsthat the larger the candidate set size is, the more
+frequentlytabulisttakese !ectandsomemovesaretabu.
+Thismakesanintensi "cationofthesearch.Onthecon-
+trary, a small candidate set size makes the tabu list
+seldom take e!ect, and the search process becomes too
+arbitrary.Thiswilldecreasetheperformanceofthetabu
+search.
+4.3. Initial solution
+We have tested the e!ect of di!erent initial solutions
+on the resultant solution by parametric study. In the
+experimentsthetabulistlengthwas30,thecandidateset
+size 30, and the maximum number of iterations was 60.
+We compared the results obtained from random initial
+solutions with those from the better initial solutions,
+which are the results of other near optimal algorithms.
+The results are shown in Table 7.
+H. Zhang,G. Sun/Pattern Recognition 35 (2002) 701}711 709
+--- PAGE 10 ---
+Table6
+Comparisonof di!erentcandidateset sizes
+Candidate set size Numberof
+iterations
+Outputcriterion function Total timestabu list
+tooke !ect (mean
+of 20 runs)
+Meanof times tabu
+list tooke!ect at each
+iterationMean Best Worst
+30 60 12.69 12.22 13.11 33.8 0.554
+15 120 12.73 12.33 13.05 32.6 0.271
+8 225 12.87 12.12 13.65 30.3 0.134
+4 450 13.13 12.61 13.76 33.6 0.074
+Table7
+Comparisonof di!erentinitial solutions
+Initialsolution Experiment
+times
+Criterion
+functionof
+initial
+solution
+Criterion
+functionof
+resultant
+solution
+Result of SFS 1 13.89 12.61
+Result of SBS 1 14.02 12.12
+Result ofPTA(2,1) 1 12.98 12.77
+Result ofPTA(1,2) 1 13.03 12.36
+Result of SFFS 1 12.98 12.77
+Result of SBFS 1 12.75 12.75
+Randomly 20 * 12.69 (mean)
+generated
+Table8
+Comparisonof two typesof neighborhood
+Neighborhoodtype Experimenttimes Outputcriterion function Timeswhen tabu list take e !ect
+Mean Best Worst Mean Most Least
+A 20 12.69 12.22 13.11 33.8 49 27
+B20 13.02 12.32 13.64 2.2 4 0
+From Table 7 we can see that the tabu search is
+notmuchsensitivetoinitialsolutionsintheexperiments.
+When we took the near optimal solutions (the outputs
+of other algorithms) as the initial solutions, the
+average value of the criterion function is 12.56, a little
+better than that of the random initial solutions. In fact,
+whentheinitialsolutionisfarfromtheoptimalsolution,
+thetabusearchactsmorelikeSFSorSBSatthebegin-
+ning steps.
+4.4. Neighborhoodtype
+Recall that in Section 3.1 we have de"ned the neigh-
+borhoodofasolutionasthosegeneratedbyalternating
+thestatus(inclusive/exclusive)ofexactlyonefeature.We
+call such neighborhood as type A to distinguish from
+neighborhoodtype Bde "nedasbelow.
+AB-typeneighborhoodofasolution xisgeneratedby
+reversing one or two features' states of x. The B-type
+neighborhoodcan be divided into following"ve cases.
+(1)0 P1: addinga feature.
+(2)1 P0: removinga feature.
+(3)00 P11: addingtwo features simultaneously.
+(4)11 P00: removingtwo featuressimultaneously.
+(5)10 P01: adding a feature meanwhile removing an-
+otherfeature.
+Note that an A-type neighborhood is included in the
+B-typeneighborhood.
+Supposetheoriginalfeaturespacebe n-dimension.The
+sizeofA-typeneighborhoodis n, andB-typen(n#1)/2.
+SowhenusingneighborhoodoftypeB,thecomputation
+cost will increase tremendously if we try to maintain
+high-ratio access to the neighborhood. However, de-
+creasing the access ratio will make the function of tabu
+list degrade and the control over search direction
+becomes weak. Extremely, when the neighborhood be-
+comes the power set 2/p76, the tabu search will become
+random search. Based on the above analysis, the con-
+clusionisnaturallythattabusearchusingB-typeneigh-
+borhoodwithlowaccessratewillnotperformwell.The
+followingexperimentsonthe1st-formoffeatureselection
+veri"edthis analysis.
+Let the neighborhood type be B, tabu list size 30,
+and the number of iterations 60. At each step, the next
+710 H. Zhang,G. Sun/Pattern Recognition 35 (2002) 701}711
+--- PAGE 11 ---
+move is selected from 30 solutions, which are random-
+ly picked out from the B-type neighborhood of the
+current solution. Repeat this experiment 20 times. The
+results are listed in Table 8. To compare expediently,
+we also list the results using neighborhood type A in
+Table8.
+From the experimental results it can be seen that
+the tabu list seldom takes e!ect when the neighbor-
+hood is B-type. In fact, in 2 runs the move is never
+tabu. It becomes no di !erent from the random
+search, and this makes the performance of tabu search
+worse.
+5. Conclusion
+In this paper, we have used tabu search to solve the
+two forms of optimal feature selection problem. The
+experimentalresultsareveryencouragingandshowthat
+thetabusearchnotonlyhasahighpossibilitytoobtain
+the optimal or a close to the optimal solution, but also
+requires less computational time than the branch and
+boundmethodandmostothercurrentlyusedsuboptimal
+methods.
+Thebranchandboundmethodisoptimal,buttheopti-
+mality of the results is constrained by the monotonicity
+ofthefeatureselectioncriterionfunction.Anotherdraw-
+backisthat,forproblemswithmorefeatures,thebranch
+and bound method is still impractical, and the size of
+featuresitcan tackledependson the computer 'sperfor-
+mance.
+Basedonourexperimentalresults,thesequential #oat-
+ing methods SFFS and SBFS are e$cient and usually
+can "nd fairlygood solutions.But they also su!er from
+trapping into local optimal solutions. We have demon-
+stratedan example of this problem.
+In this paper, our experiments are done on synthetic
+data. It will be a meaningful work to test and compare
+the performance and e$ciency of tabu search with GA
+andSFFS (SBFS)on real data sets.
+References
+[1] T.M. Cover, J.M. Van Campenhout, On the possible or-
+derings in the measurement selection problem, IEEE
+Trans.Systems Man Cybern. 7 (9) (1977) 657}661.
+[2] P.M.Narendra,K.Fukunaga,Abranchandboundalgo-
+rithm for feature subset selection, IEEE Trans. Comput.
+26 (9) (1977) 917}922.
+[3] I. Foroutan, J. Sklansky, Feature selection for automatic
+classi"cationofnon-Gaussiandata,IEEETrans.Systems
+ManCybernet.17 (1987) 187}198.
+[4] T.M.Cover,Thebesttwoindependentmeasurementsare
+notthetwobest,IEEETrans.SystemsManCybern.4(2)
+(1974) 116}117.
+[5] E. Backer, J.A. Shipper, On the max}min approach for
+featureorderingandselection,ProceedingsoftheSeminar
+on PatternRecognition,Liege, 1977.
+[6] J. Kittler, Feature set search algorithms, in: C.H. Chen
+(Ed.),PatternRecognitionandSignalProcessing,Sijtho !
+and Noordho!, Alphen aan den Rijn, The Netherlands,
+1978, pp. 41}60.
+[7] A.Jain,D.Zongker,Featureselection:evaluation,applica-
+tion,andsmallsampleperformance,IEEETrans.Pattern
+Anal Mach.Intell. 19 (2) (1997) 153}158.
+[8] W. Siedlecki, J. Sklansky, On automatic feature selection,
+Int.J.PatternRecognitionArtif.Intell.2(2)(1988)197 }220.
+[9] W.Siedlecki,J.Sklansky,Anoteongeneticalgorithmfor
+large-scalefeatureselection,Pattern RecognitionLett. 10
+(11) (1989) 335}347.
+[10] P.Pudil,Novovicova,J.Kittler,Floatingsearchmethods
+in feature selection. Pattern Recognition Lett. 15 (11)
+(1994) 1119}1125.
+[11] J.Sklansky,W.Siedlecki,Large-scalefeatureselection,in:
+C.H. Chen, L.F. Pau, P.S.P. Wang (Eds.), Handbook of
+PatternRecognitionandComputerVision,WorldScient-
+i"c, Singapore,1993, pp. 61}123.
+[12] M. Kudo, J. Sklansky, Comparison of algorithms that
+select features for pattern classi"ers, Pattern Recognition
+33 (1) (2000) 25}41.
+[13] F.Glover,TabusearchI.ORSAJ.Comput.1(1989)190 }206.
+[14] F.Glover,TabusearchII.ORSAJ.Comput.2(1989)4 }32.
+[15] F.Glover,M.Laguna,Tabusearch,in:R.C.Reeves(Ed.),
+Modern Heuristic Techniques for Combinatorial Prob-
+lems, McGraw-Hill,Berkshire.
+About the Author*HONGBINZHANGreceivedtheB.S.degreeinAutomationin1968,andtheM.S.degreeinPatternRecognition
+andIntelligentSystemin1981,bothfromTsinghuaUniversity,China.From1986to1989hewasaninvitedresearcherinDepartmentof
+InformationScienceof Kyoto University, Japan. From 1993 to 1994 he was a visiting scholarof RPI, USA.Since 1993 he has been
+a professor of the Computer Institute of Beijing Polytechnic University, China. His current research interests include pattern
+recognition,computer vision, image processingand neural networks.
+About the Author*GUANGYU SUN received the B.S. degree in Geology from Peking University in 1992, and the M.S. degree in
+Pattern Recognition and Computer Vision from Beijing Polytechnic University in 1999. His current interests include pattern
+recognitionand computervision.
+H. Zhang,G. Sun/Pattern Recognition 35 (2002) 701}711 711

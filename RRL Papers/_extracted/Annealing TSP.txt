@@ -1,0 +1,1088 @@
+--- PAGE 1 ---
+Research Article
+List-Based Simulated Annealing Algorithm for
+Traveling Salesman Problem
+Shi-hua Zhan,1,2 Juan Lin,1 Ze-jun Zhang,1 and Yi-wen Zhong1,2
+1CollegeofComputerandInformationScience,FujianAgricultureandForestryUniversity,Fuzhou350002,China
+2CenterofModernEducationTechnologyandInformationManagement,FujianAgricultureandForestryUniversity,
+Fuzhou350002,China
+CorrespondenceshouldbeaddressedtoYi-wenZhong;yiwzhong@fafu.edu.cn
+Received16August2015;Revised21January2016;Accepted10February2016
+AcademicEditor:LeonardoFranco
+Copyright © 2016 Shi-huaZhanetal. This is an open access article distributed under the Creative Commons Attribution License,
+whichpermitsunrestricteduse,distribution,andreproductio ninanymedium,providedtheoriginalworkisproperlycited.
+Simulated annealing (SA) algorithm is a popular intelligent optimization algorithm which has been successfully applied in many
+fields.Parameters’settingisakeyfactorforitsperformance,butitisalsoatediouswork.Tosimplifyparameterssetting,wepresenta
+list-basedsimulatedannealing(LBSA)algorithmtosolvetravelingsalesmanproblem(TSP).LBSAalgorithmusesanovellist-based
+cooling schedule to control the decrease of temperature. Specifically, a list of temperatures is created first,and then themaximum
+temperatureinlistisusedbyMetropolisacceptancecriteriontodecidewhethertoacceptacandidatesolution.Thetemperaturelist
+isadaptediterativelyaccordingtothetopologyofthesolutionspaceoftheproblem.Theeffectivenessandtheparametersensitivity
+of the list-based cooling schedule are illustrated through benchmark TSP problems. The LBSA algorithm, whose performance is
+robustonawiderangeofparametervalues,showscompetitiveperformancecomparedwithsomeotherstate-of-the-artalgorithms.
+1. Introduction
+Simulated annealing (SA) algorithm, which was first inde-
+pendently presented as a search algorithm for combinato-
+rial optimization problems in [1, 2], is a popular iterative
+metaheuristic algorithm widely used to address discrete and
+continuous optimization problems. The key feature of SA
+algorithm lies in means to escape from local optima by
+allowing hill-climbing moves to find a global optimum. One
+of the major shortages of SA is that it has several parameters
+to be tuned, and its performance is sensitive to the values of
+thosecontrolparameters.Therearetwospecialstrategiesfor
+parameter tuning: the online parameter tuning and the off-
+line parameter tuning. In the online approach, the param-
+eters are controlled and updated dynamically or adaptively
+throughouttheexecutionoftheSAalgorithm[3–7],whereas
+in the off-line approach, the values of different parameters
+are tuned before the execution of the SA algorithm and are
+fixed during its execution. Fine-tuning parameter values is
+not trivial, and those parameters are quite often very poorly
+made by trial and error. So, SA algorithm, which has less
+parameter or is less sensitive to parameter setting, is very
+attractiveforpracticalusers.
+Recently, a metaheuristic algorithm called the list-based
+t h r e s h o l d - a c c e p t i n g( L B T A )a l g o r i t h mh a sb e e nd e v e l o p e d
+and has shown significant performance for combinatorial
+optimizationproblems thatare NP-complete. The advantage
+of LBTA over the majority of other neighbourhood search-
+based metaheuristic methods is that it has fewer controlling
+parameters that have to be tuned in order to produce
+satisfactory solutions. Since its appearance, LBTA has been
+successfully applied to many combinatorial optimization
+problems[8–14].
+In this work we are motivated by the success of LBTA
+in simplifying parameter tuning to study how list-based
+parameter control strategy can be applied to SA algorithm.
+Towards by this goal, our paper presents a novel list-based
+cooling schedule for SA algorithm to solve travelling sales-
+man problem (TSP), and we call our proposed algorithm
+as list-based simulated annealing (LBSA) algorithm. In list-
+based cooling schedule, all temperatures are stored in a list
+whichisorganizedasapriorityqueue.Ahighertemperature
+Hindawi Publishing Corporation
+Computational Intelligence and Neuroscience
+Volume 2016, Article ID 1712630, 12 pages
+http://dx.doi.org/10.1155/2016/1712630
+--- PAGE 2 ---
+2 ComputationalIntelligenceandNeuroscience
+has higher priority.In LBSA,a list of temperaturesis created
+first, and then, in each generation, the maximum value in
+thelistisusedascurrenttemperaturetocalculateacceptance
+probability for candidate solution. The temperature list is
+updatedadaptivelyaccordingtothetopologyofthesolution
+space of the problem. Using the list-based cooling schedule,
+SA algorithm has good performance on a wide range of
+parameter values; and it also has competitive performance
+compared with some other state-of-the-art algorithms. The
+p a r a m e t e rr o b u s t n e s so fl i s t - b a s e dc o o l i n gs c h e d u l ec a n
+greatly simplify the design and implementation of LBSA
+algorithmforpracticalapplications.
+The remainder of this paper is organized as follows:
+Section2 provides a short description of TSP problem and
+SA algorithm. Section3 presents our proposed list-based
+SA algorithm. Section4 gives the experimental approach
+and results of experiments carried out on benchmark TSP
+problems.Finally,inSection5wesummarizeourstudy.
+2. Preliminaries
+2.1. Traveling Salesman Problem. TSP problem is one of
+themostfamoushardcombinatorialoptimizationproblems.
+It belongs to the class of NP-hard optimization problems.
+This means that no polynomial time algorithm is known to
+guarantee its global optimal solution. Consider a salesman
+whohastovisit 𝑛cities.TheTSPproblemconsistsoffinding
+the shortest tour through all the cities such that no city is
+visitedtwiceandthesalesmanreturnsbacktothestartingcity
+attheendofthetour.Itcanbedefinedasfollows.For 𝑛cites
+problem, we can use a distance matrix𝐷=(𝑑
+𝑖,𝑗)𝑛×𝑛 to store
+distancesbetweenallthepairofcites,whereeachelement 𝑑𝑖,𝑗
+of matrix𝐷 represents the distance between citiesV𝑖 and V𝑗.
+And we use a set of permutations𝜋 of the integers from 1 to
+𝑛, which contains all the possible tours of the problem. The
+goal is to find a permutation𝜋=(𝜋(1),𝜋(2),...,𝜋(𝑛)) that
+minimizes
+𝑓(𝜋)=
+𝑛−1
+∑
+𝑖=1
+𝑑𝜋(𝑖),𝜋(𝑖+1)+𝑑𝜋(𝑛),𝜋(1). (1)
+TSP problem may be symmetric or asymmetric. In the
+symmetricTSP,thedistancebetweentwocitiesisthesamein
+each opposite direction, forming an undirected graph. This
+symmetry halves the number of possible solutions. In the
+asymmetric TSP, paths may not exist in both directions or
+the distances might be different, forming a directed graph.
+Traffic collisions, one-way streets, and airfares for cities with
+different departure and arrival fees are examples of how this
+symmetrycouldbreakdown.
+2.2. Simulated Annealing Algorithm.SA algorithm is com-
+monly said to be the oldest among the metaheuristics and
+surely one of the few algorithms that have explicit strategies
+t oa v o i dl o c a lm i n i m a .Th eo r i g i n so fS Aa r ei ns t a t i s t i -
+cal mechanics and it was first presented for combinatorial
+optimization problems. The fundamental idea is to accept
+moves resulting in solutions of worse quality than the
+current solution in order to escape from local minima. The
+probabilityofacceptingsuch a moveisdecreased duringthe
+Start
+Ye s No
+Ye s
+No
+Stop condition of outer loop is met?
+Ye s
+Ye s
+No
+No
+End
+Generate an initial solution x randomly
+Generate a candidate solutiony randomly
+based on current solutionx and a specified
+neighbourhood structure
+y is better thanx?
+Generater in [0,1) randomly
+r<p ?
+x=y
+Stop condition of inner loop is met?
+Decrease the temperaturet
+Output the solutionx
+p= exp(−(f(y)− f(x))
+t )
+Figure1:Flowchartofsimulatedannealingalgorithm.
+search through parameter temperature. SA algorithm starts
+with an initial solution𝑥, and candidate solution𝑦 is then
+generated (either randomly or using some prespecified rule)
+from the neighbourhood of𝑥. The Metropolis acceptance
+criterion [15], which models how a thermodynamic system
+moves from one state to another state in which the energy is
+beingminimized,isusedtodecidewhethertoaccept 𝑦ornot.
+Thecandidatesolution𝑦isacceptedasthecurrentsolution 𝑥
+basedontheacceptanceprobability:
+𝑝=
+{
+{
+{
+1, if𝑓(𝑦)≤𝑓 (𝑥),
+𝑒
+−(𝑓(𝑦)−𝑓(𝑥))/𝑡, otherwise,
+(2)
+where𝑡is the parameter temperature. The SA algorithm can
+bedescribedbyFigure1.
+In order to apply the SA algorithm to a specific problem,
+o n em u s ts p e c i f yt h en e i g h b o u r h o o ds t r u c t u r ea n dc o o l i n g
+schedule. These choices and their corresponding parameter
+settingcanhaveasignificantimpactontheSA’sperformance.
+Unfortunately, there are no choices of these strategies that
+will be good for all problems, and there is no general easy
+way to find the optimal parameter sets for a given problem.
+--- PAGE 3 ---
+ComputationalIntelligenceandNeuroscience 3
+A cooling schedule should consist of starting temperature,
+temperature decrement function, Markov chain length, and
+termination condition. Geometric cooling schedule, which
+can be described by the temperature-update formula𝑡
+𝑘+1=
+𝑎𝑡𝑘,isprobablythemostcommonlyusedintheSAliterature
+a n da c t sa sab a s el i n ef o rc o m p a r i s o nw i t ho t h e rm o r e
+elaborate schemes [16]. Typical values of𝑎 for moderately
+slowcoolingratesare0.8through0.99.
+For practical application where computation complexity
+of objective function is high, SA algorithm may run with
+constant Markov chain length and use fixed iteration times
+as termination condition. As a result, initial temperature
+and cooling coefficient𝑎 are the two key parameters that
+impacttheperformanceofSAalgorithm.Eveninthissimple
+situation, it is not an easy task to find optimal values for
+those two parameters, because SA’s performance is sensitive
+tothoseparameters.Onewaytotackletheparametersetting
+problem of SA algorithm is to use adaptive cooling strategy
+[3–7]. Adaptive cooling strategy is definitely efficient and it
+makesSAalgorithmlesssensitivetouserdefinedparameters
+than canonical SA, but it also makes SA algorithm lose the
+featureofsimplicity.Anotherwaytotacklethisproblemisto
+findnewcoolingschedulewhichhasfewerparametersorthe
+parametersaremorerobust.
+2.3. Simulated Annealing Algorithm for TSP Problems.In
+ordertouseSAalgorithmforTSPproblem,wecanrepresent
+solution𝑥as a permutation𝜋. Then, a large set of operators,
+such as the famous 2-Opt, 3-Opt, inverse, insert, and swap
+operators,canbeusedtogeneratecandidatesolution 𝑦.Since
+its appearance, SA algorithm has been widely and deeply
+studied on TSP problems [17–21]. Many cooling schedules,
+such as geometric, exponential, logarithmic, and arithmetic
+o nesandtheirvarian ts,ha vebeenusedinli tera tur e.
+The theory convergence conditions of SA make it very
+timeconsuminginmostcases[22].W angetal.[23]proposed
+a two-stage SA algorithm which was tested on 23 TSP
+benchmarkinstanceswithscalefrom51to783.Thenumerical
+r e s u l t ss h o wt h a ti ti sd i ffi c u l tf o rS Aa l g o r i t h mt os o l v eT S P
+benchmark instances with scale exceeding 1000 cities based
+on time complexity. Geng et al. [24] proposed an adaptive
+simulated annealing algorithm with greedy search (ASA-
+GS), where greedy search technique is used to speed up the
+convergence rate. The ASA-GS achieves a reasonable trade-
+offamongcomputationtime,solutionquality,andcomplexity
+of implementation. It has good scalability and has good
+performance even for TSP benchmark instances with scale
+exceeding1000cities.Wangetal.[25]proposedamultiagent
+SA algorithm with instance-based sampling (MSA-IBS) by
+exploiting learning ability of instance-based search algo-
+rithm. The learning-based sampling can effectively improve
+the SA’s sampling efficiency. Simulation results showed that
+the performance of MSA-IBS is far better than ASA-GS in
+termsofsolutionaccuracyandCPUtime.Inthispaper,MSA-
+IBSisusedasbasistouselist-basedcoolingschedule.
+3. List-Based Simulated Annealing Algorithm
+3.1. The Neighbourhood Structure.In this paper, we use the
+greedy hybrid operator proposed by Wang et al. [25] to
+produce candidate solution. This is a kind of multiple move
+operators, which select the best one from three neighbours.
+Specifically, after two positions𝑖 and𝑗 are selected, it
+uses inverse operator, insert operator, and swap operator
+to produce three neighbour solutions. And the best one is
+used as the candidate solution. The inverse, insert, and swap
+operatorscanbedefinedasfollows.
+Define1 (inverseoperatorinverse(𝜋,𝑖,𝑗) ). Itmeanstoinverse
+the cities between positions𝑖 and𝑗.Th ei n v e r s e(𝜋,𝑖,𝑗) will
+generate a new solution𝜋
+󸀠 such that𝜋󸀠(𝑖)=𝜋(𝑗) ,𝜋󸀠(𝑖+1)=
+𝜋(𝑗−1),... ,𝜋󸀠(𝑗)=𝜋(𝑖) ,where1≤𝑖,𝑗≤𝑛∧1≤𝑗−𝑖<𝑛−1 ;
+inaddition,if𝑗−𝑖=𝑛−1 ,itmeans𝑖=1 and𝑗=𝑛 ,andthen
+𝜋󸀠(𝑖)=𝜋(𝑗) and𝜋󸀠(𝑗)=𝜋(𝑖) .T w oe d g e sw i l lb er e p l a c e db y
+inverseoperatorforsymmetricTSPproblems.
+Define2 (insertoperatorinsert(𝜋,𝑖,𝑗) ). Itmeanstomovethe
+cityinposition𝑗toposition𝑖.Theinsert(𝜋,𝑖,𝑗) operatorwill
+generate a new solution𝜋󸀠 such that𝜋󸀠(𝑖)=𝜋(𝑗) ,𝜋󸀠(𝑖+1)=
+𝜋(𝑖),... ,𝜋󸀠(𝑗)=𝜋(𝑗−1) ,i nt h ec a s eo f𝑖<𝑗 ,o r𝜋󸀠(𝑗)=
+𝜋󸀠(𝑗+1),... ,𝜋󸀠(𝑖−1)=𝜋(𝑖) ,𝜋󸀠(𝑖)=𝜋(𝑗) ,inthecaseof 𝑖>𝑗 .
+Ingeneral,threeedgeswillbereplacedbyinsertoperator.
+Define 3(swap operator swap(𝜋,𝑖,𝑗) ). It means to swap the
+city in position𝑗 and city in position𝑖.Th es w a p(𝜋,𝑖,𝑗)
+operatorwillgenerateanewsolution 𝜋󸀠 suchthat𝜋󸀠(𝑖)=𝜋(𝑗)
+and𝜋󸀠(𝑗)=𝜋(𝑖) . In general, four edges will be replaced by
+swapoperator.
+U s i n gt h ea b o v et h r e eo p e r a t o r s ,t h eu s e dh y b r i dg r e e d y
+operatorcanbedefinedasfollows:
+𝜋󸀠= min(inverse(𝜋,𝑖+1,𝑗), insert(𝜋,𝑖+1,𝑗),
+swap(𝜋,𝑖+1,𝑗)),
+(3)
+whereminreturnsthebestoneamongitsparameters.
+3.2.ProduceInitialTemperatureList. As inLBTA algorithms
+[8–14], list-based parameter controlling strategy needs to
+produce an initial list of parameters. Because temperature in
+SA is used to calculate acceptance probability of candidate
+solution, we use initial acceptance probability𝑝
+0 to produce
+temperature𝑡 as follows. Suppose𝑥 is current solution and
+𝑦 is candidate solution which is randomly selected from𝑥’s
+neighbours. Their objective function values are𝑓(𝑥) and
+𝑓(𝑦),r e s p e c t i v e l y .I f𝑦 is worse than𝑥, then the acceptance
+probability𝑝 of𝑦 c a nb ec a l c u l a t e du s i n gf o r m u l a( 2 ) .
+Conversely, if we know the acceptance probability𝑝0,t h e n
+wecan calculatethecorrespondingtemperature𝑡asfollows:
+𝑡=−(𝑓(𝑦)−𝑓 (𝑥))
+ln(𝑝0) . (4)
+Figure2istheflowchartofproducinginitialtemperature
+list.InFigure2,afterafeasiblesolution 𝑥isproduced,acan-
+didatesolution𝑦israndomlyselectedfrom𝑥’s neighbours. If
+𝑦isbetterthan𝑥,then𝑥isreplacedby𝑦.Andusingformula
+(4), the absolute value of𝑓(𝑦)−𝑓(𝑥) is used to calculate an
+initialtemperaturevalue𝑡.Then𝑡willbeinsertedintoinitial
+--- PAGE 4 ---
+4 ComputationalIntelligenceandNeuroscience
+Begin
+End
+Ye s
+No
+No
+Ye s
+Create an initial solutionx
+Create an empty temperature listL
+Defining maximum list lengthLmax
+Defining initial acceptance probabilityp0
+i=0
+Create neighbour solution y from x randomly
+f(y) < f(x)?
+x=y
+Insertt into temperature listL
+i=i+1
+i<L max?
+t= −|f(y)− f(x)|
+ln(p0)
+Figure2:Flowchartofproducinginitialtemperaturelist.
+temperature list. The temperature list is a priority list, where
+higher temperature has higher priority. The same procedure
+isrepeateduntilthelistoftemperaturevaluesisfilled.
+3.3. Temperature Controlling Procedure.In each iteration
+𝑘, the maximum temperature in list is used as current
+temperature𝑡
+max.IfMarkovchainlengthis 𝑀,then𝑡max may
+be used at best𝑀 times for the calculation of acceptance
+probability of candidate solution. Suppose there are𝑛 times
+thatbadsolutionisacceptedascurrentsolution;weuse 𝑑𝑖 and
+𝑝𝑖 torepresentthedifferenceofobjectivefunctionvaluesand
+acceptanceprobability,respectively,where𝑖=1⋅⋅⋅𝑛 ,andthe
+relation between𝑑𝑖 and𝑝𝑖 can be described as the following
+equation:
+𝑝𝑖=𝑒−𝑑𝑖/𝑡max. (5)
+According to the Metropolis acceptance criterion, for
+eachtimeabadcandidatesolutionismet,arandomnumber
+𝑟 is created. If𝑟 is less than the acceptance probability, then
+thebadcandidatesolutionwillbeaccepted.So,foreachpair
+of𝑑
+𝑖 and𝑝𝑖,t h e r ei sar a n d o mn u m b e r𝑟𝑖 and𝑟𝑖 is less than
+𝑝𝑖.W eu s e𝑑𝑖 and𝑟𝑖 to calculate a new temperature𝑡𝑖 as the
+followingformuladescribed:
+𝑡𝑖= −𝑑𝑖
+ln(𝑟𝑖). (6)
+We use the average of𝑡𝑖 to update the temperature list.
+Specifically,𝑡max will be removed from list, and average of𝑡𝑖
+willbeinsertedintolist.Because 𝑡𝑖 isalwayslessthan𝑡max,the
+averageof𝑡𝑖 islessthan𝑡max also.Inthisway,thetemperature
+decr easesalwa ysasthesear chp r oceeds.
+3.4. Description of LBSA Algorithm.Because the main pur-
+pose of this paper is to study the effectiveness of list-based
+cooling schedule, we use a simple SA framework which uses
+fixed iteration times for outer loop and fixed Markov chain
+length in each temperature. The detailed flowchart of the
+main optimization procedure is shown in Figure3. Besides
+t h ec r e a t i o no fi n i t i a lt e m p e r a t u r el i s t ,t h em a i nd i ff e r e n c e
+betweentheflowchartofLBSAandtheflowchartofcanonical
+SA is about the temperature control strategy. In canonical
+SA,thetemperaturecontrollingprocedureisindependentof
+the topology of solution space of the problem. Conversely,
+the temperature controlling procedure of LBSA is adaptive
+according to the topology of solution space of the problem.
+In Figure 3,𝐾 is maximum iteration times of outer loop,
+which is terminationconditionofLBSA.𝑀is Markov chain
+length,whichisterminationconditionofinnerloop.Counter
+𝑘 is used to record the current iteration times of outer loop,
+𝑚 is used to record current sampling times of inner loop,
+and𝑐 is used to record how many times bad solution is
+accepted in each temperature. Variable𝑡 is used to store the
+total temperature calculated by formula (6), and the average
+temperature𝑡/𝑐 will be used to update the temperature list.
+We can use a maximum heap to implement the temperature
+list.Asthetimecomplexityofstorageandretrievalfromheap
+islogarithmic,theuseoftemperaturelistwillnotincreasethe
+timecomplexityofSAalgorithm.
+4. Simulation Results
+In order to observe and analyse the effect of list-based
+cooling schedule and the performance of LBSA algorithm,
+five kinds of experiments were carried out on benchmark
+TSP problems. The first kind of experiments was used to
+analyse the effectiveness of the list-based cooling schedule.
+The second kind was carried out to analyse the parameter
+sensitivityofLBSAalgorithm.Thethirdkindwascarriedout
+to compare the performance of different ways to update the
+temperaturelist.Thefourthkindwascarriedouttocompare
+theperformanceofdifferentneighbourhoodstructures.And
+thefifthkindwascarriedouttocompareLBSA’sperformance
+withsomeofthestate-of-the-artalgorithms.
+4.1. The Effectiveness of List-Based Cooling Schedule. To
+illustrate the effectiveness of list-based cooling schedule, we
+comparethetemperaturevaryingprocessandsearchprocess
+ofLBSAalgorithmwithSAalgorithmsbasedontheclassical
+geometriccoolingscheduleandarithmeticcoolingschedule.
+--- PAGE 5 ---
+ComputationalIntelligenceandNeuroscience 5
+Begin
+End
+Ye s No
+No
+Ye s
+Ye s No
+NoYe s
+temperature list
+Used to update
+temperature list
+UpdateNo
+Ye s
+Produce initial temperature listL
+k=0
+Fetch the maximum temperaturetmax from listL
+k=k+1 ,t=0 ,c=0 ,m=0
+Create neighbour solutiony from x randomly
+m=m+1
+f(y) < f(x)?
+Generater in [0,1) randomly
+r<p ?
+c=c+1
+x=y
+m≤M
+Pop the maximum value from listL
+k≤K ?
+Insertt/c into listL
+p= exp(−(f(y) < f(x))
+tmax
+)
+c= =0 ?
+t= t− (f(y)− f(x))
+ln(r)
+Figure3:Flowchartoflist-basedSAalgorithm.
+Those experiments were carried out on BCL380, XQL662,
+XIT1083, and XSC6880 problems from VLSI data sets. The
+bestknownintegersolutionsofthoseproblemsare1621,2513,
+3558,and21537,respectively.Theiterationtimesofouterloop
+are1000,andtheMarkovchainlengthineachtemperatureis
+th ec i t yn u m be ro fth ep r o b l e m ,wh i c hi s380 ,66 2 ,1 0 8 3 ,a n d
+6880,respectively.
+Figure4 compares the temperature varying process of
+differentcoolingschedulesonthefourbenchmarkproblems.
+List-based cooling schedule can be viewed as a kind of
+geometriccoolingschedulewithvariablecoolingcoefficient.
+Compared with the temperature varying of geometric cool-
+ing schedule, temperature of list-based cooling schedule
+decreases quicker in the early stage, but slower in the later
+stage.AsindicatedbyAbramsonetal.[16],geometriccooling
+schedule always uses constant cooling coefficient regardless
+of the stages of search. However, at high temperatures
+almost all candidate solutions are accepted, even though
+many of them could be nonproductive. To use variable
+coolingcoefficients,whichdependonthestages,wouldallow
+SA algorithm to spend less time in the high temperature
+stages. Consequently, more time would be spent in the low
+temperature stages, thus reducing the total amount of time
+requiredto solve the problem.
+Figure5comparesthesearchprocessofdifferentcooling
+schedules on the four benchmark problems. Compared with
+geometriccoolingscheduleandarithmeticcoolingschedule,
+list-based cooling schedule has quicker convergence speed
+and has good long-term behaviour also. This good perfor-
+mance may be due to the variable cooling coefficient feature
+of list-based cooling schedule. The temperature is updated
+adaptively according to the topology of solution space of the
+problem. As a result, LBSA algorithm can spend more time
+tosearch onpromisingareafinely.
+4.2.SensitivityAnalysisofTemperatureListLengthandInitial
+Temperature Values.Weobservethesensitivityoflistlength
+on BCL380, XQL662, XIT1083, and XSC6880 problems. For
+each problem, we test 30 different list lengths from 10 to
+300 with a step 10. For each list length, we run LBSA
+algorithm 50 times and calculate the average tour length
+and the percentage error of the mean tour length to the
+best known tour length. Figure6 is the relation between
+percentage error and list length. It shows the following: (1)
+for all the problems, there is a wide range of list length for
+LBSA to have similar promising performance; (2) list length
+is more robust on small problems than on large problems;
+(3) list length should not be too big for large problems. For
+big problems, the used Markov chain length, which is the
+city number of the problem, is not big enough for LBSA to
+reachequilibriumoneachtemperature.Biglistlengthmeans
+thetemperaturedecreasesmoreslowly,sothealgorithmwill
+spend too much time on high temperature and accept too
+much nonproductive solutions. As a result, a big list length
+will dramatically deteriorate LBSA’s performance for large
+problems. Because of the robust temperature list length, we
+usefixedtemperaturelistlengthinthefollowingsimulations,
+whichis120forallinstances.
+In order to observe the sensitivity of initial temperature
+values, we carried out experiments with different initial
+temperature values on BCL380, XQL662, XIT1083, and
+XSC6880 problems. Because the initial temperature values
+are produced according to initial acceptance probability𝑝
+0,
+weuse30different𝑝0,whichrangefrom10−20 to0.9,tocreate
+initial temperature values. Specifically, the set of𝑝0 is the
+unionofgeometricsequencefrom10−20 to10−2 withcommon
+ratio10andarithmeticsequencefrom0.1to0.9withcommon
+difference0.1.Foreachinitialacceptanceprobability,werun
+LBSA algorithm 50 times and calculate the average tour
+length and the percentage error of the mean tour length to
+the best known tour length. Figure7 is the relation between
+percentage error and index of initial acceptance probability.
+It shows the following: (1)t h ep e r f o r m a n c eo fL B S Ai sn o t
+--- PAGE 6 ---
+6 ComputationalIntelligenceandNeuroscience
+BCL380
+Geometric
+Arithmetic
+List
+100 200 300 400 500 600 700 800 900 10000
+Iteration times
+0
+2
+4
+6
+8
+10
+12
+14
+16
+18Temperature
+(a)
+Geometric
+Arithmetic
+List
+XQL662
+100 200 300 400 500 600 700 800 900 10000
+Iteration times
+0
+2
+4
+6
+8
+10
+12
+14
+16
+18
+20
+22
+24Temperature
+(b)
+Geometric
+Arithmetic
+List
+XIT1083
+100 200 300 400 500 600 700 800 900 10000
+Iteration times
+0
+4
+8
+12
+16
+20
+24
+28
+32Temperature
+(c)
+Geometric
+Arithmetic
+List
+XSC6880
+100 200 300 400 500 600 700 800 900 10000
+Iteration times
+0
+5
+10
+15
+20
+25
+30
+35
+40
+45
+50
+55
+60
+65Temperature
+(d)
+Figure4:Comparethetemperaturevaryingprocessofdifferentcoolingschedule.
+sensitive to the initial temperature values; (2)t h e r ei sa
+different varying direction among different problems. For
+smallproblems,theinitialtemperatureshouldnotbetoolow,
+b u tf o rb i gp r o b l e m s ,t h ei n i t i a lt e m p e r a t u r es h o u l dn o tb e
+too high. This difference is due to the limited computation
+resource used and the nonlinear computation complexity
+of TSP problem. The LBSA algorithm can have similar
+promisingperformanceonawiderangeofinitialtemperature
+values;thishighrobustnessofinitialtemperatureisduetothe
+adaptivenatureoflist-basedcoolingschedule.
+4.3. Comparing Different Temperature Updating Schemes.In
+ouralgorithmdescribedinSection3.4,weusetheaverageof
+temperature𝑡
+𝑖 to update temperature list. There are several
+variants,suchasusingmaximum 𝑡𝑖 or minimum𝑡𝑖.T osho w
+the advantage of using average of𝑡𝑖,w ec o m p a r et h er e s u l t s
+and the decreasing process of temperature using those three
+updating schemes. Table1 is the simulationresults; it is clear
+that using average temperature to update temperature list
+has far better performance than the other methods. The
+temperature decreasing process of different strategies on
+BCL380,whichisshowedinFigure8,canexplainwhyusing
+average temperature is the best option. If we use maximum
+temperature to update the temperature list, the temperature
+will decrease very slowly. As a result, the acceptation proba-
+bility of bad solution is always high, and SA algorithm will
+search randomly in the solution space. Conversely, if we
+use minimum temperature to update the temperature list,
+the temperature will decrease sharply. As a result, the SA
+algorithm will be trapped into local minimum quickly and
+--- PAGE 7 ---
+ComputationalIntelligenceandNeuroscience 7
+BCL380
+Geometric
+Arithmetic
+List
+100 200 300 400 500 600 700 800 900 10000
+Iteration times
+1500
+1750
+2000
+2250
+2500
+2750
+3000
+3250
+3500
+3750
+4000
+4250
+4500Tour length
+(a)
+XQL662
+Geometric
+Arithmetic
+List
+100 200 300 400 500 600 700 800 900 10000
+Iteration times
+2500
+3000
+3500
+4000
+4500
+5000
+5500
+6000
+6500
+7000
+7500Tour length
+(b)
+Geometric
+Arithmetic
+List
+XIT1083 
+100 200 300 400 500 600 700 800 900 10000
+Iteration times
+4000
+5000
+6000
+7000
+8000
+9000
+10000
+11000
+12000Tour length
+(c)
+XSC6880
+Geometric
+Arithmetic
+List
+100 200 300 400 500 600 700 800 900 10000
+Iteration times
+20000
+30000
+40000
+50000
+60000
+70000
+80000
+90000
+100000
+110000Tour length
+(d)
+Figure5:Comparethesearchprocessofdifferentcoolingschedule.
+Table1:Comparisonofdifferenttemperaturelistupdatingschemes.
+Instance OPT Average Maximum Minimum
+BCL380 1621 1630.2 2357.4 1651.9
+XQL662 2513 2527.2 4117.8 2565.8
+XIT1083 3558 3592.9 6663.0 3674.6
+XSC6880 21537 21920.0 63472.2 22649.8
+losetheadvantageofescapingfromlocalminimumbyusing
+Metropolisacceptancecriterion.
+4.4. Comparing Different Neighbourhood Structures.In our
+algorithm, we use a greedy hybrid neighbour operator pro-
+posedbyWangetal.[25]toproducecandidatesolution.This
+Table2:Comparisonofdifferentneighbourhoodstructures.
+Instance Inverse Insert Swap Hybrid
+BCL380 1631.96 1776.24 2666.44 1630.84
+XQL662 2535.2 2836.52 4437.2 2527.2
+XIT1083 3603.48 4118.72 6760.84 3592.08
+XSC6880 22115.6 29048 64263.4 21930.6
+hybridoperatorusesthebestoneproducedbyinverse,insert,
+and swap operators. To show its advantage, we compare
+the results produced by inverse, insert, swap, and hybrid
+operators.Andwecomparethepercentageofinverse,insert,
+and swap operators accepted when we use hybrid operator.
+Table2 is the simulation results; it is clear that hybrid
+--- PAGE 8 ---
+8 ComputationalIntelligenceandNeuroscience
+BCL380
+XQL662
+XIT1083
+XSC6880
+20 40 60 80 100 120 140 160 180 200 220 240 260 280 3000
+Temperature list length
+0
+10
+20
+30
+40
+50
+60
+70Error (%)
+Figure6:Sensitivityofparametertemperaturelistlength.
+BCL380
+XQL662
+XIT1083
+XSC6880
+2468 1 0 1 2 1 4 1 6 1 8 2 0 2 2 2 4 2 6 2 8 3 00
+Index of different initial acceptance probability
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+1.6
+1.8
+2.0
+2.2Error (%)
+Figure7:Sensitivityofparameterinitialtemperaturevalues.
+operator has the best performance. Among the three basic
+operators, inverse is the best. If we compare the percentages
+of different basic operators accepted when we use hybrid
+operator, we found that inverse operator is accepted most.
+Figure9isthepercentagesofdifferentoperatorsacceptedon
+instanceBCL380.Thepercentagesofinverse,insert,andswap
+operators are 65%, 31%, and 4%, respectively. The relative
+percentages of the three operators accepted are similar on
+other instances as on BCL380. The good performance of
+inverse operator is due to its ability to produce more fine-
+grained neighbourhood structure, because it changes two
+edges only. The hybrid operator, which uses inverse, insert,
+andswapoperatorsatthesametime,hasabiggerneighbour-
+hoodstructure.Soithashigherprobabilitytofindpromising
+solutions.
+Average
+Maximum
+Minimum
+−5
+0
+5
+10
+15
+20
+25
+30
+35Temperature
+100 200 300 400 500 600 700 800 900 10000
+Iteration times
+Figure 8: Temperature decreasing process of different temperature
+listupdatingschemesoninstanceBCL380.
+Inverse
+65%
+Insert
+31%
+Swap
+4%
+Figure9:Percentageofinverse,insert,andswapoperatorsaccepted
+inhybridoperatoroninstanceBCL380.
+4.5. Competitiveness of LBSA Algorithm.We compare LBSA
+algorithm with genetic simulated annealing ant colony
+system (GSAACS) [26] and MSA-IBS on 24 benchmark
+instanceswithcitiesfrom51to1655.TheGSAACSisahybrid
+algorithmwhichusestheantcolonysystem(ACS)togenerate
+the initial solutions of the genetic algorithms. Then, it uses
+geneticalgorithm(GA),whichusesSAasmutationoperator,
+to generate offspring solutions based on the initial solutions.
+If the solutions searched by GA are better than the initial
+solutions, GSAACS will use these better solutions to update
+the pheromone for the ACS. After a predefined number
+of generations, GSAACS uses particle swarm optimization
+(PSO) to exchange the pheromone information between
+groups.
+--- PAGE 9 ---
+ComputationalIntelligenceandNeuroscience 9
+Table3:CompareLBSAwithGSAACSandMSA-IBSon24benchmarkinstancesfromTSPLIB.
+Number Instance OPT GSAACS MSA-IBS LBSA
+Best Mean PEav Best Mean PEav Best Mean PEav
+1 eil51 426 427 427.27 0.30 426 426 0 426 426 0
+2 eil76 538 538 540.20 0.41 538 538 0 538 538 0
+3 eil101 629 630 635.23 0.99 629 629 0 629 629 0
+4 berlin52 7542 7542 7542.00 0 7542 7542 0 7542 7542 0
+5 bier127 118282 118282 119421.83 0.96 118282 118291.2 0.01 118282 118282 0
+6 ch130 6110 6141 6205.63 1.57 6110 6110 0 6110 6110.6 0.01
+7 ch150 6528 6528 6563.70 0.55 6528 6544.4 0.25 6528 6537.5 0.15
+8 rd100 7910 7910 7987.57 0.98 7910 7910 0 7910 7910.1 0
+9 lin105 14379 14379 14406.37 0.19 14379 14379 0 14379 14379 0
+10 lin318 42029 42487 43002.90 2.32 42040 42170.9 0.34 42029 42138.55 0.26
+11 kroA100 21282 21282 21370.47 0.42 21282 21282 0 21282 21284.15 0.01
+12 kroA150 26524 26524 26899.20 1.41 26524 26524.15 0 26524 26524.05 0
+13 kroA200 29368 29383 29738.73 1.26 29368 29383.45 0.05 29368 29371.9 0.01
+14 kroB100 22141 22141 22282.87 0.64 22141 22174.2 0.15 22141 22184.2 0.2
+15 kroB150 26130 26130 26448.33 1.22 26130 26134.05 0.02 26130 26137.9 0.03
+16 kroB200 29437 29541 30035.23 2.03 29438 29439.4 0.01 29437 29438.65 0.01
+17 kroC100 20749 20749 20878.97 0.63 20749 20749 0 20749 20749 0
+18 kroD100 21294 21309 21620.47 1.53 21294 21342.75 0.23 21294 21294.55 0
+19 kroE100 22068 22068 22183.47 0.52 22068 22114.4 0.21 22068 22092.6 0.11
+20 rat575 6773 6891 6933.87 2.38 6813 6824.65 0.76 6789 6815.55 0.63
+21 rat783 8806 8988 9079.23 3.10 8845 8869.7 0.72 8846 8866.6 0.69
+22 rl1323 270199 277642 280181.47 3.69 270893 271972.3 0.66 270475 271415 0.45
+23 fl1400 20127 20593 21349.63 6.07 20299 20392.4 1.32 20140 20182.2 0.27
+24 d1655 62128 64151 65621.13 5.62 62786 62966.3 1.35 62454 62610.1 0.78
+Average 1.62 0.25 0.15
+The results of GSAACS are from [26]. GSAACS uses 120
+ants and 1000 generations. In each generation of GSAACS,
+GA runs 100 generations. In MSA-IBS and LBSA algorithm,
+we set the population size to 30 and the iteration times of
+outer loop to 1000, and the Markov chain length in each
+temperature is two times the number of cities. The end
+c o n d i t i o ni st h a te i t h e ri tfi n d st h eo p t i m a ls o l u t i o no rt h e
+iteration times of outer loop reach 1000. The algorithm was
+executed 25 times on each TSP problem, and the results are
+listedinTable3.
+In Table 3, the columns Instance, OPT, Best, Mean, and
+P Ea vd e n o t et h en a m eo ft h eT S Pp r o b l e m ,t h eo p t i m a lt o u r
+length from TSPLIB, the shortest tour length found, the
+average tour length among the 25 trials, and the percentage
+error of the mean tour length to the OPT, respectively. As
+c a nb es e e ni nT a b l e3 ,b o t hM S A - I B Sa n dL B S Ah a v eb e t t e r
+performance than GSAACS on all 24 instances. LBSA is a
+little better than MSA-IBS in terms of average percentage
+error.
+We compare LBSA algorithm with GA-PSO-ACO [27]
+and MSA-IBS on 35 benchmark instances with cities from
+48 to 33810. GA-PSO-ACO combines the evolution ideas of
+thegeneticalgorithms,particleswarmoptimization,andant
+colony optimization. In the GA-PSO-ACO algorithm, the
+wholeprocessisdividedintotwostages.Inthefirststage,GA
+a n dP S Oa r eu s e dt oo b t a i nas e r i e so fs u b o p t i m a ls o l u t i o n s
+to adjust the initial allocation of pheromone for ACO. In the
+secondstage,ACOisusedtosearchtheoptimalsolution.The
+results of GA-PSO-ACO are from [27]. GA-PSO-ACO uses
+100individualsand1000generations.InLBSAandMSA-IBS
+algorithm,wesetthenumberofpopulationsizeto10andthe
+iteration times of outer loop to 1000, and the Markov chain
+length in each temperature is the number of cities. The end
+condition of LBSA is that either it finds the optimal solution
+ortheiterationtimesofouterloopreach1000.LikeGA-PSO-
+ACOandMSA-IBS,LBSAwasexecuted20timesoneachTSP
+instance,andther esul tsar elistedinT able4.
+A scanbeseeninT able4,bo thMSA -IBSandLBSAha ve
+better performance than GA-PSO-ACO on all 35 instances.
+LBSA is a little bit better than MSA-IBS in terms of average
+percentageerror.
+We compare LBSA algorithm with ASA-GS [24] and
+MSA-IBS algorithm on 40 benchmark instances with cities
+from 151 to 85900. The experiments were run on a 2.8GHz
+PC, and the ASA-GS was run on a 2.83GHz PC. For all
+instances, we set the iteration times of outer loop to 1000
+--- PAGE 10 ---
+10 ComputationalIntelligenceandNeuroscience
+Table4:CompareLBSAwithGA-PSO-ACOandMSA-IBSon35benchmarkinstancesfromTSPLIB.
+Instance OPT GA-PSO-ACO MSA-IBS LBSA
+Best Mean PEav Best Mean PE Best Mean PEav
+Att48 33522 33524 33662 0.42 33522 33554.64 0.10 33522 33536.6 0.04
+Eil51 426 426 431.84 1.37 426 426.48 0.11 426 426.5 0.12
+Berlin52 7542 7544.37 7544.37 0.03 7542 7542 0 7542 7542 0
+St70 675 679.60 694.60 2.90 675 677.16 0.32 675 675.55 0.08
+Eil76 538 545.39 550.16 2.26 538 538.2 0.04 538 538 0
+Pr76 108159 109206 110023 1.72 108159 108288 0.12 108159 108268.3 0.10
+Rat99 1211 1218 1275 5.28 1211 1211.04 0.00 1211 1211.1 0.01
+Rad100 7910 7936 8039 1.63 7910 7914.56 0.06 7910 7914.7 0.06
+KroD100 21294 21394 21484 0.89 21294 21340.64 0.22 21294 21314.2 0.09
+Eil101 629 633.07 637.93 1.42 629 629.6 0.10 629 629 0
+Lin105 14379 14397 14521 0.99 14379 14380.48 0.01 14379 14379 0
+Pr107 44303 44316 44589 0.65 44303 44379.88 0.17 44303 44392.25 0.20
+Pr124 59030 59051 60157 1.91 59030 59032.88 0.00 59030 59031.8 0.00
+Bier127 118282 118476 120301 1.71 118282 118334.6 0.04 118282 118351.2 0.06
+Ch130 6110 6121.15 6203.47 1.53 6110 6121.96 0.20 6110 6127.95 0.29
+Pr144 58537 58595 58662 0.21 58537 58549.72 0.02 58537 58570.15 0.06
+KroA150 26524 26676 26803 1.05 26524 26538.2 0.05 26524 26542.6 0.07
+Pr152 73682 73861 73989 0.42 73682 73727.96 0.06 73682 73688.8 0.01
+U159 42080 42395 42506 1.01 42080 42182.32 0.24 42080 42198.85 0.28
+Rat195 2323 2341 2362 1.68 2328 2334.2 0.48 2328 2331 0.34
+RroA200 29368 29731 31015 5.61 29368 29422.64 0.19 29368 29405.35 0.13
+Gil262 2378 2399 2439 2.57 2379 2383.56 0.23 2379 2382.45 0.19
+Pr299 48191 48662 48763 1.19 48192 48263.08 0.15 48191 48250 0.12
+Lin318 42029 42633 42771 1.77 42076 42292.04 0.63 42070 42264.35 0.56
+Rd400 15281 15464 15503 1.45 15324 15377.56 0.63 15311 15373.75 0.61
+Pcb442 50778 51414 51494 1.41 50879 51050.12 0.54 50832 51041.7 0.52
+Rat575 6773 6912 6952 2.64 6819 6854.64 1.21 6829 6847.95 1.11
+U724 41910 42657 42713 1.92 42150 42302.12 0.94 42205 42357.8 1.07
+Rat783 8806 9030 9126 3.63 8897 8918.28 1.28 8887 8913.25 1.22
+Pr1002 259045 265987 266774 2.98 261463 262211.7 1.22 261490 262202.5 1.22
+D1291 50801 52378 52443 3.23 51098 51340.84 1.06 51032 51358.7 1.10
+D1655 62128 64401 65241 5.01 62784 63011.96 1.42 62779 62994.65 1.39
+Nl4461 182566 18933 192574 5.48 185377 185631.1 1.68 185290 185501.7 1.61
+Brd14051 469385 490432 503560 7.28 478040 478618.8 1.97 477226 477612.7 1.75
+Pla33810 66048945 70299195 72420147 9.65 67868250 68038833.1 3.01 67754877 67848535.1 2.72
+Average 2.43 0.53 0.49
+a n ds e tt h eM a r k o vc h a i nl e n g t hi ne a c ht e m p e r a t u r et o
+the number of cities. As in MSA-IBS algorithm, a suitable
+populationsizeisselectedforeachinstancesuchthattheCPU
+timeofLBSAislessthanthatofASA-GS.Theendcondition
+of LBSA and MSA-IBS is either when it finds the optimal
+solutionorwhentheiterationtimesofouterloopreach1000.
+Thealgorithmisexecuted25trialsoneachinstance,andthe
+results arelisted inTable 5.
+AscanbeseeninT able5,theaveragePEavofLBSAforall
+instancesis0.75,whichisbetterthan1.87ofASA-GS,andthe
+averageCPUtimeofLBSAforallinstancesis282.49,whichis
+farlessthan650.31ofASA-GS.LBSAisalittlebitbetterthan
+MSA-IBSintermsofaveragePEav.
+5. Conclusion
+This paper presents a list-based SA algorithm for TSP
+problems. The LBSA algorithm uses novel list-based cooling
+schedule to control the decrease of temperature parameter.
+The list-based cooling schedule can be viewed as a special
+--- PAGE 11 ---
+ComputationalIntelligenceandNeuroscience 11
+Table5:CompareLBSAwithASA-GSandMSA-IBSon40benchmarkinstancesfromTSPLIB.
+Number Instance OPT ASA-GS MSA-IBS LBSA
+Mean PEav Time Mean PEav Time Mean PEav Time
+1 Ch150 6528 6539.8 0.16 10.91 6529 0.02 0.86 6529.8 0.03 1.29
+2 Kroa150 26524 26538.6 0.05 10.9 26524 0 0.82 26524 0 0.98
+3 Krob150 26130 26178.1 0.18 10.9 26135 0.02 1.51 26137 0.03 1.65
+4 Pr152 73682 73694.7 0.01 10.85 73682 0 0.84 73682 0 0.87
+5 U159 42080 42398.9 0.75 11.49 42080 0 0.79 42080 0 0.91
+6 Rat195 2323 2348.05 1.07 14.37 2330.2 0.31 1.86 2328 0.22 1.93
+7 D198 15780 15845.4 0.41 14.6 15780 0 1.39 15780 0 1.53
+8 Kroa200 29368 29438.4 0.23 14.26 29378 0.03 1.74 29373.8 0.02 1.67
+9 Krob200 29437 29513.1 0.25 14.24 29439.8 0.01 1.95 29442.2 0.02 2.1
+10 Ts225 126643 126646 0.00 16.05 126643 0 1.3 126643 0 1.54
+11 Pr226 80369 80687.4 0.39 16.7 80369 0 1.93 80369.8 0.00 2.16
+12 Gil262 2378 2398.61 0.86 19.43 2378.8 0.03 2.39 2379.2 0.05 2.72
+13 Pr264 49135 49138.9 0.00 19.09 49135 0 1.43 49135 0 1.49
+14 Pr299 48191 48326.4 0.28 21.94 48226.4 0.07 2.67 48221.2 0.06 2.93
+15 Lin318 42029 42383.7 0.84 23.35 42184.4 0.37 2.4 42195.6 0.40 2.58
+16 Rd400 15281 15429.8 0.97 30.4 15347.2 0.43 3.2 15350.4 0.45 3.46
+17 Fl417 11861 12043.8 1.54 32.02 11875.6 0.12 3.72 11867.8 0.06 4.01
+18 Pr439 107217 110226 2.80 34.92 107407.2 0.18 3.6 107465.2 0.23 3.95
+19 Pcb442 50778 51269.2 0.96 35.75 50970 0.38 3.68 50877 0.19 4.31
+20 U574 36905 37369.8 1.25 48.47 37155.8 0.68 5.21 37164.6 0.70 6.13
+21 Rat575 6773 6904.82 1.94 52.1 6839.8 0.99 5.27 6837.4 0.95 5.99
+22 U724 41910 42470.4 1.33 66.83 42212.2 0.72 8.11 42252 0.82 8.34
+23 Rat783 8806 8982.19 2.00 78.9 8893.4 0.99 8.99 8888.2 0.93 8.9
+24 Pr1002 259045 264274 2.01 164.42 261481.8 0.94 12.71 261805.2 1.07 12.96
+25 Pcb1173 56892 57820.5 1.63 193.08 57561.6 1.18 8.9 57431.8 0.95 9.61
+26 D1291 50801 52252.3 2.85 214.64 51343.8 1.07 10.59 51198.8 0.78 11.77
+27 Rl1323 270199 273444 1.20 210.16 271818.4 0.6 11.53 271714.4 0.56 12.64
+28 Fl1400 20127 20782.2 3.25 232.02 20374.8 1.23 17.72 20249.4 0.61 15.43
+29 D1655 62128 64155.9 3.26 281.88 62893 1.23 16.18 63001.4 1.41 16.45
+30 Vm1748 336556 343911 2.18 276.98 339617.8 0.91 19.7 339710.8 0.94 19.05
+31 U2319 234256 236744 1.06 410.97 235236 0.42 17.02 235975 0.73 18.94
+32 Pcb3038 137694 141242 2.57 554.28 139706.2 1.46 27.64 139635.2 1.41 29.05
+33 Fnl4461 182566 187409 2.65 830.9 185535.4 1.63 30.43 185509.4 1.61 29.67
+34 Rl5934 556045 575437 3.48 1043.95 566166.8 1.82 50.76 566053 1.80 52.5
+35 Pla7397 23260728 24166453 3.89 1245.22 2.38E+07 2.48 100.69 2.38E+07 2.24 89.61
+36 Usa13509 19982859 20811106 4.14 2016.05 2.04E+07 2.06 365.12 2.04E+07 1.89 326.76
+37 Brd14051 469385 486197 3.58 2080.5 478609.6 1.97 375.28 478010 1.84 369.86
+38 D18512 645238 669445 3.75 2593.97 658149.2 2.00 654.85 657457.2 1.89 629.14
+39 Pla33810 66048945 69533166 5.27 4199.88 68075607 3.07 1959.68 68029226.4 3.00 1998.19
+40 Pla85900 142382641 156083025 9.63 8855.13 146495515.6 2.89 7596.18 145526542.6 2.21 7586.6
+Average 1.87 650.31 0.81 283.52 0.75 282.49
+geometriccoolingschedulewithvariablecoolingcoefficient.
+The variance of cooling coefficient is adaptive according to
+the topology of solution space, which may be more robust
+to problems at hand. Simulated results show that this novel
+cooling schedule is insensitive to the parameter values and
+the proposed LBSA algorithm is very effective, simple, and
+easy to implement. The advantage of insensitive parameter
+is very attractive, allowing LBSA algorithm to be applied in
+diverse problems without much effort on tuning parameters
+to produce promisingresults.
+Conflict of Interests
+The authors declare that there is no conflict of interests
+regardingthepublicationofthispaper.
+--- PAGE 12 ---
+12 ComputationalIntelligenceandNeuroscience
+Acknowledgment
+This work was supported by Nature Science Foundation of
+FujianProvinceofChina(no.2014J01219,no.2013J01216).
+References
+[1] V.ˇCern´y, “Thermodynamical approach to the traveling sales-
+man problem: an efficient simulation algorithm,”Journal of
+Optimization Theory and Applications,v o l .4 5 ,n o .1 ,p p .4 1 – 5 1 ,
+1985.
+[2] S.Kirkpatrick,C.D.Gelatt,andM.P.Vecchi,“Optimizationby
+simulated annealing,”Science,v o l .2 2 0 ,n o .4 5 9 8 ,p p .6 7 1 – 6 8 0 ,
+1983.
+[3] L.Ingber,“Adaptivesimulatedannealing,” LesterIngber,vol.52,
+no.5,pp.491–500,1993.
+[4] L. Ingber, “Adaptive simulated annealing (ASA): lessons
+learned,”ControlandCybernetics ,vol.25,no.1,pp.32–54,1996.
+[5] S.-J. Jeong, K.-S. Kim, and Y.-H. Lee, “The efficient search
+method of simulated annealing using fuzzy logic controller,”
+Expert Systems with Applications,v o l .3 6 ,n o .3 ,p p .7 0 9 9 – 7 1 0 3 ,
+2009.
+[6] H.A.EOliveiraJr.andA.Petraglia,“Solvingnonlinearsystems
+of functional equations with fuzzy adaptive simulated anneal-
+ing,”Applied Soft Computing Journal,v o l .1 3 ,n o .1 1 ,p p .4 3 4 9 –
+4357,2013.
+[7] H.OliveiraJr.andA.Petraglia,“Establishingnashequilibriaof
+strategicgames:amultistartfuzzyadaptivesimulatedannealing
+approach,”Applied Soft Computing Journal,v o l .1 9 ,p p .1 8 8 – 1 9 7 ,
+2014.
+[8] C. D. Tarantilis and C. T. Kiranoudis, “A list-based threshold
+accepting method for job shop scheduling problems,”Interna-
+tionalJournalofProductionEconomics ,vol.77 ,no.2,pp.159–171,
+2002.
+[9] C. D. Tarantilis, C. T. Kiranoudis, and V. S. Vassiliadis, “A list
+basedthresholdacceptingalgorithmforthecapacitatedvehicle
+routingproblem,”InternationalJournalofComputerMathemat-
+ics,vol.79 ,no .5,p p .5 37 –55 3,200 2.
+[ 1 0 ]C .D .T a r a n t i l i s ,C .T .K i r a n o u d i s ,a n dV .S .V a s s i l i a d i s ,“ Al i s t
+basedthresholdacceptingmetaheuristicfortheheterogeneous
+fixed fleet vehicle routing problem,”Journal of the Operational
+ResearchSociety,vol.54,no .1,p p .65–71,2003.
+[11] C. D. Tarantilis, G. Ioannou, C. T. Kiranoudis, and G. P. Pras-
+tacos, “Solving the open vehicle routeing problem via a single
+parameter metaheuristic algorithm,”Journal of the Operational
+ResearchSociety,vol.56,no.5,pp.588–596,2005.
+[12] D.S.Lee,V.S.Vassiliadis,andJ.M.Park,“List-basedthreshold-
+accepting algorithm for zero-wait scheduling of multiproduct
+batchplants,”Industrial&EngineeringChemistryResearch ,vol.
+41,no.25,pp.6579–6588,2002.
+[ 1 3 ]D .S .L e e ,V .S .V a s s i l i a d i s ,a n dJ .M .P a r k ,“ An o v e lt h r e s h o l d
+acceptingmeta-heuristicforthejob-shopschedulingproblem,”
+Computers&OperationsResearch ,vol.31,no.13,pp.2199–2213,
+2004.
+[14] A. Nikolakopoulos and H. Sarimveis, “A threshold accepting
+h e u r i s t i cw i t hi n t e n s el o c a ls e a r c hf o rt h es o l u t i o no fs p e c i a l
+instancesofthetravelingsalesmanproblem,” European Journal
+of Operational Research,vol.177 ,no .3,p p .1911 –19 29 ,2007 .
+[15] N. Metropolis, A. W. Rosenbluth, M. N. Rosenbluth, A. H.
+Teller, and E. Teller, “Equation of state calculations by fast
+computing machines,”The Journal of Chemical Physics,v o l .2 1 ,
+no.6,pp.1087–1092,1953.
+[16] D. Abramson, M. Krishnamoorthy, and H. Dang, “Simulated
+annealing cooling schedules for the school timetabling prob-
+lem,”Asia-Pacific Journal of Operational Research,v o l .1 6 ,n o .
+1,pp.1–22,1999.
+[17] E.H.Aarts,J.H.Korst,andP.J.vanLaarhoven,“Aquantitative
+analysis of the simulated annealing algorithm: a case study for
+the traveling salesman problem,”Journal of Statistical Physics,
+vol.50,no.1-2,pp.187–206,1988.
+[18] J.R.A.AllwrightandD.B.Carpenter,“Adistributedimplemen-
+tation of simulated annealing for the travelling salesman prob-
+lem,”Parallel Computing,vol.10,no .3,p p .3 35–3 38,198 9 .
+[19] C.-S. Jeong and M.-H. Kim, “Fast parallel simulated annealing
+for traveling salesman problem on SIMD machines with linear
+interconnections,”Parallel Computing,v o l .1 7 ,n o .2 - 3 ,p p .2 2 1 –
+228,1991.
+[20] M. Hasegawa, “Verification and rectification of the physical
+analogyofsimulatedannealingforthesolutionofthetraveling
+salesman problem,” Physical Review E,v o l .8 3 ,A r t i c l eI D
+036708,2011.
+[21] P. Tian and Z. Yang, “An improved simulated annealing algo-
+rithm with genetic characteristics and the traveling salesman
+problem,”JournalofInformationandOptimizationSciences ,vol.
+14,no.3,pp.241–255,1993.
+[22] N. Sadati, T. Amraee, and A. M. Ranjbar, “A global Particle
+Swarm-Based-Simulated Annealing Optimization technique
+for under-voltage load shedding problem,”Applied Soft Com-
+puting Journal,vol.9 ,no .2,p p .65 2–657 ,2009 .
+[23]Z.C.W ang,X.T .Geng,andZ.H.Shao ,“ Aneffectivesimulated
+annealing algorithm for solving the traveling salesman prob-
+lem,”JournalofComputationalandTheoreticalNanoscience ,vol.
+6,no.7,pp.1680–1686,2009.
+[ 2 4 ]X .T .G e n g ,Z .H .C h e n ,W .Y a n g ,D .Q .S h i ,a n dK .Z h a o ,
+“Solving the traveling salesman problem based on an adaptive
+simulatedannealingalgorithmwithgreedysearch,” AppliedSoft
+ComputingJournal,vol.11,no.4,pp.3680–3689,2011.
+[25] C.Y.Wang,M.Lin,Y.W.Zhong,andH.Zhang,“Solvingtrav-
+elling salesman problem using multiagent simulated annealing
+algorithmwithinstance-basedsampling,” InternationalJournal
+of Computing Science and Mathematics,v o l .6 ,n o .4 ,p p .3 3 6 –
+353,2015.
+[26] S.-M. Chen and C.-Y. Chien, “Solving the traveling salesman
+problem based on the genetic simulated annealing ant colony
+system with particle swarm optimization techniques,”Expert
+Systems with Applications,vol.38,no .12,pp .14439–14450,2011.
+[27] W .Deng,R.Chen,B.He,Y .Liu,L.Yin,andJ.Guo,“ Anoveltwo-
+stage hybrid swarm intelligence optimization algorithm and
+application,”SoftComputing,vol.16,no.10,pp.1707 –1722,2012.

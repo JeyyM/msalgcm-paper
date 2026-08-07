@@ -40,8 +40,8 @@ type SectionProps = {
 export function SectionCard({ contextLabel, title, subtitle, children }: SectionProps) {
   return (
     <section className="section-card">
-      <div className="section-context">{contextLabel}</div>
       <div className="section-body">
+        {contextLabel ? <p className="section-eyebrow">{contextLabel}</p> : null}
         <h3>{title}</h3>
         {subtitle && <p className="section-subtitle">{subtitle}</p>}
         {children}

@@ -25,6 +25,27 @@
       "best_known_makespan": 1642
     },
     {
+      "name": "abz5",
+      "file": "instances/abz5.txt",
+      "jobs": 10,
+      "machines": 10,
+      "best_known_makespan": 1234
+    },
+    {
+      "name": "ta02",
+      "file": "instances/ta02.txt",
+      "jobs": 15,
+      "machines": 15,
+      "best_known_makespan": 1244
+    },
+    {
+      "name": "ta22",
+      "file": "instances/ta22.txt",
+      "jobs": 20,
+      "machines": 20,
+      "best_known_makespan": 1600
+    },
+    {
       "name": "ta31",
       "file": "instances/ta31.txt",
       "jobs": 30,

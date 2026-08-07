@@ -50,12 +50,15 @@ decisions:
       - ft10
       - ta01
       - ta21
+      - abz5
+      - ta02
+      - ta22
       - ta31
       - ta41
       - ta51
       - ta71
     tuning_instances: [ft10, ta01, ta21]
-    comparison_instances: [ta31, ta51, ta71]
+    comparison_instances: [abz5, ta02, ta22, ta31, ta51]
     excluded_from_split: [ta41]
     excluded_reason: "ta41 has null best_known_makespan in datasets/scheduling/jsp/metadata.json — gap % cannot be computed; still runnable ad hoc, excluded from formal tune/compare protocol"
 
@@ -63,7 +66,7 @@ decisions:
     status: resolved
     value: "config/tuning/jsp_tuning_protocol.json"
     tuning_instances: [ft10, ta01, ta21]
-    comparison_instances: [ta31, ta51, ta71]
+    comparison_instances: [abz5, ta02, ta22, ta31, ta51]
     initial_solution: longest_processing_time
     runs_per_config: 5
     final_comparison_runs: 30
@@ -73,6 +76,8 @@ decisions:
     notes: >
       Same initial_solution used for tuning AND final comparison (unlike TSP v1/v2,
       which mismatched NN vs random and needed a confirmation pass) — avoids that rework.
+      ta71 (100×20) dropped for compute cost. Comparison uses abz5/ta02/ta22
+      (same size classes as tuning instances but held out) plus ta31/ta51.
     frozen_winners: "results/tuning/jsp_selected_parameters.json (2026-08-07) — applied to config/examples/jsp_ft10_comparison.json"
 
   D8_fs_datasets:
@@ -106,7 +111,7 @@ decisions:
     status: resolved
     value: "config/tuning/fs_tuning_protocol.json"
     tuning_datasets: [ZooEW, IonosphereEW, SonarEW]
-    comparison_datasets: [BreastEW, WineEW, LymphographyEW, SpectEW, MadelonEW]
+    comparison_datasets: [BreastEW, WineEW, LymphographyEW, SpectEW]
     initial_solution: random
     runs_per_config: 5
     final_comparison_runs: 30
@@ -119,8 +124,9 @@ decisions:
     notes: >
       No known-optimum concept for FS, so selection metric is mean best_objective
       (already a bounded [0,1] weighted CV-loss + reduction score) rather than gap %.
-      Tuning set spans small/medium feature counts (16/34/60); MadelonEW (500
-      features) held out for comparison only as the large-scale stress test.
+      Tuning set spans small/medium feature counts (16/34/60). Final comparison
+      Final comparison uses BreastEW, WineEW, LymphographyEW, SpectEW; MadelonEW
+      dropped for compute cost. Tuning-only sets hidden from the dashboard.
     frozen_winners: "results/tuning/fs_selected_parameters.json (2026-08-07) — applied to config/examples/fs_breastew_comparison.json"
     pso_dimension_bug_fixed: >
       2026-08-07: PSO had never worked on feature_selection (any dataset) — every run

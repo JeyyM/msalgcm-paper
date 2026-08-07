@@ -1,0 +1,1078 @@
+--- PAGE 1 ---
+EngineeringApplicationsofArtiﬁcialIntelligence14(2001)167–181
+Evolutionaryalgorithms,simulatedannealingandtabusearch:
+acomparativestudy
+HabibYoussef*,SadiqM.Sait,HakimAdiche
+Department of Computer Engineering, King Fahd University of Petroleum and Minerals, KFUPM Box # 673, Dhahran-31261, Saudi Arabia
+Received1July1999;receivedinrevisedform1June2000;accepted1July2000
+Abstract
+Evolutionary algorithms, simulated annealing (SA), and tabu search (TS) are general iterative algorithms for combinatorial
+optim ization. The termevolutionary algorithmis used to refer to any probabilistic algorithmwhose design is inspired by
+evolutionarymechanismsfoundinbiologicalspecies.Mostwidelyknownalgorithmsofthiscategoryaregeneticalgorithms(GA).
+GA,SA,andTShavebeenfoundtobeveryeﬀectiveandrobustinsolvingnumerousproblemsfromawiderangeofapplication
+domains.Furthermore,theyareevensuitableforill-posedproblemswheresomeoftheparametersarenotknownbeforehand.
+Thesepropertiesarelackinginalltraditionaloptimizationtechniques.InthispaperweperformacomparativestudyamongGA,
+SA, and TS. These algorithms have many similarities, but they also possess distinctive features, mainly in their strategies for
+searchingthesolutionstatespace.Thethreeheuristicsareappliedonthesameoptimizationproblemandcomparedwithrespectto
+(1)qualityofthebestsolutionidentiﬁedbyeachheuristic,(2)progressofthesearchfrominitialsolution(s)untilstoppingcriteria
+aremet,(3)theprogressofthecostofthebestsolutionasafunctionoftime(iterationcount),and(4)thenumberofsolutionsfound
+atsuccessiveintervalsofthecostfunction.Thebenchmarkproblemusedistheﬂoorplanningofverylargescaleintegrated(VLSI)
+circuits.Thisisahardmulti-criteriaoptimizationproblem.Fuzzylogicisusedtocombineallobjectivecriteriaintoasinglefuzzy
+evaluation(cost)function,whichisthenusedtoratecompetingsolutions. # 2001 ElsevierScienceLtd.Allrightsreserved.
+Keywords: Geneticalgorithms;Simulatedannealing;Tabusearch;Fuzzylogic;Floorplanning;Combinatorialoptimization;VLSI
+1. Introduction
+This paper is concerned with one class of combina-
+torial optimization algorithms: general iterati ve al-
+gorithms, which constitute a class ofapproximation
+algorithms. The growing interest in this class of
+algorithms is attributed to their generality, ease of
+implementation,andmainly,theirrobustnessinsolving
+awidevarietyofproblemsfromarangeofapplication
+domains. We shall limit ourselves to three popular
+iterativealgorithms,(1)geneticalgorithm,(2)simulated
+annealing,and,(3)tabusearch. All threeoptimization
+heuristics have several similarities, namely (Sait and
+Youssef,1999a):
+1. They are approximation (heuristic) algorithms, i.e.,
+theydonotguaranteeﬁndinganoptimalsolution.
+2. Theyareblind,inthattheydonotknowwhenthey
+reachedanoptimalsolution.Thereforetheymustbe
+toldwhentostop.
+3. They have ‘‘hill climbing’’ property, i.e., they
+occasionallyacceptuphill(bad)moves.
+4. Theyaregeneral,i.e.,theycaneasilybeengineeredto
+implementanycombinatorialoptimizationproblem;
+all that is required is to have a suitable solution
+representation,acostfunction,andamechanismto
+traversethesearchspace.
+5. Under certain conditions, they asymptotically con-
+vergetoanoptimalsolution.
+The question of how to compare two constructive
+algorithms has long been settled. Two measures are
+typicallyused:(1)thetimecomplexityofthealgorithm,
+and,(2)thequalityofsolution,i.e.,howfarwouldthe
+solution be fromoptim al in the worst or best case. In
+most cases, the time complexity of a constructive
+algorithmisusuallyeasytoderive;however,determin-
+ing the quality of solution relative to the optimum is
+usuallyverydiﬃcult,andinsomecasesnotpossible.
+*Corresponding author. Tel.: +966-3-860-4286; fax: +966-3-860-
+3059.
+E-mail address:youssef@ccse.kfupm.edu.sa(H.Youssef).
+0952-1976/01/$-seefrontmatter # 2001 ElsevierScienceLtd.Allrightsreserved.
+PII:S 0952-1976(00)00065-8
+--- PAGE 2 ---
+For iterative approximation algorithms, the time
+complexity is mostly a function of the number of
+iterations allowed for the algorithmas well as the
+complexity of the evaluation function. The various
+operatorsofthealgorithmaswellastheproblemtobe
+solved can also have determining eﬀect on the time
+complexity of the algorithm. However, typically, all
+implementations of approximation iterative algorithms
+have polynomial time complexity. Thus the time
+complexityisnotofconcernwhencomparingheuristics
+in this category. Of major importance however is the
+qualityofsolution(s)foundbyaparticularheuristicfor
+the problemclass at hand. That is, if for exam ple, a
+giveniterativeapproximationalgorithmA1performson
+average better than a second algorithmA2 over a
+numberofprobleminstances,wethenconcludethatA1
+implementation is better than that of A2. Another
+legitimate comparison would be with respect to the
+quality of the solution subspace examined by each
+algorithm.Thatis,ifthenumberofsolutionsobtained
+with algorithmA1 with a cost lower than a particular
+value C is higher than that of algorithmA2, we then
+conclude that A1 exhibits superior performance than
+A2. Yet another comparison would be with respect to
+the progress ofthe best solutionversus the numberof
+iterations. In this paper we report a number of
+experimentsperformedtocomparetheperformanceof
+three well-known approximation iterative algorithms
+with respect to criteria such as those described above.
+Thetestproblemusedisﬂoorplanning,ahardproblem
+encounteredduringthephysicaldesignofVLSIcircuits.
+Itisencounteredinseveralotherareasofengineeringas
+well.InVLSIdesign,aﬂoorplanningtoolhelpsdecide
+severalimportant questionssuchasdimensions, orien-
+tationsandlocationofcells(orblocks),overallrequired
+areaofthecircuit,andspeedperformancerequirements
+(SaitandYoussef,1995).
+The paper is organized as follows. Section 2
+formulates ﬂoorplanning as a combinatorial optimiza-
+tion problem. In Section 3 we describe how a ﬂoor-
+planning solution is encoded and evaluated. The same
+solutionencodingandevaluationfunctionareusedwith
+all three approximation algorithms. Section 4 brieﬂy
+discusses the main features and operators of each of
+GA,SA,andTSalgorithms.InSection5,experimental
+results are presented and the performance of the three
+heuristicsarecompared.WeconcludeinSection6.
+2. Floorplanning
+Apossibleformulationoftheﬂoorplanningproblem
+ofVLSIcircuitsisasfollows(SaitandYoussef,1995):
+Given:
+1. A set of n rectangular blocks B ¼f b
+1; b2; ...;
+bi; ...; bng;foreach bi 2 Bwehave
+* wi; hi: width and height of bi, which are
+constants for rigid blocks and variable for
+ﬂexibleblocks.
+* ri: desirable aspect ratio about each variable-
+shape block where 1=ri4hi=wi4ri; ri ¼1i f
+block iisrigid.
+* ai:areaof bi (i.e., ai ¼ wi /C2hi), ai isconstant.
+2. Asetof nets N ¼f n1; n2; ... ; ni; ...; nkgdescrib-
+ingtheconnectivityinformation.
+3. Desirable ﬂoorplan aspect ratio r such that
+1=r4H=W4r; whereH and W are the height
+andwidthoftheﬂoorplan,respectively.
+4. Timinginformation.
+Output: A legal ﬂoorplan is a ﬂoorplan satisfying the
+followingconstraintsandobjectives:
+1. Eachblock bi isassignedtoalocation( xi; yi);
+2. notwoblocksoverlap;
+3. foreachﬂexibleblock b
+i; ai ¼ wi /C2hi;
+4. meet aspect ratio constraints, for each ﬂexible
+block bi andfortheoverallﬂoorplan;and
+5. minimize ﬂoorplan area, wire length and circuit
+delay.
+Fig.3(a)isaﬂoorplanwith7blocks.
+3. Solution encoding and cost evaluation
+3.1. Solution encodin g
+To have a simple and eﬃcient encoding scheme the
+ﬂoorplanner constrains the structure to be slicing, but
+allows the circuit modules to have ﬂexible shapes and
+free orientations. The layout is represented as a
+repetitive division into basic rectangles by horizontal
+and vertical cut-lines. Such a layout is called aslicing
+structure.Aslicingstructurecanbemodeledbyabinary
+tree withn leaves andn /C01 nodes, where each node
+representsaverticalcut-lineorhorizontalcut-line,and
+each leaf a basic rectangle. This binary tree is called
+slicing tree,andthecorrespondingﬂoorplanisa slicing
+ﬂoorplan. Letters H and V refer to horizontal and
+verticalcutoperators,respectively.Apostordertraver-
+sal of a slicing tree produces a Polish expression with
+operators H and V, and with operands the basic
+rectangles1 ;2; ...; n(WongandLiu,1986).Fig.3gives
+arectangulardissection,twopossibleslicingtrees,and
+thecorrespondingPolishexpressions.Sincethereisonly
+onewayofperformingapostordertraversalofabinary
+tree,thereisone-to-onecorrespondencebetweenﬂoor-
+plan trees and their corresponding Polish expressions.
+The operatorsH and V carrythe followingmeanings:
+ijH means rectanglej on-top-ofrectangle i; ijV means
+rectangle i to-the-left-of rectanglej. In this work each
+solution is encoded as a Polish expression as in Wong
+andLiu(1986).
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181168
+--- PAGE 3 ---
+3.2. Cost e valuation
+Unlike constructive algorithms for physical design,
+whichproduceasolutiononlyattheendofthedesign
+process, iterative algorithms operate with design solu-
+tionsdeﬁnedateachiteration.Anevaluationfunctionis
+usedtocompareresultsofconsecutiveiterationsandto
+selectasolutionbasedonthemaximal(minimal)value
+oftheobjectivefunction.
+The cost function is a measure of how good is a
+particularﬂoorplan.Forﬂoorplanning,threecriteriaare
+ofprimeimportance:area,wirelength,andtiming.Area
+is estimated by the size of the smallest bounding
+rectangle of the ﬂoorplan. Wire length is set equal to
+thelengthofallthenets(orinterconnectsoftheblocks)
+of the circuit. The length of an individual net or
+interconnectisestimatedusingtheSteinertreeapprox-
+imation of Youssef et al. (1995). The delay along the
+longestpathofthecircuit,takingintoconsiderationthe
+estimated interconnect length, is used as a measure of
+thetimingperformanceoftheﬂoorplan(Youssefetal.,
+1995).
+The cost function should reﬂect all objectives.
+Traditionally, multiple objectives have been combined
+intoascalarobjectivefunction,usuallythroughalinear
+combination(weightedsum)ofthemultipleattributes,
+orbyturningobjectivesintoconstraints.Onewayisto
+assign a constant weight to each of the multiple
+objective functions whose value will depend on the
+importance of that objective. Assuming that all objec-
+tives are to be maximized, the cost of a ﬂoorplan
+solution xcanbeexpressedasfollows:
+costðxÞ¼ w
+1 /C1f1ðxÞþ w2 /C1f2ðxÞþ/C1/C1/C1þwn /C1fnðxÞ; ð1Þ
+where nisthenumberofobjectivefunctions,and wi is
+theweightofthe ithobjective fi.Theproblemwiththis
+weighted sumapproach is thediﬃculty indeterm ining
+suitable weights. Adhoc methods are sometimes em-
+ployed.
+Fuzzy logic.The logic used to infer a crisp outcome
+fromfuzzy input values is calledfuzzy logic(Zadeh,
+1965;Zimmermann,1996;Kartalopoulos,1996).Using
+fuzzy logic approach, optimization of a vector-valued
+function is replaced by the optimization of a scalar
+function, which is constructed fromthe levels of
+satisfactionofdecision-makersbyvaluesofthecompo-
+nents of a vector function. Below, we present a brief
+introductiontofuzzylogic,andthenshowhowitcanbe
+applied in optimization problems with multiple objec-
+tives.
+Fuzzy set theory:Unlikeinordinarysettheorywhere
+anelementiseitherinasetornotinaset,infuzzyset
+theory, anelementmay partiallybelong toaset.Lotﬁ
+Zadeh deﬁned a fuzzy set as a class of objects with a
+continuumofgradesofmembership.Formally,afuzzy
+set Aof a universe of discourseX ¼f xgis deﬁned as
+A ¼f ðx; m
+AðxÞÞjall x 2 Xg, where X is a space of
+points and mAðxÞ is a membership function ofx 2 X
+being an element ofA. In general the membership
+function mAð:Þisamappingfrom Xtotheinterval[0,1].
+If mAðxÞ¼ 1,or0,forall x 2 X,thefuzzyset Abecomes
+anordinaryset(Zadeh,1965).
+Example. As an example, leth refer to height of an
+athlete,and‘‘tall’’consideredasaparticularvalueofthe
+fuzzy variable ‘‘height’’. Then for eachh in the range
+from0 to hmax, mtallðhÞ2½ 0;1/C138indicates the extent to
+which h is considered to be tall;mtallðhÞ is called the
+membershipfunction.
+Example. As another example, consider the possible
+heights of sportsmen in feet to be H ¼
+f3:5;4:0;4:5;5:0;5:5;6:0;6:5g. Heights around 4.5 feet
+areconsideredshort( S),around5.5feetareconsidered
+moderate (M), and heights around 6.0 feet are
+consideredtall( T).Thus,short,moderate,andtallare
+notcrisplydeﬁned.Fuzzysetsforshort,moderate,and
+tall may be expressed as sets of ordered pairs
+fðx; mAðxÞÞ jall x 2 Xg, where the ﬁrst element of the
+pair is the height and the second is its membership in
+thatset.Fromourpreviousknowledgewecandeﬁnethe
+fuzzysets S, Mand T asfollows:
+S ¼fð3:5;1:0Þ; ð4:0;1:0Þ; ð4:5;1:0Þ; ð5:0;0:3Þ;
+ð5:5;0:3Þ; ð6:0;0:0Þ; ð6:5;0:0Þg
+M ¼fð3:5;0:0Þ; ð4:0;0:0Þ; ð4:5;0:1Þ; ð5:0;0:5Þ;
+ð5:5;1:0Þ; ð6:0;0:5Þ; ð6:5;0:1Þg
+T ¼fð3:5;0:0Þ; ð4:0;0:0Þ; ð4:5;0:0Þ; ð5:0;0:1Þ;
+ð5:5;0:4Þ; ð6:0;1:0Þ; ð6:5;1:0Þg
+Fig.1illustratesthethreemembershipfunctions.For
+simplicity we have used piecewise linear membership
+functions.Membershipfunctionscanalsobecontinuous
+curves of many diﬀerent shapes. For example, Fig. 2
+illustratesacontinuousmembershipfunctionofafuzzy
+set:Anindividual’sweightaround50kg.
+Fuzzy operators: As seen above, in fuzzy logic, the
+values are not crisp, and their fuzziness exhibits a
+distribution described by the membership function. In
+ordinary set theory, operations such as union ([),
+intersection (\), and complementation (:) are used.
+Whatistheresultoftheseoperationsonfuzzysets?This
+question has been addressed by variousfuzzy logics.
+These are logics that have been deﬁned for operations
+on fuzzy sets. One such logic deﬁned by Zadeh is
+calledthe min–maxlogic(Zadeh,1965).Thereareother
+fuzzylogics,oneofwhichweusedisdiscussedlater.In
+min–max logic, the ‘‘union’’, ‘‘intersection’’ and
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181 169
+--- PAGE 4 ---
+‘‘complementation’’aredeﬁnedasfollows:
+mA\BðxÞ¼ minðmAðxÞ; mBðxÞÞ;
+mA[BðxÞ¼ maxðmAðxÞ; mBðxÞÞ;
+m:AðxÞ¼ 1:0 /C0ðmAðxÞÞ:
+Fuzzy rules: Approximate reasoning can be made
+basedonlinguisticvariablesandtheirvalues.Rulescan
+begeneratedbasedonpreviousexperience.These rules
+can then be expressed withIf ... Then statements.
+Connectives such asAND and OR can be used in
+approximate reasoning to join two or more linguistic
+values.
+As mentioned above, inmin–max logic, the fuzzy
+ANDisrealizedbythefunction min.Ifmorethanone
+ruleisusedtoperformdecision-making,eachrulecan
+beevaluatedtogenerateanumericalvalue.Then,these
+numerical values from various evaluations of diﬀerent
+rules can be combined to generate a crisp value on a
+higherlevelofhierarchy.
+Fuzziﬁcation.Inthiswork,werelyontheexpressive
+power of fuzzy logic (Zadeh, 1965, 1975, 1973) to
+expressthedesignerobjectivesintheformoffuzzylogic
+rules. The evaluation of a ﬂoorplanning solution
+consists of the evaluation of the fuzzy rules which
+returnavaluerepresentingthedegreeofmembershipof
+thatsolutioninthefuzzysubsetofgoodﬂoorplans.The
+fuzzylogicrulesareexpressedonlinguisticvariablesof
+theproblemdomain.
+For ﬂoorplanning, the designer seeks to ﬁnd ﬂoor-
+plansoptimizedwithrespecttotheareaoccupiedbythe
+ﬂoorplan (area occupied by the cells and wires), wire
+length required to interconnet all the cells, and delay
+along the longest path of the corresponding circuit
+(delays due to the cells and wires). Therefore, the
+objectivefunctionisnotascalar,butavectorfunction
+/C22FðxÞ¼ð AreaðxÞ;LengthðxÞ;DelayðxÞÞ;
+where x is a particular ﬂoorplan solution with area
+AreaðxÞ,wirelengthLength ðxÞ,anddelayperformance
+DelayðxÞ(Fig.3).
+To obtain a fuzzy logic deﬁnition of the above
+multicriteriaobjectivefunction,threelinguisticvariables
+area, length, and delay are deﬁned Shragowitz et al.,
+1997).Inthisimplementation,onlyonelinguisticvalue
+is deﬁned for each variable. That is, small area, short
+length,andlowdelay.Theselinguisticvaluescharacter-
+ize the degree of satisfaction of the designer with the
+values of objectives Area, Length, and Delay of the
+ﬂoorplan.Thesedegreesofsatisfactionaredescribedby
+membershipfunctions m
+A; mL,and mD onfuzzysetsof
+linguisticvaluessmallarea,shortlength,andlowdelay.
+Membership functions for small area, short length
+andlowdelayareeasytobuild.Theyarenon-increasing
+functions,sincethesmallerthearea,thelength,andthe
+delay,thehigheristhedegreeofsatisfaction m
+A, mL,and
+mD oftheexpertandviceversa(seeFig.4).
+To make the membership functions applicable to
+diﬀerent designs, the base variables ﬂoorplan area,
+length and delay are normalized to the interval [0,1]
+(see Fig. 4).The valuesA
+min; Lmin,and Dmin are lower
+boundsonthearea,totallengthandclockperiodofthe
+circuit. A
+min isthesumofareasofallcells; Lmin isthe
+smallest possible length, computed assuming all con-
+nectedcellsareplacedadjacenttoeachother; Dmin isthe
+smallestpossibledelayofthecircuit,whichisthedelay
+ofthelongestpathduetocellsandassumingminimum
+interconnect delay for the nets. The values ofA
+max,
+Lmax, andDmax are values corresponding to the initial
+solution.
+The most desirable ﬂoorplan is the one with the
+highest membership in the fuzzy subsets small area,
+Fig.1. Membershipfunctionsforshort,moderate,andtall.
+Fig.2. Continuousmembershipfunctionforthefuzzyset:individual’s
+weightaround50Kg.
+Fig. 3. (a) Slicing ﬂoorplan. (b) Slicing tree with Polish expression
+VH21HHV67V453. (c) Another possible slicing tree with Polish
+expressionVH21HV67HV453.
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181170
+--- PAGE 5 ---
+shortlengthandlowdelay.Suchasolutionmostlikely
+does not exist since some of the criteria conﬂict with
+each other. Therefore, one has to tradeoﬀ these
+individual criteria against each other. This tradeoﬀ is
+convenientlyspeciﬁedinlinguistictermsintheformof
+oneorseveralfuzzylogicrules.
+Asmentionedearlier,afuzzylogicruleisan If–Then
+rule.The Ifpart(antecedent)isafuzzypredicatedeﬁned
+intermsoflinguisticvaluesandfuzzyoperators( AND
+andOR).The Thenpartiscalledtheconsequent.Inour
+case, the linguistic value used in the consequent part
+identiﬁesthefuzzysubsetofgoodsolutions.Therefore,
+theresultofevaluationoftheantecedentpartidentiﬁes
+the degree of membership in the fuzzy subset of good
+ﬂoorplan solutions according to the fuzzy rule in
+question(Shragowitzetal.,1997).
+The fuzzy subset of good ﬂoorplan solutions is
+characterizedbythefollowingfuzzyrule:
+R:0 If ðsmallarea ÞOR ðshortlength ÞOR ðlowdelay Þ
+Thengoodsolution :
+According to the traditionalmin–max fuzzy logic, the
+aboveruleR.0evaluatestothefollowing:
+m
+ðSÞðxÞ¼ maxðmA; mL; mDÞ;
+where mðSÞ is the membership function of the fuzzy
+subset of good solutions, andmA, mL,a n dmD are the
+membershipfunctionsinthefuzzysubsetsofsmall-area
+solutions, short wire-length solutions, and small delay
+solutions,respectively.Theminandmaxoperatorsare
+non-compensatory, i.e., the weaker elements cannot
+compensate for the stronger element. Such property is
+undesirable in the case of multi-criteria optimiza-
+tion=decision problems. For this category of problems
+it is important to make use of all the information
+sources. In this case it is recommended to use a
+compensatoryinterpretationofthefuzzyORoperator,
+which allows all the criteria elements to inﬂuence the
+outcomeoftheoperator.Onesuchinterpretationisthe
+orlike ordered weighted averaging (OWA) operator
+suggested by Yager in Yager (1994); Yager and Filev
+(1994) in the context of the softening of the rule
+aggregation technique. According to thisorlike opera-
+tion,thefuzzylogicruleR.0evaluatestothefollowing:
+m
+ðSÞðxÞ¼ b /C2maxðm1; m2; m3Þþð 1 /C0bÞ/C21
+3
+X3
+i¼1
+miðxÞ;
+ð2Þ
+where mðSÞ is the membership function of the fuzzy
+subsetofgoodsolutions,and bisaparameterbetween0
+and 1 indicating the degree of nearness of this orlike
+operator to the strict meaning of the logical OR
+operator.When b ¼1,theorlikeoperatorbehaveslike
+aregularmaxoperator,andfor b ¼0itbehaveslikea
+weightedaveragingoperator.
+Individual objective criteria can be given relative
+rankingtoreﬂecttheirimportance.Thiscanbeachieved
+by assigning weights as exponents to individual mem-
+bershipfunctions.Whenthemembershipfunctionofa
+particularcriterion isassignedapositive exponent less
+than 1, we say that the corresponding fuzzy subset is
+dilated. This corresponds to giving more empha-
+sis=importance to that criterion. Concentration corre-
+spondstothecaseofassigninganexponentgreaterthan
+1 (Mendel, 1995). For example, in the case of ﬂoor-
+planningproblem,Areaisamoresigniﬁcantcriterion,
+whereas Length and Delay are of equal but less
+importance. Such preferences can be conveniently
+expressedbyusingdilationandconcentrationoperators.
+Withthesepreferences,Eq.(2)becomes
+m
+ðSÞðxÞ¼ b /C2maxðm1=2
+A ; m2
+L; m2
+D
+Þþð 1 /C0bÞ
+/C21
+3ðm1=2
+A þ m2
+L þ m2
+D
+Þ: ð3Þ
+Inthe aboveequation,the fuzzysubsetrepresenting
+solutions with small area is dilated, whereas the fuzzy
+subset of solutions with short length and the fuzzy
+subsetofsolutionswithsmalldelayareconcentrated.
+4. GA, SA, AND TS algorithms
+Anyiterativeapproximationalgorithm,beitGA,SA,
+orTS,requiresdecisionswithrespect to the following
+Fig.4. Normalizedmembershipfunctionsforarea,lengthanddelay.
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181 171
+--- PAGE 6 ---
+elements:
+* asolutionencoding,
+* amechanismtogenerateinitialsolutionsfromwhere
+theiterativesearchwillproceed,
+* anevaluationfunctiontoratesolutionsencountered
+duringthesearch,
+* perturbationoperatorstocreatenewsolutionsfroma
+givencurrentsolution,
+* assignmenttotheparametersofthealgorithm,and
+* stoppingcriteria.
+Below,weprovideabriefdescriptionofeachofGA,
+SA, and TS, and illustrate how each algorithmis
+adaptedtotheﬂoorplanningproblem.
+4.1. Genetic al gorithms
+Genetic algorithms (GAs) are robust and eﬀective
+optimization techniques inspired by the mechanism of
+evolutionandnaturalgeneticsGoldberg,1989;Holland,
+1975.Theyarecharacterizedbyaparallelsearchofthe
+state space as against a point-by-point search by the
+conventional optimization techniques. The parallel
+searchisachievedbykeepingasetofpossiblesolutions
+to the optimization problem, calledpopulation.A n
+individualinthepopulationisastringofsymbolsand
+is an abstract representation of the solution. The
+symbols are calledgenes and each string of genes is
+termeda chromosome.Theindividualsinthepopulation
+areevaluatedbysome ﬁtnessmeasure.Thepopulation
+of chromosomes evolves from generation to the next
+through the use of two types of genetic operators: (1)
+unary operators such asmutation and inversion which
+alterthegeneticstructureofasinglechromosome,and
+(2)higher-orderoperator,referredtoas crossoverwhich
+consists of obtaining new individual by combining
+geneticmaterialfromtwoselectedparentchromosomes.
+Then the new population is selected out of the indi-
+viduals of the current population and its oﬀsprings.
+Basedontheﬁtnessvalue,twoindividuals( parents)are
+selected at a time from the population. The genetic
+operators (crossover and mutation) are applied on the
+selectedparentstogeneratenewpossiblesolutionscalled
+oﬀsprings.ThestructureofbasicGAisgiveninFig.5.
+Theapplicationofgeneticalgorithmforanyproblem
+requiresarepresentationofthesolutiontotheproblem
+asastringofsymbols,achoiceofgeneticoperators,an
+evaluation function,aselection mechanism,anddeter-
+mination of genetic parameters (population size and
+probabilities of crossover, mutation, and inversion).
+Eachofthesegreatlyinﬂuencestheperformanceofthe
+geneticalgorithm.
+In this work, a chromosome in the population
+(solution)isaPolishexpressionrepresentingaparticular
+slicing ﬂoorplan (see Section 3.1, Fig. 3). The initial
+population consists of randomly generated Polish
+expressions withn operands andn /C01 operators. The
+ﬁtness function is a measure of how good each
+individual of current generation is with respect to the
+desired features. For each chromosome x; fitness
+ðxÞ¼ m
+ðSÞðxÞ, wheremðSÞ is as deﬁned in Eq. (3). The
+choice of parents fromthe set of individuals that
+comprise the population (also known as the mating
+pool) is probabilistic. In keeping with the ideas of
+natural selection, we assume that stronger individuals,
+thatis,thosewithhigherﬁtnessvalues,aremorelikely
+tomatethantheweakerones.Onewaytosimulatethis
+is to select parents with a probability that is directly
+proportional to their ﬁtness values. This method is
+calledthe roulette-wheel method(Goldberg,1989).
+Crossover.Crossoverisamechanismforprobabilistic
+inheritance of useful information from two ﬁt indi-
+vidualstooﬀsprings.Themainideaisthatthegenetic
+informationofagoodsolutionisspreadovertheentire
+population.Thus,thebestsolutioncanbeobtainedby
+thoroughlycombiningthechromosomesinthepopula-
+tion.Crossoveroperationachievesrecombinationofthe
+genetic material. The recombination process includes
+domainspeciﬁcknowledgetoenforcetheinheritanceof
+desirable features fromindividuals of current popula-
+tion.Thefollowingthreecrossoveroperatorshavebeen
+usedinthiswork(Cohoonetal.,1991).
+In the ﬁrst crossover scheme, the operands from
+parent P
+1 are copied into the oﬀspringO. Then, the
+operatorsfromparent P2 arecopiedbymakingaleft-to-
+right scan to complete the chromosome. Hence, each
+oﬀspring inherits the block structure of one of the
+parents. For example, ifP1 ¼ VH21HHV67V453 and
+P2 ¼ VH12HV47HV653,then,accordingtothiscross-
+over,theoﬀspringwouldbe VH21HVH67V453.
+The second crossover operates by copying the
+operators fromparent P1 into the corresponding
+positions in oﬀspring O. Then, it completes the
+constructionof Obycopyingtheoperandsfromparent
+P2 by making a left-to-right scan. By propagating
+the groups of operators fromP1 to O, this cros-
+sover produces an oﬀspring having the same overall
+slicing structure as that ofP
+1. We call this crossover
+‘‘slicing inheritance crossover’’. For example, if
+P
+1 ¼ VH21HHV67V453and P2 ¼ VH12HV47HV653,
+then,accordingtothiscrossover,theoﬀspringwouldbe
+VH12HHV47V653.Boththeabovecrossoversproduce
+validPolishexpressions.
+ThethirdcrossoveremployedinthisworkisthePMX
+crossover (partially mapped crosso ver) which has been
+widely used in other genetic implementations for
+combinatorial optimization problems (Shahookar and
+Mazumder,1991).PMXisappliedonlyonthemodules
+(operands),theoperatorsandthepositionsfromoneof
+theparentsareusedintheoﬀspring(seeFigs.6and7).
+Mutation. Mutation is a means of introducing new
+informationintothepopulation.Threesimplemutation
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181172
+--- PAGE 7 ---
+operatorsareusedinthiswork(WongandLiu,1986):
+(1)inversionofarandomlyselectedchainofoperators,
+(2)swappingoftworandomlyselectedoperands,and(3)
+swapping an operand with an adjacent operator
+(provideditresultsinavalidPolishexpression).
+Inversion.This operator consists ofrandomly select-
+ingtwopositionswithinthestring(achromosome)and
+thenlaterallyinvertingthestringbetweenthem.Inthis
+work,itisimplementedsoastomakeafullright-to-left
+or left-to-right lateral inversion on the entire string of
+Fig.5. Structureofgeneticalgorithmforﬂoorplanning.
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181 173
+--- PAGE 8 ---
+operands(only).Forexample,ifthechromosomebefore
+inversionis268 HH7H5V4H13VV,thenafterinversion
+thenewsolutiongeneratedwillbe:314 HH5H7V8H62VV.
+A number of methods have been proposed to select
+individuals that can survive and be used in the next
+generation (Goldberg, 1989). In this work, among the
+parents and their oﬀsprings, the chromosomes for the
+nextgenerationarechosenbasedontheirﬁtnessvalues
+(higher ﬁtness translates to higher survival). The
+probability of mutation is set to 5%, and the prob-
+ability of crossover to 80%. Inversion is applied
+with a probability of 30%. Population size chosen is
+10, and in each generation the number of oﬀsprings
+producedisthesameasthenumberofparents.Stopping
+criterion in this case was set to a ﬁxed number of
+generations.
+Fig.6. Crossoverthatpropagatesslicingstructuretotheoﬀspring.
+Fig.7. IllustrationofPMXcrossover.
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181174
+--- PAGE 9 ---
+4.2. Simulated annealin g
+Simulated annealing (SA) is an iterative search
+methodinspiredbytheannealingofmetals(Kirkpatrick
+et al., 1983; Cerny, 1985). Starting with an initial
+solution and armed with adequate perturbation and
+evaluationfunctions,thealgorithmperformsastochas-
+tic partial search of the state space. Uphill moves are
+occasionallyacceptedwithaprobabilitycontrolledbya
+parameter called temperatureðTÞ. The probability of
+acceptanceofuphillmovesdecreasesas Tdecreases.At
+hightemperature,thesearchisalmostrandom,whileat
+lowtemperaturethesearchbecomesalmostgreedy.At
+zerotemperature,thesearchbecomestotallygreedy,i.e.,
+onlygoodmovesareaccepted(Kirkpatricketal.,1983;
+Cerny,1985).
+ThebasicSAalgorithmisshowninFig.8.Thecoreof
+the algorithmis the Metropolis procedure, which
+simulatestheannealingprocessatagiventemperature
+T (Fig. 9) Metropolis et al., 1953. This procedure is
+namedafterthescientistwhodevisedasimilarscheme
+to simulate a collection of atoms in equilibrium at a
+giventemperature.The Metropolisprocedurereceivesas
+input the current temperature T, and the current
+solution CurS which it improves through local search.
+Metropolis must also be provided with the valueM,
+whichistheamountoftimeforwhichannealingmustbe
+appliedattemperature T.Theprocedure Simulated_an-
+nealing simply invokes Metropolis at decreasing tem-
+peratures.Temperatureisinitializedtoavalue T
+0 atthe
+beginning of the procedure (explained below), and is
+slowly reduced (in a geometric progression); the par-
+ameter aisusedtoachievethiscooling.Theamountof
+time spent in annealing at a temperature is gradually
+increasedastemperatureislowered.Thisisdoneusing
+theparameter b >1.Thevariable Timekeepstrackof
+thetimebeingexpendedineachcalltothe Metropolis.
+The annealing procedure halts whenTime exceeds the
+allowedtime.
+The MetropolisprocedureisshowninFig.9.Ituses
+the procedure Neighbor to generate a local neighbor
+NewS of any given solutionS. The function Fitness
+returnstheﬁtnessofagivensolution S.Iftheﬁtnessof
+thenewsolutionNew Sisbetterthantheﬁtnessofthe
+current solutionS
+c, then the new solution is accepted,
+andwedosobysettingCur S ¼NewS.Iftheﬁtnessof
+thenewsolutionisbetterthanthebestsolution(Best S)
+seenthusfar,thenwealsoreplaceBest SbyNews S.If
+thenewsolutionhasalowerﬁtnessincomparisontothe
+original solutionCurS, Metropolis will accept the new
+solution on aprobabilistic basis. A randomnum ber is
+generatedintherange0to1.Ifthisrandomnumberis
+smaller than e
+Dfitness=T, where Dfitness ¼fitness
+ðNewSÞ/C0FitnessðcurSÞ,and T isthecurrenttempera-
+ture,theinferiorsolutionisaccepted.Thiscriterionfor
+acceptingthenewsolutionisknown asthe Metropolis
+criterion. The Metropolis procedure generates and
+examines Msolutions.
+Fig.8. Procedureforsimulatedannealingalgorithm.
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181 175
+--- PAGE 10 ---
+Initial temperature. The SA algorithmneeds to start
+froma high tem peratureðTÞ. However, if this initial
+value ofT is too high, it causes a waste ofprocessing
+time.Theinitialtemperaturevalueshouldbesuchthatit
+allowsvirtuallyallproposeduphillordownhillmoves
+tobeaccepted.Thetemperatureparameterisinitialized
+usingtheproceduredescribedinWongandLiu(1986).
+The idea is basically to use the Metropolis function
+(e
+DFitness=T) to determine the initial value of the
+temperature parameter. Before the start of actual SA
+procedure,aconstantnumberofmoves,say M,inthe
+neighborhoodofthecurrentsolutionaremade,andthe
+respectiveﬁtnessvaluesofthesemovesaredetermined.
+Theﬁtnessdiﬀerenceforeachmove i; DFitness
+i isgiven
+by DFitnessi ¼Fitnessi /C0Fitnessi/C01.Let Mu and Md be
+the numberofuphill anddownhill moves, respectively
+(downhill refers to inferior moves) (M ¼ M
+u þ Md).
+Theaverage DFitnessd isthengivenby
+DFitnessd ¼ 1
+Md
+XMd
+i¼1
+DFitnessi:
+Since we wish to keep the probability, sayP0,o f
+acceptinguphillmoveshighintheinitialstageofSA,we
+estimate the value of the temperature parameter by
+substitutingthevalueof P
+0 inthefollowingexpression
+derivedfromtheMetropolisfunction:
+T0 ¼ DFitnessd
+lnðP0Þ ;
+where P0 /C251 ðP0 ¼0:999Þ.
+Parameters, stoppin g criterion. The parametera for
+updating the temperature is user speciﬁed. In our
+implementation a takes on the value of 0.85, andb is
+setequalto1.Ateachupdatedvalueofthetemperature,
+anumberofstatetransitionsaremadesoastoreachthe
+probabilisticsteadystate.
+Theperturbmechanismsemployedaresimilartothe
+mutation operators in GA. The stopping criterion is
+whentheﬁnal T50:001or A
+t=Mt50:05,where At isthe
+totalnumberofallacceptedmoves(bothgoodandbad)
+and Mt is the number of all moves made at a given
+temperature.
+4.3. Tabu search
+Tabu search is a higher-level method or meta strat-
+egy for solving combinatorial optimization problems
+(Glover, 1989, 1990). It is an iterative procedure that
+startsfromsomeinitialfeasiblesolutionandattemptsto
+determineabettersolution.TSmakesseveralneighbor-
+hood moves and selects the move producing the best
+solution among all candidate moves for current itera-
+tion.Thisbestcandidatesolutionmaynotimprovethe
+currentsolution.
+Selecting the best move (which may or may not
+improve the current solution) is based on the suppo-
+sition that good moves are more likely to reach the
+optimalornear-optimalsolutions.Thesetofadmissible
+solutions attempted at a particular iteration forms a
+candidate list. TS selects the best solution fromthe
+candidate list.Candidatelistsizeisatrade-oﬀbetween
+qualityandperformance.
+To avoid move reversals, a device called tabu
+restrictionisusedthatmakesselectedattributesofthese
+moves tabu (forbidden). Tabu restrictions allow the
+searchtogobeyondthepointsoflocaloptimalitywhile
+still making the best possible move in each iteration.
+Taburestrictionsareenforcedbya tabu listwhichstores
+the move attributes to avoid move reversals. Tabu list
+hasanassociatedsizeandcanbevisualizedasawindow
+on accepted moves. The moves which tend to undo
+moveswithinthiswindowareforbidden.
+Aspiration level component is used to temporarily
+overridethetabustatusifthemoveissuﬃcientlygood.
+If a move is made tabu in iterationi and its reversal
+comesiniteration j,where j5i þ c,(where cisthesize
+ofthetabulist),thenitispossiblethatthereversemove
+may take the search into a new region because of the
+eﬀectsof cintermediatemoves.Thesimplestaspiration
+criterion, also known as the ‘‘best cost aspiration
+criterion’’, consists of overriding the tabu status if the
+reversal produces a solution better than the best
+obtainedthusfar.Anotherapproachistousethesame
+attributeofthemovewhichisusedtoidentifythetabu
+statusandassociateanaspirationlevelvaluewithit.The
+reversalhastodobetterthanthishistoricalaspiration
+level.Fig.10illustratestheﬂowoftheshort-termtabu
+searchalgorithm.
+Onlyshort-termtabusearchwasimplementedinthis
+work. Theprogramisexecutedfor250iterations.The
+Fig.9. TheMetropolisprocedure.
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181176
+--- PAGE 11 ---
+size of the candidate list was 20. Three perturbation
+schemessimilartothemutationschemeofGA(andalso
+used in our implementation of SA) were used to
+generate neighborhood solutions. The size of the tabu
+listwassetto N=4,where Nisthenumberofblocksin
+the ﬂoorplan. For each of the perturbation schemes a
+separate tabu list is used. The attributes stored in the
+tabulistsarerelatedtotheperturbationscheme.Inthe
+casewhereperturbationconsistsofinvertingachainof
+operators,theattributestoredisthepositionoftheﬁrst
+operator of the chain. For the case of swapping two
+randomly selected operands, the attribute consists of
+one of the operands (the left operand) involved in the
+swap.Theattributerelatedtothecaseofswappingan
+operand with an operator, is the operand. For all test
+cases, the three tabu lists have the same size, and best
+costaspirationcriterionwasused.
+5. Experiments and results
+The algorithms described in this paper were im-
+plementedandtestedonﬁvediﬀerentVLSIcircuits.The
+circuits range in sizes between 15 and 141 blocks. The
+characteristicsofthesecircuitsaresummarizedinTable1.
+AllthreeapproximationalgorithmsGA,SA,andTS,
+makeuseofquiteabitofheuristicknowledgeaboutthe
+problemdom ain. The existence of several alternative
+decisions with respect to each aspect of a particular
+algorithm(e.g., initial solution, operators, evaluation
+functions,etc.)stronglysuggeststhatsomeimplementa-
+tion of the same algorithm may perform better than
+other implementations. In this work, we compare the
+performanceofthethreealgorithmswithrespecttothe
+followingaspects:
+1. quality of the best solution identiﬁed by each
+heuristic,
+2. progressofthe search frominitialsolution ðsÞuntil
+stoppingcriteriaaremet,
+3. the progress of the cost of the best solution as a
+functionoftime(iterationcount),and
+4. thenumberofsolutionsfoundatsuccessiveintervals
+ofthecostfunction.
+Fig.11isaplotofthefuzzycostfunction(membership
+in the fuzzy subset of good ﬂoorplans) of the best
+ﬂoorplan versus the number of calls to the evaluation
+functions(numberofsolutionssearched).Withrespect
+to this measure, tabu search ranked ﬁrst, genetic
+algorithmsecond, and sim ulated annealing third. The
+samerankingwasobtainedwithallﬁvecircuits.Fig.11
+showsresultsfortwoofthecircuits,Ckt-3(39blocks)
+andCkt-4(45blocks).RecallthattheGA,SA,andTS
+ﬂoorplanners are seeking ﬂoorplan solutions with the
+largestmembershipfunctioninthefuzzysubsetofgood
+ﬂoorplans.
+The experimental results reported in this section are
+based on a GA implementation identical to that
+reportedinShragowitzetal.(1997).TheSAimplemen-
+tationisbasedontheworkreportedinWongandLiu
+Fig.10. Flowchartoftheshort-termTabusearchalgorithm.
+Table1
+Characteristicsofcircuitsused
+Cktname No.ofcells Amin Lmin Tmin
+Ckt-1 15 34800 960.16 34.04
+Ckt-2 30 40832 2325.76 28.95
+Ckt-3 39 90480 4283.86 11.60
+Ckt-4 45 88160 4430.31 16.57
+Ckt-5 141 211120 10415.84 20.42
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181 177
+--- PAGE 12 ---
+(1986).Forallexperiments,thealgorithmwasforcedto
+stopafter5000evaluations.
+Fig.12illustratesanotherperformanceaspectofthe
+three heuristics. For GA algorithm, Fig. 12(a) and (d)
+showthevariationofthepopulationﬁtnessversusthe
+number of generations. For the SA algorithms, Fig.
+12(b) and (e) show the cost of the current ﬂoorplan
+solution after every twenty iterations. For the TS
+heuristic,Fig.12(c)and(f)showthecostofthesolution
+selected at each iteration (the best ﬂoorplan in a
+neighborhood of 20 ﬂoorplans). The reader should
+observe that TS quickly ﬁnds a good ﬂoorplan with a
+high membership value in the fuzzy subset of good
+solutions,andoncethere,themagnitudeofuphillmoves
+isalwaysverysmall.Incontrast,SAexhibitsthemost
+probabilisticbehaviorsincerelativelylargeuphillmoves
+continuetobeacceptedevenatrelativelylowtempera-
+tures.Thisundesirablebehaviorispartlyduetothefact
+thatthecostfunctionisnormalizedtotherange(0,1).
+Hence, though a decrease in the membership function
+Fig.11. Valueofthemembershipfunction mðSÞ ofthebestsolutionasafunctionofthenumberofsolutionsexamined.(a)ResultsforCkt-3with39
+blocks;(b)resultsforCkt-4with45blocks.
+Fig.12. ComparisonofsearchpathsofGA,SA,andTS.(a)and(d):GAaveragepopulationcostversusnumberofgenerationsforCkt-3andCkt-4;
+(b)and(e):SAsolutioncostforevery20iterationsforCkt-3andCkt-4;(c)and(f):costofTSsolutionsateachiteration,whereeachiterationselects
+thebestinaneighborhoodof20solutions,forCkt-3andCkt-4.
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181178
+--- PAGE 13 ---
+mðSÞ sayfrom0.6to0.4isconsideredlargeinthefuzzy
+domain,maystillproducealargeacceptanceprobability
+according to the Metropolis function.For example, at
+T ¼0:1; e
+/C00:2=0:1 ¼0:14. This suggests that the fuzzy
+cost diﬀerence in the exponent of the Metropolis
+function be multiplied by an inﬂation factor. The
+inﬂationfactorshouldbesuchthat,inthecoldregime,
+the probability of accepting large and even medium
+uphillmovesbeverynearzero.Wehaveconductedsuch
+experimentandusedaninﬂationfactorof100.Hence,
+ﬂoorplancostwillnolongerbeintherangeof(0,1)but
+in the range of (0,100). Fig. 13 illustrates the eﬀect of
+usingsuchaninﬂationfactorontheperformanceofSA
+algorithms. Fig. 13(a) compares the cost of the best
+ﬂoorplanasafunctionofthenumberofiterations,with
+andwithouttheuseofinﬂationfactorintheMetropolis
+function.Asthereadercansee,resultshavesigniﬁcantly
+improved.Figs.13(c)and14(b)showthatthequalityof
+thesearchedsubspacehasalsoimproved.Furthermore,
+adecreaseinthemagnitudeoftheacceptedbadmoves
+hasalsobeenobserved;thereaderisreferredtotheplots
+ofFigs.12(b)and13(b).
+For GA, the population ﬁtness improves quickly in
+theﬁrst200iterationsandthenithitsaplateau.Further,
+in the ﬁrst 50 generations the population ﬁtness is
+steadily increasing; in the following generations the
+Fig.13. ResultsillustratingtheeﬀectofinﬂatingthefuzzycostonperformanceofSAalgorithm.(a)Comparisonofthefuzzycostofthebest
+ﬂoorplanwithandwithouttheuseofinﬂationfactor.(b)SAsolutioncostforevery20iterationswhenthefuzzycostisinﬂated.(c)BarchartofSA
+withinﬂatedfuzzycost.
+Fig.14. BarchartsforGA,SAandTSdepictingthesub-spacesearchedbyeachheuristic.The x-axisis mðSÞ andthe y-axisindicatesthenumberof
+solutionsataparticularrangeof mðSÞ.Recallthatthehigherthevalueof mðSÞ thebetteristhecorrespondingﬂoorplansolution.(a)–(c)arechartsof
+testcircuitCkt-3and(d)-(f)arechartsofcircuitCkt-4.
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181 179
+--- PAGE 14 ---
+population ﬁtness occasionally decreases, however the
+magnitude of the decrease is relatively small (40:05).
+Similar plots were obtained for all circuits. These
+experiments conﬁrm the fact that, although all three
+heuristics have hill climbing property, TS is the most
+greedyandSAistheleastgreedy.
+Aﬁnalseriesofexperimentsconsistsofcomparingthe
+three heuristics with respect to the searched solution
+subspaces.TheresultsaresummarizedinFig.14inthe
+formof bar charts. Here again, TS exhibited the best
+performance and SA the worst. These bar charts are
+very informative as to where each algorithm spent its
+time.BothGAandTSconcentratedtheirsearcheﬀorts
+in good subspaces, that is, evaluating solutions with
+highmembershipinthefuzzysubsetofgoodsolutions.
+Incontrast,SAspentmostofitstimeevaluatingpoor
+quality solutions. This behavior was observed with all
+testcases.
+6. Discussion & conclusion
+Inthis paper, an experimental comparative study of
+three popular approximation algorithms is presented,
+viz.,GA,SA,andTSfortheﬂoorplanningproblem.All
+three heuristics assume and exploit regularities present
+withinthesearchspace,i.e.,searchspaceswheregood
+solutionshave higher probabilities of leading to better
+solutions.Allthreehavebeenfoundtobeeﬀectiveand
+robustonproblemswheresomemeasureofprogresscan
+beshown.Allornothingtypesofsearchspaceswhere
+oneeitherhasaperfectsolutionornosolutionarebetter
+attackedbyexhaustivesearchorevenbyrandomwalk.
+The three algorithms discussed incorporate domain
+speciﬁc knowledge todictate the search strategy. They
+also tolerate some element of non-determinism that
+helpsthesearchescapeoutoflocalminima.Theyrely
+on the use of a suitable cost function which provides
+feedbacktothealgorithmasthesearchprogresses.The
+principle diﬀerence among them is how and where
+domain-speciﬁc knowledge is used. For example, in
+simulatedannealingsuchknowledgeismainlyincluded
+inthecostfunction.Elementsinvolvedinaperturbation
+are selected randomly, and perturbations are accepted
+orrejectedaccordingtotheMetropoliscriterionwhich
+isafunctionofthecost.Thecoolingschedulehasalsoa
+major impact on the algorithm performance and must
+becarefullycraftedtotheproblemdomainaswellasthe
+particularprobleminstance.
+In the case of genetic algorithms, domain speciﬁc
+knowledge is exploited in all phases. The ﬁtness of
+individual solutions incorporates domain-speciﬁc
+knowledge. Selection for reproduction, the genetic
+operations,aswellasgenerationofthenewpopulation
+also incorporate a great deal of heuristic knowledge
+abouttheproblemdomain.
+Tabusearchisdiﬀerentfromtheaboveheuristicsin
+that it has an explicit memory component. At each
+iteration the neighborhood of the current solution is
+partiallyexplored,andamoveismadetothebestnon-
+tabusolutioninthatneighborhood.Theneighborhood
+functionaswellastabulistsizeandcontentareproblem
+speciﬁc.Thedirectionofthesearchisalsoinﬂuencedby
+thememorystructures.
+In this work our intention has been to study the
+behavior of the three heuristics in solving a hard
+engineering problem, and not to demonstrate the
+superiority of one algorithmover the other over all
+problemdom ains. Each one of themhas its m erits.
+Actually it would be unwise to generalize the results
+reported here over all classes of problems. We believe
+that some heuristics are easier to engineer to solve a
+particular problemthan others. For the benchm ark
+problemusedinthisworktabusearchexhibitedbetter
+overallbehaviorthanGAandSA.
+Recently, an interesting theoretical study has been
+reported by Wolpert and Macready in which they
+proved a number of theorems stating that the average
+performance of any pair of iterative (deterministic or
+non-deterministic) algorithms across all problems is
+identical. That is, if an algorithmperform s well on a
+certainclassofproblemsthenitnecessarilypaysforthat
+with degraded performance on the remaining set of
+problems (Wolpert and Macready, 1997). However, it
+shouldbenotedthatthereportedtheoremsassumethat
+the algorithms do not include domain-speciﬁc knowl-
+edgeoftheproblemsbeingsolved.Obviously,itwould
+be expected that a well-engineered algorithmwould
+exhibit superior performance to that of a poorly
+engineered one. Further, they do not assume any
+knowledge about the problems themselves. However
+the problemm aybe trivially stated that any algorithm
+wouldbeabletoﬁndasolutiontotheproblem.
+Ofthethreeheuristicsexperimentedwithinthiswork,
+TS exhibited the best performance with respect to
+solution quality as well as the quality of the solution
+subspace searched. Furthermore, with respect to the
+complexity of implementation and tuning of the
+algorithms parameters, GA required the most eﬀort.
+SAandTSrequiredsimilarandlessereﬀortsthanGA.
+On the basis of experiments performed, and for the
+targetproblemcategory(ﬂoorplanning),TSisthebetter
+ofthethreeheuristics,withGAaclosesecond,andSAa
+distant third. Would the same verdict hold over other
+problemcategories? To answer such question would
+require at least that similar experiments on other
+category of problems be performed. Such experiments
+are the subject of future work. Also, similar study of
+otheriterativeapproximationalgorithmssuchas simu-
+lated e volution and stochastic e volution are being
+conducted (Sait and Youssef, 1999b; Kling and Ban-
+erjee,1989;SaabandRao,1991).
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181180
+--- PAGE 15 ---
+Acknowledgements
+The authors acknowledge King Fahd University of
+Petroleumand Minerals, Dhahran, Saudi Arabia, for
+support.
+References
+Cerny,V.,1985.Thermodynamicalapproachtothetravelingsalesman
+problem:aneﬃcientsimulationalgorithm.JournalofOptimization
+TheoryandApplication45(1),41–51.
+Cohoon, J.P., Hedge, S.U., Martin, W.N., Richards, D., 1991.
+Distributed genetic algorithms for the ﬂoorplan design
+problem. IEEE Transactions on Computer-Aided Design 10 (4),
+483–492.
+Glover,F.,1989.Tabusearch }PartI.ORSAJournalonComputing
+1(3),190–206.
+Glover,F.,1990.Tabusearch }PartII.ORSAJournalonComputing
+2(1),4–32.
+Goldberg, D.E., 1989. Genetic Algorithms in Search, Optimization
+andMachineLearning.Addison-WesleyPublishingCompany,Inc.,
+Reading,MA.
+Holland, J.H., 1975. Adaptation in Natural and Artiﬁcial Systems.
+UniversityofMichiganPress,AnnArbor,MI.
+Kartalopoulos, S.V., 1996. Understanding Neural Networks and
+FuzzyLogic }BasicConceptsandApplications.IEEEPress,New
+York.
+Kirkpatrick Jr., S., Gelatt, C., Vecchi, M., 1983. Optimization by
+simulatedannealing.Science220(4598),498–516.
+Kling, R.M., Banerjee, P., 1989. ESP: Placement by Simulated
+Evolution. IEEE Transactions on Computer-Aided Design 8 (3),
+245–255.
+Mendel, J., 1995. Fuzzy logic systems for engineering: a tutorial.
+ProceedingsoftheIEEE83(3),345–377.
+Metropolis,N.,Rosenbluth,A.,Rosenbluth,M.,Teller,A.,Teller,E.,
+1953. Equation of state calculations by fast computing machines.
+JournalofChemicalPhysics21,1087–1092.
+Saab, Y.G., Rao, V.B., 1991. Combinatorial Optimization by
+Stochastic Evolution. IEEE Transactions on Computer-Aided
+Design10(4),525–535.
+Sait, S.M., Youssef, H., 1999a. VLSI Physical Design Automation:
+Theory and Practice. McGraw-Hill Book Co., Europe (also co-
+published by IEEE Press, New York) 1995 (reprinted with
+correctionsbyWorldScientiﬁc1999).
+Sait, S.M., Youssef, H., 1999b. Iterative Computer Algorithms for
+Optimization Problems. IEEE Computer Society Press, Silver
+Spring,MD.
+Shahookar, K., Mazumder, P., 1991. VLSI cell placement. ACM
+ComputingSurveys23(2),143–220.
+Shragowitz, E., Youssef, H., Sait, S.M., Adiche, H. 1997. Fuzzy
+geneticalgorithmforﬂoorplandesign.Proceedingsofthe1997SPIE
+International Symposium, Applications of Soft Computing and
+Fuzzy Logic Technology. San Diego, CA, Vol 3165, 27 July–1
+August,pp.36–46.
+Wolpert, D.H., Macready, W.G., 1997. No free lunch theorems for
+optimization. IEEE Transactions on Evolutionary Computation 1
+(1),67–82.
+Wong,D.F.,Liu,C.L.,1986.Anewalgorithmforﬂoorplandesign.
+Proceedingsofthe23rdDAC.pp.101–107.
+Yager, R.R., 1994. On ordered weighted averaging aggregation
+operators in multicriteria decision making. IEEE Transactions on
+Systems,Man,andCybernetics.SMC-18,pp.183–190.
+Yager, R.R., Filev, D.P., 1994. Parameterized andlike and orlike
+OWA operators. International Journal of General Systems 22,
+297–316.
+Youssef,H.,Sait,S.M.,Al-Farra,K.,1995.TimingInﬂuencedforce
+directed ﬂoorplanning. European Design Automation Conference
+with Euro-VHDL, Euro-DAC’95, Brighton, September, pp. 156–
+161.
+Zadeh,L.A.,1965.Fuzzysets.InformationandControl8,338–353.
+Zadeh, L.A., 1973. Outline of a new approach to the analysis of
+complex systems and decisions processes. IEEE Transactions on
+Systems,Man,andCyberneticsSMC-3(1),28–44.
+Zadeh, L.A., 1975. The concept of a linguistic variable and its
+application to approximate reasoning}I. Information Sciences 8,
+199–249.
+Zimmermann,H.J.,1996.FuzzySetTheoryanditsApplications,2nd
+Edition.KluwerAcademicPublishers,Dordrecht.
+H. Youssef et al. / Engineering Applications of Artiﬁcial Intelligence 14 (2001) 167–181 181

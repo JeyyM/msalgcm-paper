@@ -44,7 +44,6 @@ export default function App() {
         <NavLink to="/" end className="nav-brand">
           MSALGCM
         </NavLink>
-        <NavLink to="/results">Results</NavLink>
         <ContextCrumb />
       </nav>
       <Routes>

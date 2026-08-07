@@ -148,6 +148,78 @@ export function JspPage() {
     };
   }, [jobId, refreshCatalog, refreshRuns]);
 
+  // Show live Gantt/convergence for in-progress batches even after a page refresh
+  // or when started via script — no in-memory job id in those cases.
+  useEffect(() => {
+    if (jobId) return;
+    if (!instance || !algorithm) return;
+
+    let active = true;
+    let lastSeenCompletedRuns = -1;
+
+    async function pollExternal() {
+      try {
+        const status = await api.getJspLiveStatus(instance, algorithm);
+        if (!active) return;
+        setJob(status);
+
+        if (status.current_run_id && status.current_run_id !== trackedRunIdRef.current) {
+          trackedRunIdRef.current = status.current_run_id;
+          setLiveConvergence([]);
+          setLiveSchedule(null);
+        }
+        if (status.completed_runs !== lastSeenCompletedRuns) {
+          lastSeenCompletedRuns = status.completed_runs;
+          refreshRuns();
+          refreshCatalog();
+        }
+
+        if (status.experiment_dir && status.current_run_id) {
+          let latestEvaluations: number | undefined;
+          try {
+            const points = await api.getConvergence(status.experiment_dir, status.current_run_id);
+            if (active) setLiveConvergence(points);
+            latestEvaluations = points.at(-1)?.objective_evaluations;
+          } catch {
+            /* partial file may not exist yet */
+          }
+          try {
+            const solution = await api.getLiveSolution(status.experiment_dir, status.current_run_id);
+            if (active) setLiveSchedule(solution);
+          } catch {
+            try {
+              const saved = await api.getSolution(status.experiment_dir, status.current_run_id);
+              if (active && saved?.operations) {
+                setLiveSchedule({
+                  live: true,
+                  objective_evaluations: latestEvaluations,
+                  current: saved,
+                });
+              }
+            } catch {
+              /* no snapshot yet */
+            }
+          }
+        }
+      } catch {
+        if (active) {
+          setJob((current) => (current?.job_id === "external" ? null : current));
+          if (lastSeenCompletedRuns >= 0) {
+            refreshCatalog();
+            refreshRuns();
+          }
+        }
+      }
+    }
+
+    pollExternal();
+    const interval = setInterval(pollExternal, 1000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [jobId, instance, algorithm, refreshCatalog, refreshRuns]);
+
   const batchComplete = instanceStatus?.done ?? false;
   const isRunning = job?.status === "running";
   const liveAttempt = attemptLabel(job?.current_run_id, targetRuns);

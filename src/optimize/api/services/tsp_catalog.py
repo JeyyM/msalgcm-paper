@@ -191,6 +191,12 @@ def _batch_stats(experiment_dir: Path) -> dict[str, float | int | None]:
                 "best_gap_percentage": float(row["best_gap_percentage"])
                 if row.get("best_gap_percentage")
                 else None,
+                "mean_gap_percentage": float(row["mean_gap_percentage"])
+                if row.get("mean_gap_percentage")
+                else None,
+                "mean_runtime_seconds": float(row["mean_runtime_seconds"])
+                if row.get("mean_runtime_seconds")
+                else None,
             }
 
     runs_path = experiment_dir / "runs.csv"
@@ -201,9 +207,12 @@ def _batch_stats(experiment_dir: Path) -> dict[str, float | int | None]:
             "best_objective": None,
             "mean_objective": None,
             "best_gap_percentage": None,
+            "mean_gap_percentage": None,
+            "mean_runtime_seconds": None,
         }
 
     objectives: list[float] = []
+    runtimes: list[float] = []
     successful = 0
     failed = 0
     with runs_path.open(encoding="utf-8") as handle:
@@ -213,6 +222,9 @@ def _batch_stats(experiment_dir: Path) -> dict[str, float | int | None]:
                 value = row.get("best_objective")
                 if value:
                     objectives.append(float(value))
+                runtime = row.get("runtime_seconds")
+                if runtime:
+                    runtimes.append(float(runtime))
             else:
                 failed += 1
 
@@ -222,6 +234,8 @@ def _batch_stats(experiment_dir: Path) -> dict[str, float | int | None]:
         "best_objective": min(objectives) if objectives else None,
         "mean_objective": sum(objectives) / len(objectives) if objectives else None,
         "best_gap_percentage": None,
+        "mean_gap_percentage": None,
+        "mean_runtime_seconds": sum(runtimes) / len(runtimes) if runtimes else None,
     }
 
 
