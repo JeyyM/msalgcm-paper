@@ -1,0 +1,14 @@
+experiment=jsp_ta41_particle_swarm
+domain=scheduling
+instance=ta41
+algorithms=particle_swarm
+runs=30
+completed=30
+failed=0
+charts=6
+chart=charts/convergence.png
+chart=charts/convergence_by_run.png
+chart=charts/objective_boxplot.png
+chart=charts/runtime_comparison.png
+chart=charts/jsp_gantt_particle_swarm.png
+chart=charts/jsp_gantt_best_overall.png
