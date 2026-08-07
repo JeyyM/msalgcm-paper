@@ -6,6 +6,8 @@ Comparative platform for **Simulated Annealing**, **Tabu Search**, and **Particl
 
 **[`documentation v1.md`](documentation%20v1.md)** — installation, running the website, current status, next steps.
 
+**Onboarding a teammate?** Use [`TEAM_SETUP.md`](TEAM_SETUP.md) — pinned exact versions so results stay comparable across machines.
+
 Archived planning docs: [`old documentation/`](old%20documentation/)
 
 ## Quick start (website)

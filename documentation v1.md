@@ -5,6 +5,8 @@
 
 This is the **single current guide** for what the project is, how to run it, what has been done, and what comes next. Older specs live in [`old documentation/`](old%20documentation/).
 
+**Onboarding a teammate or splitting work across machines?** Use [`TEAM_SETUP.md`](TEAM_SETUP.md) instead of the install section below — it pins exact package versions (not just the loose bounds here) so results stay comparable across everyone's machines, and includes an "instructions for AI agents" section for anyone setting this up via their own AI assistant.
+
 ---
 
 ## 1. What this project is
