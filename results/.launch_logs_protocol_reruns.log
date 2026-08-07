@@ -1,0 +1,10 @@
+[2026-08-07 18:58:28] === protocol-v2 reruns ===
+[2026-08-07 18:58:28] jobs=3 workers=3 skip_charts=1
+[2026-08-07 18:58:28] tsp=True fs=False
+[2026-08-07 19:00:33] OK tsp_st70_particle_swarm -> results\2026-08-07_105830_tsp_st70_particle_swarm (125.2s)
+[2026-08-07 19:01:07] OK tsp_kroA100_particle_swarm -> results\2026-08-07_105830_tsp_kroA100_particle_swarm (158.4s)
+[2026-08-07 19:01:36] OK tsp_ch130_particle_swarm -> results\2026-08-07_105830_tsp_ch130_particle_swarm (187.7s)
+[2026-08-07 19:01:36] Finished 3/3 in 188.2s wall time
+[2026-08-07 19:01:36] Log file: C:\Users\lance\OneDrive\Documents\GitHub\msalgcm-paper\results\.launch_logs_protocol_reruns.log
+[2026-08-07 19:01:36] All reruns complete. Regenerate charts later if needed:
+[2026-08-07 19:01:36]   python scripts/generate_charts.py results/<experiment_folder>
