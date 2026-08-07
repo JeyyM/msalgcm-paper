@@ -1,0 +1,2 @@
+domain,instance,problem_size,algorithm,parameters,runs,successful_runs,failed_runs,success_rate,mean_objective,std_objective,median_objective,min_objective,max_objective,mean_runtime_seconds,mean_objective_evaluations,mean_gap_percentage,best_gap_percentage
+scheduling,ta71,2000,tabu_search,"{""candidate_list_size"": 40, ""operators"": [""swap"", ""insertion"", ""inversion""], ""tabu_tenure"": 30}",30,30,0,1.0,11113.966666666667,337.21965970104543,11101.5,10457.0,11844.0,69.62036489860014,50000,103.40348950707663,91.37994143484627
