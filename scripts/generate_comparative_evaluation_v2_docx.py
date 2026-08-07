@@ -42,8 +42,9 @@ DEFAULT_FIGURE_MAP: dict[str, list[str]] = {
     ],
     "5.3 Feature Selection (12/12 complete)": [
         "fs_best_objective_by_dataset.png",
-        "fs_breastew_convergence_combined.png",
-        "fs_features_breastew_ts.png",
+        "fs_wineew_convergence_combined.png",
+        "fs_features_wineew_ts.png",
+        "fs_wineew_boxplot.png",
     ],
 }
 

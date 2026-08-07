@@ -1,16 +1,16 @@
 {
-  "experiment_name": "fs_lymphographyew_simulated_annealing",
+  "experiment_name": "fs_wineew_simulated_annealing",
   "domain": "feature_selection",
-  "instance": "LymphographyEW",
+  "instance": "WineEW",
   "algorithms": [
     "simulated_annealing"
   ],
-  "runs": 15,
+  "runs": 1,
   "evaluation_budget": 5000,
   "seed_policy": {
     "base_seed": 4000
   },
-  "instance_path": "datasets/feature_selection/ew/LymphographyEW.csv",
+  "instance_path": "datasets/feature_selection/ew/WineEW.csv",
   "domain_config": {
     "performance_weight": 0.99,
     "reduction_weight": 0.01,

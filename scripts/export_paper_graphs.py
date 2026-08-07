@@ -11,6 +11,7 @@ Run from repo root:
 
 from __future__ import annotations
 
+import csv
 import json
 import shutil
 import sys
@@ -22,9 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from optimize.api.services.comparison_dashboard import comparison_dashboard
 from optimize.api.services.fs_catalog import (
     FS_ALGORITHMS,
-    FS_COMPARISON_DATASETS,
     FS_EVALUATION_BUDGET,
-    get_fs_batch,
     load_fs_instances,
 )
 from optimize.api.services.jsp_catalog import JSP_EVALUATION_BUDGET, get_jsp_batch
@@ -43,13 +42,48 @@ GRAPHS_DIR = ROOT / "Paper Setup" / "graphs"
 
 ALGORITHMS = TSP_ALGORITHMS
 
+# Paper FS block uses protocol-v2 reruns (15 seeds, 3 datasets).
+FS_PAPER_DATASETS = ["WineEW", "LymphographyEW", "SpectEW"]
+FS_PAPER_RUNS = 15
+
 # Representative instances for detailed figures
 TSP_CONVERGENCE_INSTANCE = "kroA100"
 TSP_ROUTE_INSTANCE = "berlin52"
 JSP_CONVERGENCE_INSTANCE = "ta22"
 JSP_GANTT_INSTANCE = "ta22"
-FS_CONVERGENCE_DATASET = "BreastEW"
-FS_FEATURES_DATASET = "BreastEW"
+FS_CONVERGENCE_DATASET = "WineEW"
+FS_FEATURES_DATASET = "WineEW"
+
+
+def _is_protocol_v2_fs_config(config: dict) -> bool:
+    domain_config = config.get("domain_config") or {}
+    return bool(domain_config.get("standardize_features")) and domain_config.get("performance_weight") == 0.99
+
+
+def _get_fs_v2_batch(instance: str, algorithm: str, results_dir: Path):
+    """Newest protocol-v2 FS folder with FS_PAPER_RUNS completed seeds."""
+    suffix = f"_fs_{instance.lower()}_{algorithm}"
+    candidates: list[tuple[str, Path, int]] = []
+    for experiment_dir in results_dir.iterdir():
+        if not experiment_dir.is_dir() or not experiment_dir.name.endswith(suffix):
+            continue
+        config_path = experiment_dir / "experiment_config.json"
+        if not config_path.exists():
+            continue
+        config = json.loads(config_path.read_text(encoding="utf-8"))["config"]
+        if not _is_protocol_v2_fs_config(config):
+            continue
+        runs_path = experiment_dir / "runs.csv"
+        if not runs_path.exists():
+            continue
+        with runs_path.open(encoding="utf-8") as handle:
+            completed = sum(1 for row in csv.DictReader(handle) if row.get("status") == "completed")
+        if completed >= FS_PAPER_RUNS:
+            candidates.append((experiment_dir.name, experiment_dir, completed))
+    if not candidates:
+        return None
+    _name, path, _completed = max(candidates, key=lambda item: item[0])
+    return path
 
 
 def _load_experiment_results(experiment_dir: Path):
@@ -123,15 +157,12 @@ def _build_fs_rows(results_dir: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     meta_by_name = {item["name"]: item for item in load_fs_instances()}
 
-    for dataset in FS_COMPARISON_DATASETS:
+    for dataset in FS_PAPER_DATASETS:
         algorithm_results: dict[str, Any] = {}
         for algorithm in FS_ALGORITHMS:
-            batch = get_fs_batch(dataset, algorithm, results_dir)
-            experiment_dir = _experiment_dir(results_dir, batch)
+            experiment_dir = _get_fs_v2_batch(dataset, algorithm, results_dir)
             best_objective = None
             if experiment_dir and (experiment_dir / "runs.csv").exists():
-                import csv
-
                 objectives: list[float] = []
                 with (experiment_dir / "runs.csv").open(encoding="utf-8") as handle:
                     for row in csv.DictReader(handle):
@@ -232,7 +263,7 @@ def main() -> None:
     manifest.append(
         {
             "file": "fs_best_objective_by_dataset.png",
-            "caption": "Figure 7. Feature selection best wrapper objective by dataset (lower is better).",
+            "caption": "Figure 7. Feature selection best wrapper objective by dataset (15 seeds per algorithm; protocol v2).",
             "source": "generated",
         }
     )
@@ -259,15 +290,18 @@ def main() -> None:
             "Feature selection",
             FS_CONVERGENCE_DATASET,
             FS_EVALUATION_BUDGET,
-            get_fs_batch,
-            "fs_breastew_convergence_combined.png",
-            "Figure 8. Mean feature-selection convergence on BreastEW (30 seeds per algorithm).",
+            _get_fs_v2_batch,
+            "fs_wineew_convergence_combined.png",
+            "Figure 8. Mean feature-selection convergence on WineEW (15 seeds per algorithm; protocol v2).",
         ),
     ]:
         dirs: dict[str, Path] = {}
         for algorithm in ALGORITHMS:
-            batch = getter(instance, algorithm, results_dir)
-            experiment_dir = _experiment_dir(results_dir, batch)
+            if getter is _get_fs_v2_batch:
+                experiment_dir = getter(instance, algorithm, results_dir)
+            else:
+                batch = getter(instance, algorithm, results_dir)
+                experiment_dir = _experiment_dir(results_dir, batch)
             if experiment_dir is not None:
                 dirs[algorithm] = experiment_dir
         if len(dirs) >= 2:
@@ -284,16 +318,20 @@ def main() -> None:
             print(f"  skip {filename} — insufficient experiment folders")
 
     print("Copying per-experiment charts...")
+    fs_ts_dir = _get_fs_v2_batch(FS_FEATURES_DATASET, "tabu_search", results_dir)
     copy_specs = [
         (get_tsp_batch(TSP_ROUTE_INSTANCE, "tabu_search", results_dir), "tsp_route_berlin52_ts.png", "tsp_route_best_overall.png", "Figure 9. Best TSP route on berlin52 (Tabu Search)."),
         (get_jsp_batch(JSP_GANTT_INSTANCE, "tabu_search", results_dir), "jsp_gantt_ta22_ts.png", "jsp_gantt_best_overall.png", "Figure 10. Best JSP schedule on ta22 (Tabu Search)."),
-        (get_fs_batch(FS_FEATURES_DATASET, "tabu_search", results_dir), "fs_features_breastew_ts.png", "fs_selected_features_tabu_search.png", "Figure 11. Selected features on BreastEW (Tabu Search best run)."),
+        (fs_ts_dir, "fs_features_wineew_ts.png", "fs_selected_features_tabu_search.png", "Figure 11. Selected features on WineEW (Tabu Search best run; protocol v2)."),
         (get_tsp_batch(TSP_CONVERGENCE_INSTANCE, "tabu_search", results_dir), "tsp_kroA100_boxplot.png", "objective_boxplot.png", "Figure 12. TSP objective distribution on kroA100 (Tabu Search, 30 seeds)."),
-        (get_fs_batch(FS_CONVERGENCE_DATASET, "tabu_search", results_dir), "fs_breastew_boxplot.png", "objective_boxplot.png", "Figure 13. FS objective distribution on BreastEW (Tabu Search, 30 seeds)."),
+        (fs_ts_dir, "fs_wineew_boxplot.png", "objective_boxplot.png", "Figure 13. FS objective distribution on WineEW (Tabu Search, 15 seeds; protocol v2)."),
     ]
 
-    for batch, dest_name, chart_name, caption in copy_specs:
-        experiment_dir = _experiment_dir(results_dir, batch)
+    for batch_or_dir, dest_name, chart_name, caption in copy_specs:
+        if isinstance(batch_or_dir, Path):
+            experiment_dir = batch_or_dir
+        else:
+            experiment_dir = _experiment_dir(results_dir, batch_or_dir)
         if experiment_dir is None:
             print(f"  skip {dest_name} — no experiment folder")
             continue

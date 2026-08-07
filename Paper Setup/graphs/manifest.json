@@ -21,7 +21,7 @@
   },
   {
     "file": "fs_best_objective_by_dataset.png",
-    "caption": "Figure 7. Feature selection best wrapper objective by dataset (lower is better).",
+    "caption": "Figure 7. Feature selection best wrapper objective by dataset (15 seeds per algorithm; protocol v2).",
     "source": "generated"
   },
   {
@@ -35,8 +35,8 @@
     "source": "generated"
   },
   {
-    "file": "fs_breastew_convergence_combined.png",
-    "caption": "Figure 8. Mean feature-selection convergence on BreastEW (30 seeds per algorithm).",
+    "file": "fs_wineew_convergence_combined.png",
+    "caption": "Figure 8. Mean feature-selection convergence on WineEW (15 seeds per algorithm; protocol v2).",
     "source": "generated"
   },
   {
@@ -50,9 +50,9 @@
     "source": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\2026-08-07_070554_jsp_ta22_tabu_search\\charts\\jsp_gantt_best_overall.png"
   },
   {
-    "file": "fs_features_breastew_ts.png",
-    "caption": "Figure 11. Selected features on BreastEW (Tabu Search best run).",
-    "source": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\2026-08-07_043306_fs_breastew_tabu_search\\charts\\fs_selected_features_tabu_search.png"
+    "file": "fs_features_wineew_ts.png",
+    "caption": "Figure 11. Selected features on WineEW (Tabu Search best run; protocol v2).",
+    "source": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\2026-08-07_110128_fs_wineew_tabu_search\\charts\\fs_selected_features_tabu_search.png"
   },
   {
     "file": "tsp_kroA100_boxplot.png",
@@ -60,8 +60,8 @@
     "source": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\2026-08-07_031702_tsp_kroA100_tabu_search\\charts\\objective_boxplot.png"
   },
   {
-    "file": "fs_breastew_boxplot.png",
-    "caption": "Figure 13. FS objective distribution on BreastEW (Tabu Search, 30 seeds).",
-    "source": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\2026-08-07_043306_fs_breastew_tabu_search\\charts\\objective_boxplot.png"
+    "file": "fs_wineew_boxplot.png",
+    "caption": "Figure 13. FS objective distribution on WineEW (Tabu Search, 15 seeds; protocol v2).",
+    "source": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\2026-08-07_110128_fs_wineew_tabu_search\\charts\\objective_boxplot.png"
   }
 ]

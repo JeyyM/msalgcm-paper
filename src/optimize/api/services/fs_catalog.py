@@ -98,7 +98,7 @@ def load_fs_instances() -> list[dict[str, Any]]:
     return [item for item in _load_fs_all_instances() if item["name"] in allowed]
 
 
-def build_fs_config(instance: str, algorithm: str) -> ExperimentConfig:
+def build_fs_config(instance: str, algorithm: str, *, runs: int | None = None) -> ExperimentConfig:
     if algorithm not in FS_ALGORITHMS:
         raise ValueError(f"unsupported feature-selection algorithm: {algorithm}")
 
@@ -116,7 +116,7 @@ def build_fs_config(instance: str, algorithm: str) -> ExperimentConfig:
     template["instance"] = instance
     template["instance_path"] = f"datasets/feature_selection/{instances[instance]['file']}"
     template["algorithms"] = [algorithm]
-    template["runs"] = FS_RUNS
+    template["runs"] = runs if runs is not None else FS_RUNS
     template["evaluation_budget"] = FS_EVALUATION_BUDGET
     template["seed_policy"] = {"base_seed": FS_BASE_SEED}
     return ExperimentConfig.model_validate(template)
@@ -367,8 +367,8 @@ def get_fs_live_status(instance: str, algorithm: str, results_dir: Path | None =
     }
 
 
-def write_fs_config_file(instance: str, algorithm: str) -> Path:
-    config = build_fs_config(instance, algorithm)
+def write_fs_config_file(instance: str, algorithm: str, *, runs: int | None = None) -> Path:
+    config = build_fs_config(instance, algorithm, runs=runs)
     temp_dir = _project_root() / "config" / ".generated"
     temp_dir.mkdir(parents=True, exist_ok=True)
     path = temp_dir / f"fs_{instance.lower()}_{algorithm}.json"
