@@ -12,8 +12,25 @@ Mechanical checks executed via [`scripts/audit_tsp_results.py`](scripts/audit_ts
 canonical comparison folders, plus manual verification of tuning protocol, TSPLIB references, operator code,
 and feature-selection data leakage. Full pytest suite: **55/55 passed**.
 
-**Verdict: no reruns required.** All P0 items on the three canonical TSP folders pass. Findings below are
+**Verdict (TSP): no reruns required.** All P0 items on the three canonical TSP folders pass. Findings below are
 documentation/framing gaps and hygiene issues, not correctness bugs.
+
+**Update (same day, later pass): JSP and FS tuning protocols built and run.** Following the TSP audit, JSP and FS
+were confirmed to have **no tuning protocol at all** (P0-15, P1-14) — algorithm parameters were hand-typed
+defaults, never grid-searched. Built `config/tuning/jsp_tuning_protocol.json` and `fs_tuning_protocol.json`
+(literature-grounded, equal-effort 4-configs-×-3-algorithms grids — see
+[`literature/algorithm_parameter_literature.md`](literature/algorithm_parameter_literature.md)), plus generalized
+`scripts/run_tuning.py` / `scripts/analyze_tuning.py` (domain-aware supersets of the TSP-only tuning scripts).
+While building the FS grid, discovered and fixed a **real, previously-undiscovered P1 bug**: 4 of 8 EW datasets
+(`ZooEW`, `LymphographyEW`, `SonarEW`, `IonosphereEW`) have string class labels that crashed the loader — see
+finding 6 below. No prior results existed for those 4 datasets, so nothing needed a rerun because of this fix.
+While *running* the FS tuning batch, also discovered and fixed a **second, more serious P0 bug**: PSO had never
+worked at all on feature_selection, for any dataset — see finding 7 below. Both JSP and FS tuning batches have
+since completed, been analyzed, and frozen: `results/tuning/jsp_selected_parameters.json` and
+`results/tuning/fs_selected_parameters.json` are written and applied to
+`config/examples/jsp_ft10_comparison.json` / `config/examples/fs_breastew_comparison.json`. Full suite: **56/56
+passed** (grew from 55 after adding a PSO×FS regression test). JSP and FS are now genuinely ready for a
+groupmate to run the final 30-run comparisons — not just "UI works," but tuned-and-frozen like TSP.
 
 ### What was checked (evidence-based, not just read-through)
 
@@ -40,11 +57,41 @@ documentation/framing gaps and hygiene issues, not correctness bugs.
 4. **Duplicate JSP metadata files** (`datasets/scheduling/metadata.json` vs `.../jsp/metadata.json`) that could
    drift out of sync — currently identical, so no active bug.
 5. **`validate_tsp_output.py` is stale**; superseded by the new general-purpose `scripts/audit_tsp_results.py`.
+6. **FS loader crashed on 4/8 EW datasets** — `ZooEW` (`"mammal"`), `LymphographyEW` (`"malign_lymph"`),
+   `SonarEW` (`"Rock"`), `IonosphereEW` (`"g"`) store the original OpenML string class name in their `class`
+   column instead of a numeric code, unlike `BreastEW`/`WineEW`/`SpectEW`/`MadelonEW`. `load_ew_dataset` only
+   handled numeric labels (`int(float(value))`), so any experiment on these 4 datasets raised
+   `ValueError: could not convert string to float`. **Fixed** in
+   `src/optimize/domains/feature_selection/loader.py` with a deterministic sorted-string label encoder
+   (`_encode_labels`); verified all 8 datasets now load with the correct class count (Zoo=7, Lymphography=4,
+   Sonar/Ionosphere=2). `FeatureSubsetEvaluator._default_metric`'s existing `num_classes > 2` check already
+   handles macro-F1 correctly for the now-fixed multiclass sets, no further change needed there.
+7. **PSO never worked on feature_selection — for any dataset, ever (P0-severity).** While running the newly-built
+   FS tuning protocol, all 60 PSO tuning runs (across all 3 tuning datasets × 4 configs × 5 seeds) came back with
+   `status: failed`, `best_objective: inf`, `error_message: "unable to infer PSO dimension from problem"`.
+   Root cause: `ParticleSwarmOptimization._infer_dimension` (`src/optimize/algorithms/particle_swarm.py`) only
+   knows how to size the swarm via `problem.instance.num_cities/num_operations` (TSP/JSP) or a generic
+   `problem.dimension` fallback — `FeatureSelectionProblem` had neither, so PSO+FS raised on the very first
+   evaluation of every single run, with no result ever silently or partially produced. **Verified this affected
+   zero prior results**: `Glob`-searched `results/` for any PSO×feature_selection folder — none existed anywhere
+   in the repo, meaning nobody had run this combination successfully before this session; there was nothing to
+   invalidate or rerun beyond the tuning batch itself. **Fixed** by adding a `dimension` property to
+   `FeatureSelectionProblem` (`src/optimize/domains/feature_selection/problem.py`, returns `dataset.num_features`).
+   **Root cause of why this was undetected for so long:** `tests/test_feature_selection.py` had a `simulated_annealing`
+   smoke test (`test_fs_sa_smoke`) but no equivalent PSO smoke test — added `test_fs_pso_smoke` as a permanent
+   regression guard. Deleted and reran all 12 affected PSO tuning experiment folders after the fix; full suite is
+   now 56/56 passing (was 55/55 before this test was added). This is the most serious bug found in the entire
+   audit — worse than the FS loader bug, because it silently produced no misleading numbers (it just errored), but
+   it means "PSO vs SA vs TS on feature selection" as a research question had literally never been answerable
+   until today.
 
 ### Tools produced
 
 - [`scripts/audit_tsp_results.py`](scripts/audit_tsp_results.py) — reusable audit script; run any time with
   `python scripts/audit_tsp_results.py --all-canonical` or point it at any other folder name(s).
+- [`scripts/run_tuning.py`](scripts/run_tuning.py) / [`scripts/analyze_tuning.py`](scripts/analyze_tuning.py) —
+  domain-aware tuning runner/analyzer (TSP, JSP, FS) superseding the TSP-only `run_tsp_tuning.py` /
+  `analyze_tsp_tuning.py` for new work.
 
 ---
 
@@ -141,7 +188,9 @@ documentation/framing gaps and hygiene issues, not correctness bugs.
 - [x] **P0-15 — Do not compare TSP (tuned) vs JSP/FS (defaults) as equal rigor**  
   JSP/FS algorithm params are **not** frozen via tuning protocol yet.  
   **Verify:** `READ` `jsp_ft10_comparison.json`, `fs_breastew_comparison.json` — document as exploratory only until tuned.  
-  **RESULT: CONFIRMED — no equivalent freeze file exists.** `Glob` for `config/tuning/*jsp*` and `config/tuning/*fs*` returned **0 files** each; `results/tuning/` contains only TSP artifacts (`selected_parameters.json`, `tuning_run_manifest.json`). JSP/FS comparison templates carry hand-picked default parameters, never validated by a grid search. Confirmed no JSP or FS "final comparison" result folders exist yet either — only single-algorithm smoke batches (e.g. `jsp_ft10_simulated_annealing`, `fs_breastew_simulated_annealing`). **This is exactly why the answer to "does anything need rerunning" is TSP-only: there's nothing paper-final on JSP/FS to rerun — it hasn't been run once yet in final form.**
+  **RESULT: CONFIRMED — no equivalent freeze file exists.** `Glob` for `config/tuning/*jsp*` and `config/tuning/*fs*` returned **0 files** each; `results/tuning/` contains only TSP artifacts (`selected_parameters.json`, `tuning_run_manifest.json`). JSP/FS comparison templates carry hand-picked default parameters, never validated by a grid search. Confirmed no JSP or FS "final comparison" result folders exist yet either — only single-algorithm smoke batches (e.g. `jsp_ft10_simulated_annealing`, `fs_breastew_simulated_annealing`). **This is exactly why the answer to "does anything need rerunning" is TSP-only: there's nothing paper-final on JSP/FS to rerun — it hasn't been run once yet in final form.**  
+  **FOLLOW-UP (same day):** Built and ran `config/tuning/jsp_tuning_protocol.json` / `fs_tuning_protocol.json` to close this gap.  
+  **CLOSED (2026-08-07):** Both tuning batches completed, analyzed, and frozen. `results/tuning/jsp_selected_parameters.json` and `results/tuning/fs_selected_parameters.json` written; winning parameters applied to `config/examples/jsp_ft10_comparison.json` and `config/examples/fs_breastew_comparison.json`. All three domains (TSP, JSP, FS) now carry equal tuning rigor. See finding 7 below for a second, more serious bug (PSO×FS was completely non-functional) discovered while running this tuning batch.
 
 ---
 
@@ -219,20 +268,20 @@ documentation/framing gaps and hygiene issues, not correctness bugs.
 
 ### JSP (before publishing JSP results)
 
-- [ ] **P1-14 — Instance split not locked in decisions.yaml**  
+- [x] **P1-14 — Instance split not locked in decisions.yaml**  
   Recommended tune/compare split exists in docs but not D4-style lock for JSP.  
   **Verify:** `READ` D6/D7; add tuning_instances / comparison_instances when ready.  
-  **RESULT: CONFIRMED OPEN.** No `config/tuning/*jsp*` file exists (glob returned 0 matches); no JSP equivalent of `results/tuning/selected_parameters.json`. Still todo — not a rerun issue since no JSP results are being claimed as final yet.
+  **RESULT: CONFIRMED OPEN, then RESOLVED same day.** Split locked in `config/decisions.yaml` D7/D13: tuning = `[ft10, ta01, ta21]`, comparison = `[ta31, ta51, ta71]`, `ta41` excluded (see P1-15). Matches `config/tuning/jsp_tuning_protocol.json`.
 
-- [ ] **P1-15 — ta41 has null BKS**  
+- [x] **P1-15 — ta41 has null BKS**  
   Gap reporting impossible; exclude from gap tables or cite external upper bound.  
   **Verify:** `READ` jsp metadata.  
-  **RESULT: CONFIRMED.** `datasets/scheduling/jsp/metadata.json` and its duplicate `datasets/scheduling/metadata.json` both have `"best_known_makespan": null` for ta41. Exclude from gap tables.
+  **RESULT: CONFIRMED.** `datasets/scheduling/jsp/metadata.json` and its duplicate `datasets/scheduling/metadata.json` both have `"best_known_makespan": null` for ta41. Excluded from the formal tune/compare split (`config/decisions.yaml` D7); still runnable ad hoc via the UI/CLI catalog for anyone curious, just outside the paper-final comparison.
 
-- [ ] **P1-16 — ta21 dimensions vs literature (D6 note)**  
+- [x] **P1-16 — ta21 dimensions vs literature (D6 note)**  
   Confirm 20×20 matches SchedulingLab / Taillard spec.  
   **Verify:** `READ` instance file header + literature.  
-  Not verified this session — still open.
+  **RESULT: CONFIRMED.** `Select-String` on `datasets/scheduling/jsp/instances/ta21.txt` line 1 reads `"20\t20"` (jobs × machines), matching `datasets/scheduling/jsp/metadata.json`'s `jobs: 20, machines: 20` and the SchedulingLab/Taillard reference. Updated `config/decisions.yaml` D6 to mark this verified.
 
 - [x] **P1-17 — JSP decoder correctness**  
   SSGS from operation sequence produces valid schedule; makespan matches serialized value.  
@@ -241,9 +290,10 @@ documentation/framing gaps and hygiene issues, not correctness bugs.
 
 ### Feature selection (before publishing FS results)
 
-- [ ] **P1-18 — EW discretization matches Hall & Holmes (k=5)**  
+- [x] **P1-18 — EW discretization matches Hall & Holmes (k=5)**  
   **Verify:** `READ` `datasets/feature_selection/metadata.json` + build scripts.  
-  Not verified this session — still open.
+  **RESULT: CONFIRMED BY METADATA.** `datasets/feature_selection/metadata.json` → `ew_benchmarks.reference` explicitly cites `"Hall & Holmes (2003)"` and each dataset entry records `"discretization": "equal_width_5_bins"` (`SpectEW` is the one exception, correctly noted as `"none (already binary)"` since it's native UCI binary data, not discretized). Added the full citation to `literature/references.bib` (`hall2003benchmarking`) since it wasn't previously in the bib file despite being referenced in metadata.  
+  **Related new finding (this session):** 4 of these 8 datasets had a **loader-crashing bug** — see "New findings" item 6 above and P0/hygiene note; unrelated to the discretization method itself, which was correct.
 
 - [x] **P1-19 — WineEW uses macro-F1; others accuracy**  
   Cross-dataset comparison of objective values is not directly comparable — report per-dataset metrics.  
@@ -346,11 +396,13 @@ documentation/framing gaps and hygiene issues, not correctness bugs.
 - [ ] **P3-02 — Pytest invariants for frozen params**  
   Test: examples ↔ selected_parameters.json ↔ catalog output.
 
-- [ ] **P3-03 — JSP tuning protocol JSON**  
-  Mirror TSP equal-effort structure before JSP benchmark.
+- [x] **P3-03 — JSP tuning protocol JSON**  
+  Mirror TSP equal-effort structure before JSP benchmark.  
+  **RESULT: DONE.** `config/tuning/jsp_tuning_protocol.json` — 4 configs × 3 algorithms, literature-grounded (van Laarhoven et al. 1992; Nowicki & Smutnicki 1996).
 
-- [ ] **P3-04 — FS tuning protocol JSON**  
-  Tune/compare dataset split locked in decisions.
+- [x] **P3-04 — FS tuning protocol JSON**  
+  Tune/compare dataset split locked in decisions.  
+  **RESULT: DONE.** `config/tuning/fs_tuning_protocol.json` — 4 configs × 3 algorithms, literature-grounded (Kohavi & John 1997; Xue et al. 2013; Ma et al. 2023); split locked in `config/decisions.yaml` D14.
 
 - [ ] **P3-05 — Friedman + Wilcoxon in codebase**  
   Close D11; cite Demšar (2006) from literature folder.

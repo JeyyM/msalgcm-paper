@@ -120,6 +120,47 @@ def test_fs_sa_smoke() -> None:
     assert "test_score" in payload
 
 
+def test_fs_pso_smoke() -> None:
+    """Regression test: PSO previously crashed on every FS run with
+    "unable to infer PSO dimension from problem" because FeatureSelectionProblem
+    exposed neither `.instance` nor `.dimension` — ParticleSwarmOptimization._infer_dimension
+    had nothing to fall back on. Fixed by adding a `dimension` property. This test
+    would have caught it: no FS+PSO smoke test existed before."""
+    budget = EvaluationBudget(60)
+    problem = create_problem(
+        "feature_selection",
+        budget,
+        {
+            "instance_path": str(BREASTEW),
+            "performance_weight": 0.9,
+            "reduction_weight": 0.1,
+            "split_seed": 11,
+            "operators": ["flip", "swap"],
+        },
+    )
+    algorithm = get_algorithm("particle_swarm")
+    algorithm.initialize(
+        problem,
+        {
+            "swarm_size": 5,
+            "inertia_weight": 0.7,
+            "cognitive_coefficient": 1.5,
+            "social_coefficient": 1.5,
+        },
+        seed=42,
+    )
+    algorithm.run()
+    assert algorithm.get_best_objective() < float("inf")
+    assert algorithm.get_stop_reason() in {
+        StopReason.COMPLETED,
+        StopReason.EVALUATION_BUDGET,
+    }
+    solution = algorithm.get_best_solution()
+    assert solution is not None
+    payload = problem.serialize_solution(solution)
+    assert 0 < payload["selected_feature_count"] <= problem.dataset.num_features
+
+
 def test_fs_runner_smoke(tmp_path: Path) -> None:
     config_path = tmp_path / "fs_smoke.json"
     output_dir = tmp_path / "out"

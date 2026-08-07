@@ -1,0 +1,166 @@
+{
+  "protocol_name": "fs_parameter_tuning_v1",
+  "domain": "feature_selection",
+  "config_prefix": "fs",
+  "description": "Equal-effort parameter search on 3 EW wrapper feature-selection datasets (spanning small/medium/larger feature counts) before final comparison. Literature: Kohavi & John (1997) wrapper concept; Xue, Zhang & Browne (2013) PSO-FS ranges; Ma et al. (2023) tabu tenure ~n/2 for wrapper FS.",
+  "tuning_instances": [
+    {
+      "name": "ZooEW",
+      "path": "datasets/feature_selection/ew/ZooEW.csv",
+      "known_optimum": null
+    },
+    {
+      "name": "IonosphereEW",
+      "path": "datasets/feature_selection/ew/IonosphereEW.csv",
+      "known_optimum": null
+    },
+    {
+      "name": "SonarEW",
+      "path": "datasets/feature_selection/ew/SonarEW.csv",
+      "known_optimum": null
+    }
+  ],
+  "comparison_instances": ["BreastEW", "WineEW", "LymphographyEW", "SpectEW", "MadelonEW"],
+  "runs_per_config": 5,
+  "evaluation_budget": 1200,
+  "final_comparison_evaluation_budget": 5000,
+  "evaluation_budget_note": "Tuning uses a reduced 1200-eval budget (24% of the 5000-eval final-comparison budget) purely to keep the 36-cell grid tractable given the per-evaluation cost of k-fold k-NN cross-validation; relative config ranking is the goal here, not absolute quality. Final comparison configs still use the full 5000-eval budget (see final_comparison_evaluation_budget and config/examples/fs_breastew_comparison.json).",
+  "base_seed": 4000,
+  "selection_metric": "mean_best_objective",
+  "tie_breakers": ["std_best_objective", "mean_runtime_seconds"],
+  "domain_config": {
+    "performance_weight": 0.9,
+    "reduction_weight": 0.1,
+    "test_size": 0.3,
+    "cv_folds": 5,
+    "k_neighbors": 5,
+    "initial_solution": "random",
+    "operators": ["flip", "swap"]
+  },
+  "algorithms": {
+    "simulated_annealing": {
+      "configs": [
+        {
+          "id": "sa_baseline",
+          "label": "Baseline (pre-tuning comparison default)",
+          "params": {
+            "initial_temperature": 1.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.995,
+            "moves_per_temperature": 50
+          }
+        },
+        {
+          "id": "sa_slow_cool",
+          "label": "Slower cooling",
+          "params": {
+            "initial_temperature": 1.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.998,
+            "moves_per_temperature": 50
+          }
+        },
+        {
+          "id": "sa_fast_cool",
+          "label": "Faster cooling",
+          "params": {
+            "initial_temperature": 1.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.99,
+            "moves_per_temperature": 50
+          }
+        },
+        {
+          "id": "sa_high_temp",
+          "label": "Higher initial temperature",
+          "params": {
+            "initial_temperature": 2.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.995,
+            "moves_per_temperature": 50
+          }
+        }
+      ]
+    },
+    "tabu_search": {
+      "configs": [
+        {
+          "id": "ts_baseline",
+          "label": "Baseline (pre-tuning comparison default)",
+          "params": {
+            "tabu_tenure": 15,
+            "candidate_list_size": 30
+          }
+        },
+        {
+          "id": "ts_short_tabu",
+          "label": "Short tabu tenure",
+          "params": {
+            "tabu_tenure": 8,
+            "candidate_list_size": 30
+          }
+        },
+        {
+          "id": "ts_long_tabu",
+          "label": "Longer tabu tenure (Ma et al. 2023 ~n/2 for larger n)",
+          "params": {
+            "tabu_tenure": 30,
+            "candidate_list_size": 30
+          }
+        },
+        {
+          "id": "ts_wide_list",
+          "label": "Larger candidate list",
+          "params": {
+            "tabu_tenure": 15,
+            "candidate_list_size": 50
+          }
+        }
+      ]
+    },
+    "particle_swarm": {
+      "configs": [
+        {
+          "id": "pso_baseline",
+          "label": "Baseline (pre-tuning comparison default)",
+          "params": {
+            "swarm_size": 30,
+            "inertia_weight": 0.7,
+            "cognitive_coefficient": 1.5,
+            "social_coefficient": 1.5
+          }
+        },
+        {
+          "id": "pso_small_swarm",
+          "label": "Smaller swarm",
+          "params": {
+            "swarm_size": 15,
+            "inertia_weight": 0.7,
+            "cognitive_coefficient": 1.5,
+            "social_coefficient": 1.5
+          }
+        },
+        {
+          "id": "pso_high_inertia",
+          "label": "Higher inertia and cognitive/social coefficients",
+          "params": {
+            "swarm_size": 30,
+            "inertia_weight": 0.6,
+            "cognitive_coefficient": 1.8,
+            "social_coefficient": 1.8
+          }
+        },
+        {
+          "id": "pso_low_inertia",
+          "label": "Lower inertia and cognitive/social coefficients",
+          "params": {
+            "swarm_size": 30,
+            "inertia_weight": 0.5,
+            "cognitive_coefficient": 1.2,
+            "social_coefficient": 1.2
+          }
+        }
+      ]
+    }
+  }
+}

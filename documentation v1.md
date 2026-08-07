@@ -56,28 +56,38 @@ Each folder has 90 completed runs (30 per algorithm). Do **not** use pre-tuning 
 
 **Findings (high level):** TS ≪ SA ≪ PSO on gap % under this protocol. SA tuning barely changed rankings under nearest-neighbor init; PSO remains weak despite tuning.
 
-### JSP — **UI ready, tuning not started**
+### JSP — **tuned, frozen, ready to run**
 
 | Item | Status |
 |------|--------|
 | 7 instances on disk (ft10 → ta71) | Done |
 | Web UI (instance × algorithm, live Gantt + convergence) | Done |
-| Parameter tuning protocol | Not started |
-| Final 30-run comparison benchmark | Not started |
+| Parameter tuning protocol | `config/tuning/jsp_tuning_protocol.json` — literature-grounded, equal-effort (4 configs × 3 algorithms) |
+| Tuning batch | **Done** (`results/tuning/jsp/`) — winners frozen in `results/tuning/jsp_selected_parameters.json` |
+| Comparison config | **Frozen params applied** to `config/examples/jsp_ft10_comparison.json` (SA: `sa_baseline`, TS: `ts_long_tabu`, PSO: `pso_baseline` — see file for values) |
+| Final 30-run comparison benchmark | **Ready to launch** on ta31 / ta51 / ta71 |
 
-Suggested split (not locked in decisions yet): tune on ft10, ta01, ta21; compare on ta31, ta51, ta71.
+Locked split (`config/decisions.yaml` D7/D13): tune on ft10, ta01, ta21; compare on ta31, ta51, ta71. `ta41` excluded (null best-known makespan).
 
-### Feature selection — **UI ready, tuning not started**
+### Feature selection — **tuned, frozen, ready to run**
 
 | Item | Status |
 |------|--------|
 | 8 EW datasets on disk | Done |
 | Web UI (dataset × algorithm, live feature grid + convergence) | Done |
 | ML design locked in `config/decisions.yaml` (D9) | Done |
-| Parameter tuning protocol | Not started |
-| Final 30-run comparison benchmark | Not started |
+| Parameter tuning protocol | `config/tuning/fs_tuning_protocol.json` — literature-grounded, equal-effort (4 configs × 3 algorithms) |
+| Tuning batch | **Done** (`results/tuning/fs/`) — winners frozen in `results/tuning/fs_selected_parameters.json` |
+| Comparison config | **Frozen params applied** to `config/examples/fs_breastew_comparison.json` (full 5000-eval budget, 30 runs — see file for winning values) |
+| Final 30-run comparison benchmark | **Ready to launch** on BreastEW / WineEW / LymphographyEW / SpectEW / MadelonEW |
+
+Locked split (`config/decisions.yaml` D14): tune on ZooEW, IonosphereEW, SonarEW; compare on BreastEW, WineEW, LymphographyEW, SpectEW, MadelonEW.
 
 **FS design (locked):** Binary wrapper subset search; k-NN (k=5); stratified 5-fold CV on **train only**; objective `0.9 × CV_loss + 0.1 × feature_ratio`; 30% test holdout for reporting only.
+
+**Bug fixed during tuning build (2026-08-07, #1):** 4 of 8 EW datasets (`ZooEW`, `LymphographyEW`, `SonarEW`, `IonosphereEW`) had string class labels that crashed the loader — no experiment could ever have completed on them before this session. Fixed in `src/optimize/domains/feature_selection/loader.py`; see `audit_checklist.md` finding 6.
+
+**Bug fixed during tuning build (2026-08-07, #2 — more serious):** PSO had *never worked* on the feature-selection domain, for any dataset, ever. Every PSO×FS run crashed internally with `"unable to infer PSO dimension from problem"` because `FeatureSelectionProblem` exposed neither `.instance` nor `.dimension` — the two attributes `ParticleSwarmOptimization._infer_dimension` looks for. The runner swallowed the exception and recorded `status: failed`, `best_objective: inf` per run, which is how it surfaced (all 60 initial PSO tuning runs were `inf`). No prior comparison results existed for PSO×FS (nothing to rerun/invalidate — this is genuinely the first time it's ever been executed). Fixed by adding a `dimension` property to `FeatureSelectionProblem` (`src/optimize/domains/feature_selection/problem.py`); added a regression test `test_fs_pso_smoke` in `tests/test_feature_selection.py` (previously there was a SA smoke test but no PSO one, which is why this went undetected). All 12 affected tuning groups were deleted and rerun clean after the fix; all 56 tests pass.
 
 ---
 

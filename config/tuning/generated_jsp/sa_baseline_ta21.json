@@ -1,18 +1,16 @@
 {
-  "experiment_name": "jsp_ft10_comparison",
+  "experiment_name": "tuning_sa_baseline_ta21",
   "domain": "scheduling",
-  "instance": "ft10",
-  "instance_path": "datasets/scheduling/jsp/instances/ft10.txt",
+  "instance": "ta21",
   "algorithms": [
-    "simulated_annealing",
-    "tabu_search",
-    "particle_swarm"
+    "simulated_annealing"
   ],
-  "runs": 30,
+  "runs": 5,
   "evaluation_budget": 50000,
   "seed_policy": {
     "base_seed": 2000
   },
+  "instance_path": "datasets/scheduling/jsp/instances/ta21.txt",
   "domain_config": {
     "initial_solution": "longest_processing_time",
     "operators": [
@@ -27,19 +25,10 @@
       "final_temperature": 0.001,
       "cooling_factor": 0.999,
       "moves_per_temperature": 150
-    },
-    "tabu_search": {
-      "candidate_list_size": 40,
-      "tabu_tenure": 30
-    },
-    "particle_swarm": {
-      "swarm_size": 40,
-      "inertia_weight": 0.6,
-      "cognitive_coefficient": 1.8,
-      "social_coefficient": 1.8
     }
   },
   "output": {
-    "directory": "results"
-  }
+    "directory": "results\\tuning\\jsp\\experiments"
+  },
+  "runtime_budget_seconds": null
 }

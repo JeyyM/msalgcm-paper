@@ -1,0 +1,38 @@
+{
+  "experiment_name": "tuning_sa_fast_cool_SonarEW",
+  "domain": "feature_selection",
+  "instance": "SonarEW",
+  "algorithms": [
+    "simulated_annealing"
+  ],
+  "runs": 5,
+  "evaluation_budget": 1200,
+  "seed_policy": {
+    "base_seed": 4000
+  },
+  "instance_path": "datasets/feature_selection/ew/SonarEW.csv",
+  "domain_config": {
+    "performance_weight": 0.9,
+    "reduction_weight": 0.1,
+    "test_size": 0.3,
+    "cv_folds": 5,
+    "k_neighbors": 5,
+    "initial_solution": "random",
+    "operators": [
+      "flip",
+      "swap"
+    ]
+  },
+  "algorithm_configs": {
+    "simulated_annealing": {
+      "initial_temperature": 1.0,
+      "final_temperature": 0.001,
+      "cooling_factor": 0.99,
+      "moves_per_temperature": 50
+    }
+  },
+  "output": {
+    "directory": "results\\tuning\\fs\\experiments"
+  },
+  "runtime_budget_seconds": null
+}

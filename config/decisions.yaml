@@ -42,7 +42,7 @@ decisions:
     benchmark: "Taillard via datasets/scheduling/jsp/instances/"
     representation: "operation sequence + serial schedule decoder (SSGS)"
     verify_before_phase_3:
-      - "Confirm ta21 dimensions match literature (SchedulingLab shows 20x20)"
+      - "Confirm ta21 dimensions match literature (SchedulingLab shows 20x20) — CONFIRMED 20x20 (audit, 2026-08-07)"
 
   D7_scheduling_benchmarks:
     status: resolved
@@ -54,6 +54,26 @@ decisions:
       - ta41
       - ta51
       - ta71
+    tuning_instances: [ft10, ta01, ta21]
+    comparison_instances: [ta31, ta51, ta71]
+    excluded_from_split: [ta41]
+    excluded_reason: "ta41 has null best_known_makespan in datasets/scheduling/jsp/metadata.json — gap % cannot be computed; still runnable ad hoc, excluded from formal tune/compare protocol"
+
+  D13_jsp_tuning_protocol:
+    status: resolved
+    value: "config/tuning/jsp_tuning_protocol.json"
+    tuning_instances: [ft10, ta01, ta21]
+    comparison_instances: [ta31, ta51, ta71]
+    initial_solution: longest_processing_time
+    runs_per_config: 5
+    final_comparison_runs: 30
+    evaluation_budget: 50000
+    selection_metric: mean_gap_percentage
+    literature: "van Laarhoven et al. (1992) SA schedule; Nowicki & Smutnicki (1996) / Watson et al. (2006) TS tenure ~8 — see literature/algorithm_parameter_literature.md"
+    notes: >
+      Same initial_solution used for tuning AND final comparison (unlike TSP v1/v2,
+      which mismatched NN vs random and needed a confirmation pass) — avoids that rework.
+    frozen_winners: "results/tuning/jsp_selected_parameters.json (2026-08-07) — applied to config/examples/jsp_ft10_comparison.json"
 
   D8_fs_datasets:
     status: resolved
@@ -74,6 +94,43 @@ decisions:
       reduction_weight: "configurable"
     madelon_split: "Use official train/valid/test from UCI — never optimize on test"
     spect_split: "stratified holdout via domain_config.test_size + split_seed from seed_policy.base_seed"
+    loader_bug_fixed: >
+      2026-08-07 audit: ZooEW, LymphographyEW, SonarEW, IonosphereEW had string class
+      labels (e.g. "mammal", "Rock") that crashed load_ew_dataset (expected numeric).
+      Fixed in src/optimize/domains/feature_selection/loader.py via deterministic
+      sorted-string label encoding; verified all 8 EW datasets now load with correct
+      num_classes. These 4 datasets could not have produced any valid result before
+      this fix — no prior results exist for them, so nothing needed a rerun.
+
+  D14_fs_tuning_protocol:
+    status: resolved
+    value: "config/tuning/fs_tuning_protocol.json"
+    tuning_datasets: [ZooEW, IonosphereEW, SonarEW]
+    comparison_datasets: [BreastEW, WineEW, LymphographyEW, SpectEW, MadelonEW]
+    initial_solution: random
+    runs_per_config: 5
+    final_comparison_runs: 30
+    evaluation_budget: 5000
+    selection_metric: mean_best_objective
+    literature: >
+      Kohavi & John (1997) wrapper concept; Xue, Zhang & Browne (2013) PSO-FS ranges;
+      Ma et al. (2023) tabu tenure ~n/2 for wrapper FS — see
+      literature/algorithm_parameter_literature.md
+    notes: >
+      No known-optimum concept for FS, so selection metric is mean best_objective
+      (already a bounded [0,1] weighted CV-loss + reduction score) rather than gap %.
+      Tuning set spans small/medium feature counts (16/34/60); MadelonEW (500
+      features) held out for comparison only as the large-scale stress test.
+    frozen_winners: "results/tuning/fs_selected_parameters.json (2026-08-07) — applied to config/examples/fs_breastew_comparison.json"
+    pso_dimension_bug_fixed: >
+      2026-08-07: PSO had never worked on feature_selection (any dataset) — every run
+      crashed with "unable to infer PSO dimension from problem" because
+      FeatureSelectionProblem exposed neither `.instance` nor `.dimension`. Fixed by
+      adding a `dimension` property to FeatureSelectionProblem
+      (src/optimize/domains/feature_selection/problem.py). No prior PSO×FS results
+      existed anywhere in the repo, so nothing needed a rerun beyond the 12 tuning
+      groups affected (deleted and rerun clean). Added regression test
+      test_fs_pso_smoke in tests/test_feature_selection.py.
 
   D10_experimental_design:
     status: open

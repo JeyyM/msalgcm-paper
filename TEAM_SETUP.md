@@ -147,7 +147,7 @@ This is the step that actually catches version drift. Run both:
 pytest -q
 ```
 
-**Expected: `55 passed`.** If you get a different number, stop — do not proceed to run
+**Expected: `56 passed`.** If you get a different number, stop — do not proceed to run
 experiments, report the exact output back first.
 
 ```bash
@@ -211,7 +211,14 @@ folder per pair as canonical.
 ## 9. Task assignment
 
 Fill in before splitting work. Check `documentation v1.md` and `audit_checklist.md` first —
-TSP is already complete; nothing there needs to be rerun.
+TSP is already complete; nothing there needs to be rerun. **JSP and FS are now also tuned and
+frozen** (as of 2026-08-07 — see `documentation v1.md`), so all three domains are ready for the
+final 30-run comparison benchmarks: `config/examples/jsp_ft10_comparison.json` on
+ta31/ta51/ta71, and `config/examples/fs_breastew_comparison.json` on
+BreastEW/WineEW/LymphographyEW/SpectEW/MadelonEW. Use `optimize list` to see everything
+available. Do not touch the tuning instances/datasets (ft10, ta01, ta21 for JSP; ZooEW,
+IonosphereEW, SonarEW for FS) for final comparisons — those were used to pick the frozen
+parameters and would leak tuning effort into the reported results.
 
 | Person | Domain | Instance(s) / dataset(s) | Algorithm(s) | Status |
 |---|---|---|---|---|

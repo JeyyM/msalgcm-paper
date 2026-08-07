@@ -1,0 +1,38 @@
+{
+  "experiment_name": "tuning_pso_high_inertia_SonarEW",
+  "domain": "feature_selection",
+  "instance": "SonarEW",
+  "algorithms": [
+    "particle_swarm"
+  ],
+  "runs": 5,
+  "evaluation_budget": 1200,
+  "seed_policy": {
+    "base_seed": 4000
+  },
+  "instance_path": "datasets/feature_selection/ew/SonarEW.csv",
+  "domain_config": {
+    "performance_weight": 0.9,
+    "reduction_weight": 0.1,
+    "test_size": 0.3,
+    "cv_folds": 5,
+    "k_neighbors": 5,
+    "initial_solution": "random",
+    "operators": [
+      "flip",
+      "swap"
+    ]
+  },
+  "algorithm_configs": {
+    "particle_swarm": {
+      "swarm_size": 30,
+      "inertia_weight": 0.6,
+      "cognitive_coefficient": 1.8,
+      "social_coefficient": 1.8
+    }
+  },
+  "output": {
+    "directory": "results\\tuning\\fs\\experiments"
+  },
+  "runtime_budget_seconds": null
+}

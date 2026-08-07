@@ -1,0 +1,32 @@
+{
+  "experiment_name": "tuning_ts_baseline_ft10",
+  "domain": "scheduling",
+  "instance": "ft10",
+  "algorithms": [
+    "tabu_search"
+  ],
+  "runs": 5,
+  "evaluation_budget": 50000,
+  "seed_policy": {
+    "base_seed": 2000
+  },
+  "instance_path": "datasets/scheduling/jsp/instances/ft10.txt",
+  "domain_config": {
+    "initial_solution": "longest_processing_time",
+    "operators": [
+      "swap",
+      "insertion",
+      "inversion"
+    ]
+  },
+  "algorithm_configs": {
+    "tabu_search": {
+      "tabu_tenure": 20,
+      "candidate_list_size": 40
+    }
+  },
+  "output": {
+    "directory": "results\\tuning\\jsp\\experiments"
+  },
+  "runtime_budget_seconds": null
+}

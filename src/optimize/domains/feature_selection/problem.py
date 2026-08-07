@@ -78,6 +78,11 @@ class FeatureSelectionProblem(OptimizationProblem):
             min_selected_features=min_selected_features,
         )
 
+    @property
+    def dimension(self) -> int:
+        """Number of binary decision variables (features) — used by PSO to size the swarm."""
+        return self.dataset.num_features
+
     def create_initial_solution(self, rng: np.random.Generator) -> list[int]:
         n = self.dataset.num_features
         if self.initial_solution == "all_features":

@@ -1,0 +1,36 @@
+{
+  "experiment_name": "tuning_ts_baseline_IonosphereEW",
+  "domain": "feature_selection",
+  "instance": "IonosphereEW",
+  "algorithms": [
+    "tabu_search"
+  ],
+  "runs": 5,
+  "evaluation_budget": 1200,
+  "seed_policy": {
+    "base_seed": 4000
+  },
+  "instance_path": "datasets/feature_selection/ew/IonosphereEW.csv",
+  "domain_config": {
+    "performance_weight": 0.9,
+    "reduction_weight": 0.1,
+    "test_size": 0.3,
+    "cv_folds": 5,
+    "k_neighbors": 5,
+    "initial_solution": "random",
+    "operators": [
+      "flip",
+      "swap"
+    ]
+  },
+  "algorithm_configs": {
+    "tabu_search": {
+      "tabu_tenure": 15,
+      "candidate_list_size": 30
+    }
+  },
+  "output": {
+    "directory": "results\\tuning\\fs\\experiments"
+  },
+  "runtime_budget_seconds": null
+}

@@ -1,0 +1,161 @@
+{
+  "protocol_name": "jsp_parameter_tuning_v1",
+  "domain": "scheduling",
+  "config_prefix": "jsp",
+  "description": "Equal-effort parameter search on small Taillard/OR-Library JSP instances before final comparison. Literature: van Laarhoven et al. (1992) SA cooling schedule; Nowicki & Smutnicki (1996) / Watson et al. (2006) tabu tenure ~8 for JSP.",
+  "tuning_instances": [
+    {
+      "name": "ft10",
+      "path": "datasets/scheduling/jsp/instances/ft10.txt",
+      "known_optimum": 930
+    },
+    {
+      "name": "ta01",
+      "path": "datasets/scheduling/jsp/instances/ta01.txt",
+      "known_optimum": 1231
+    },
+    {
+      "name": "ta21",
+      "path": "datasets/scheduling/jsp/instances/ta21.txt",
+      "known_optimum": 1642
+    }
+  ],
+  "comparison_instances": ["ta31", "ta51", "ta71"],
+  "excluded_instances": ["ta41"],
+  "excluded_reason": "ta41 has no published best-known makespan (null in datasets/scheduling/jsp/metadata.json) so gap % cannot be computed; still runnable ad hoc via the UI/CLI catalog, just outside the formal tune/compare split.",
+  "runs_per_config": 5,
+  "evaluation_budget": 50000,
+  "base_seed": 2000,
+  "selection_metric": "mean_gap_percentage",
+  "tie_breakers": ["std_gap_percentage", "mean_runtime_seconds"],
+  "domain_config": {
+    "initial_solution": "longest_processing_time",
+    "operators": ["swap", "insertion", "inversion"]
+  },
+  "algorithms": {
+    "simulated_annealing": {
+      "configs": [
+        {
+          "id": "sa_baseline",
+          "label": "Baseline (pre-tuning comparison default)",
+          "params": {
+            "initial_temperature": 8000.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.999,
+            "moves_per_temperature": 150
+          }
+        },
+        {
+          "id": "sa_slow_cool",
+          "label": "Slower cooling",
+          "params": {
+            "initial_temperature": 8000.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.9995,
+            "moves_per_temperature": 150
+          }
+        },
+        {
+          "id": "sa_fast_cool",
+          "label": "Faster cooling",
+          "params": {
+            "initial_temperature": 8000.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.995,
+            "moves_per_temperature": 150
+          }
+        },
+        {
+          "id": "sa_low_temp",
+          "label": "Lower initial temperature",
+          "params": {
+            "initial_temperature": 3000.0,
+            "final_temperature": 0.001,
+            "cooling_factor": 0.999,
+            "moves_per_temperature": 150
+          }
+        }
+      ]
+    },
+    "tabu_search": {
+      "configs": [
+        {
+          "id": "ts_baseline",
+          "label": "Baseline (pre-tuning comparison default)",
+          "params": {
+            "tabu_tenure": 20,
+            "candidate_list_size": 40
+          }
+        },
+        {
+          "id": "ts_short_tabu",
+          "label": "Short tabu tenure (Nowicki & Smutnicki TSAB ~8)",
+          "params": {
+            "tabu_tenure": 8,
+            "candidate_list_size": 40
+          }
+        },
+        {
+          "id": "ts_long_tabu",
+          "label": "Longer tabu tenure",
+          "params": {
+            "tabu_tenure": 30,
+            "candidate_list_size": 40
+          }
+        },
+        {
+          "id": "ts_wide_list",
+          "label": "Larger candidate list",
+          "params": {
+            "tabu_tenure": 20,
+            "candidate_list_size": 80
+          }
+        }
+      ]
+    },
+    "particle_swarm": {
+      "configs": [
+        {
+          "id": "pso_baseline",
+          "label": "Baseline (pre-tuning comparison default)",
+          "params": {
+            "swarm_size": 40,
+            "inertia_weight": 0.6,
+            "cognitive_coefficient": 1.8,
+            "social_coefficient": 1.8
+          }
+        },
+        {
+          "id": "pso_small_swarm",
+          "label": "Smaller swarm",
+          "params": {
+            "swarm_size": 20,
+            "inertia_weight": 0.6,
+            "cognitive_coefficient": 1.8,
+            "social_coefficient": 1.8
+          }
+        },
+        {
+          "id": "pso_high_inertia",
+          "label": "Higher inertia and cognitive/social coefficients",
+          "params": {
+            "swarm_size": 40,
+            "inertia_weight": 0.7,
+            "cognitive_coefficient": 2.0,
+            "social_coefficient": 2.0
+          }
+        },
+        {
+          "id": "pso_low_inertia",
+          "label": "Lower inertia and cognitive/social coefficients",
+          "params": {
+            "swarm_size": 40,
+            "inertia_weight": 0.5,
+            "cognitive_coefficient": 1.5,
+            "social_coefficient": 1.5
+          }
+        }
+      ]
+    }
+  }
+}

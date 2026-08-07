@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import warnings
+from dataclasses import dataclass, field
 
 import numpy as np
 
 from optimize.domains.feature_selection.loader import FeatureSelectionDataset
+
+# StratifiedKFold warns once per split() call when a class has fewer members
+# than n_splits (e.g. ZooEW's rarest class). This is benign — sklearn still
+# produces a valid (if slightly imbalanced) fold assignment — but with a
+# 5000-evaluation budget it would otherwise print thousands of identical
+# warnings and materially slow down the run.
+warnings.filterwarnings("ignore", category=UserWarning, module="sklearn.*")
 
 
 def _require_sklearn():
@@ -32,6 +40,9 @@ class FeatureSubsetEvaluator:
     cv_folds: int
     metric: str
     cv_seed: int
+    _cv_splits: list[tuple[np.ndarray, np.ndarray]] | None = field(
+        default=None, init=False, repr=False, compare=False
+    )
 
     @classmethod
     def from_dataset(
@@ -86,16 +97,25 @@ class FeatureSubsetEvaluator:
             return float(accuracy_score(y_true, y_pred))
         raise ValueError(f"unsupported feature-selection metric: {self.metric}")
 
+    def _get_cv_splits(self) -> list[tuple[np.ndarray, np.ndarray]]:
+        # Fold assignment depends only on y_train + cv_seed, never on the
+        # feature mask, so it is identical across every evaluation of a given
+        # run — compute once and reuse instead of rebuilding per call.
+        if self._cv_splits is None:
+            _, StratifiedKFold, _, _, _ = _require_sklearn()
+            splitter = StratifiedKFold(
+                n_splits=self.cv_folds,
+                shuffle=True,
+                random_state=self.cv_seed,
+            )
+            self._cv_splits = list(splitter.split(self.X_train, self.y_train))
+        return self._cv_splits
+
     def cross_validation_loss(self, mask: list[int]) -> float:
-        KNeighborsClassifier, StratifiedKFold, _, _, _ = _require_sklearn()
+        KNeighborsClassifier, _, _, _, _ = _require_sklearn()
         X_train = self._selected_matrix(mask, self.X_train)
-        splitter = StratifiedKFold(
-            n_splits=self.cv_folds,
-            shuffle=True,
-            random_state=self.cv_seed,
-        )
         scores: list[float] = []
-        for train_index, validation_index in splitter.split(X_train, self.y_train):
+        for train_index, validation_index in self._get_cv_splits():
             model = KNeighborsClassifier(n_neighbors=self.k_neighbors)
             model.fit(X_train[train_index], self.y_train[train_index])
             predictions = model.predict(X_train[validation_index])
