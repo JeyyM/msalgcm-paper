@@ -1,0 +1,2 @@
+domain,instance,problem_size,algorithm,parameters,runs,successful_runs,failed_runs,success_rate,mean_objective,std_objective,median_objective,min_objective,max_objective,mean_runtime_seconds,mean_objective_evaluations,mean_gap_percentage,best_gap_percentage
+tsp,rat195,195,tabu_search,"{""candidate_list_size"": 100, ""operators"": [""two_opt"", ""two_opt"", ""inversion"", ""insertion"", ""swap""], ""tabu_tenure"": 15}",30,30,0,1.0,2772.3333333333335,98.63681980995851,2758.5,2637.0,3028.0,8.574791383333407,100000,19.342803845601953,13.517003874300473

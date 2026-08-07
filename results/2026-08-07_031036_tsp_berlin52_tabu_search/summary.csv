@@ -1,0 +1,2 @@
+domain,instance,problem_size,algorithm,parameters,runs,successful_runs,failed_runs,success_rate,mean_objective,std_objective,median_objective,min_objective,max_objective,mean_runtime_seconds,mean_objective_evaluations,mean_gap_percentage,best_gap_percentage
+tsp,berlin52,52,tabu_search,"{""candidate_list_size"": 100, ""operators"": [""two_opt"", ""two_opt"", ""inversion"", ""insertion"", ""swap""], ""tabu_tenure"": 15}",30,30,0,1.0,7798.066666666667,159.98998579772285,7768.5,7567.0,8117.0,4.944413253333308,100000,3.3952090515336337,0.33147706178732433

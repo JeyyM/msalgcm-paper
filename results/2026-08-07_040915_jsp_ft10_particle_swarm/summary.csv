@@ -1,0 +1,2 @@
+domain,instance,problem_size,algorithm,parameters,runs,successful_runs,failed_runs,success_rate,mean_objective,std_objective,median_objective,min_objective,max_objective,mean_runtime_seconds,mean_objective_evaluations,mean_gap_percentage,best_gap_percentage
+scheduling,ft10,100,particle_swarm,"{""cognitive_coefficient"": 1.8, ""inertia_weight"": 0.6, ""operators"": [""swap"", ""insertion"", ""inversion""], ""social_coefficient"": 1.8, ""swarm_size"": 40}",30,30,0,1.0,1073.4,42.92598280761898,1073.0,999.0,1160.0,11.520195023333205,50000,15.419354838709678,7.419354838709677

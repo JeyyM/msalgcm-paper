@@ -1,0 +1,14 @@
+experiment=tsp_rat195_simulated_annealing
+domain=tsp
+instance=rat195
+algorithms=simulated_annealing
+runs=30
+completed=30
+failed=0
+charts=6
+chart=charts/convergence.png
+chart=charts/convergence_by_run.png
+chart=charts/objective_boxplot.png
+chart=charts/runtime_comparison.png
+chart=charts/tsp_route_simulated_annealing.png
+chart=charts/tsp_route_best_overall.png
