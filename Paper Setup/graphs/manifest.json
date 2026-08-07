@@ -1,0 +1,67 @@
+[
+  {
+    "file": "tsp_gap_by_instance.png",
+    "caption": "Figure 1. TSP best gap to known optimum by instance (30 seeds per algorithm).",
+    "source": "generated"
+  },
+  {
+    "file": "tsp_gap_scalability.png",
+    "caption": "Figure 2. TSP best gap vs problem size.",
+    "source": "generated"
+  },
+  {
+    "file": "jsp_gap_by_instance.png",
+    "caption": "Figure 4. JSP best gap to best known makespan by instance.",
+    "source": "generated"
+  },
+  {
+    "file": "jsp_gap_scalability.png",
+    "caption": "Figure 5. JSP best gap vs problem size.",
+    "source": "generated"
+  },
+  {
+    "file": "fs_best_objective_by_dataset.png",
+    "caption": "Figure 7. Feature selection best wrapper objective by dataset (lower is better).",
+    "source": "generated"
+  },
+  {
+    "file": "tsp_kroA100_convergence_combined.png",
+    "caption": "Figure 3. Mean TSP convergence on kroA100 (100 cities, 30 seeds per algorithm).",
+    "source": "generated"
+  },
+  {
+    "file": "jsp_ta22_convergence_combined.png",
+    "caption": "Figure 6. Mean JSP convergence on ta22 (20\u00d720, 30 seeds per algorithm).",
+    "source": "generated"
+  },
+  {
+    "file": "fs_breastew_convergence_combined.png",
+    "caption": "Figure 8. Mean feature-selection convergence on BreastEW (30 seeds per algorithm).",
+    "source": "generated"
+  },
+  {
+    "file": "tsp_route_berlin52_ts.png",
+    "caption": "Figure 9. Best TSP route on berlin52 (Tabu Search).",
+    "source": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\2026-08-07_031036_tsp_berlin52_tabu_search\\charts\\tsp_route_best_overall.png"
+  },
+  {
+    "file": "jsp_gantt_ta22_ts.png",
+    "caption": "Figure 10. Best JSP schedule on ta22 (Tabu Search).",
+    "source": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\2026-08-07_070554_jsp_ta22_tabu_search\\charts\\jsp_gantt_best_overall.png"
+  },
+  {
+    "file": "fs_features_breastew_ts.png",
+    "caption": "Figure 11. Selected features on BreastEW (Tabu Search best run).",
+    "source": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\2026-08-07_043306_fs_breastew_tabu_search\\charts\\fs_selected_features_tabu_search.png"
+  },
+  {
+    "file": "tsp_kroA100_boxplot.png",
+    "caption": "Figure 12. TSP objective distribution on kroA100 (Tabu Search, 30 seeds).",
+    "source": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\2026-08-07_031702_tsp_kroA100_tabu_search\\charts\\objective_boxplot.png"
+  },
+  {
+    "file": "fs_breastew_boxplot.png",
+    "caption": "Figure 13. FS objective distribution on BreastEW (Tabu Search, 30 seeds).",
+    "source": "C:\\Users\\asus\\Desktop\\MSALGCM Paper\\results\\2026-08-07_043306_fs_breastew_tabu_search\\charts\\objective_boxplot.png"
+  }
+]

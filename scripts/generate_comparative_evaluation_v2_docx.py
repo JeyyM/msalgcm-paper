@@ -7,6 +7,7 @@ Layout matches MSALGCM-Final-Paper-Draft.docx:
 
 from __future__ import annotations
 
+import json
 import re
 import shutil
 from pathlib import Path
@@ -22,6 +23,29 @@ ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / "Paper Setup" / "MSALGCM-Final-Paper-Draft.docx"
 SOURCE_MD = ROOT / "Paper Setup" / "comparative evaluation v2.md"
 OUTPUT = ROOT / "Paper Setup" / "comparative evaluation v2.docx"
+GRAPHS_DIR = ROOT / "Paper Setup" / "graphs"
+MANIFEST_PATH = GRAPHS_DIR / "manifest.json"
+
+# Figures inserted after matching ### headings (full-width, single-column blocks).
+DEFAULT_FIGURE_MAP: dict[str, list[str]] = {
+    "5.1 Traveling Salesman Problem (18/18 complete)": [
+        "tsp_gap_by_instance.png",
+        "tsp_gap_scalability.png",
+        "tsp_kroA100_convergence_combined.png",
+        "tsp_route_berlin52_ts.png",
+    ],
+    "5.2 Job-Shop Scheduling (15/15 complete)": [
+        "jsp_gap_by_instance.png",
+        "jsp_gap_scalability.png",
+        "jsp_ta22_convergence_combined.png",
+        "jsp_gantt_ta22_ts.png",
+    ],
+    "5.3 Feature Selection (12/12 complete)": [
+        "fs_best_objective_by_dataset.png",
+        "fs_breastew_convergence_combined.png",
+        "fs_features_breastew_ts.png",
+    ],
+}
 
 AUTHORS = "Juan Miguel Miranda\tJulian Johan Briones\tLance Xavier Lim"
 EMAILS = (
@@ -203,7 +227,64 @@ def body_start_index(lines: list[str]) -> int:
     raise ValueError("Could not find '## 1. INTRODUCTION' in markdown source.")
 
 
-def add_body_from_markdown(doc: Document, md_text: str, styles: dict[str, object]) -> None:
+def load_figure_captions() -> dict[str, str]:
+    if MANIFEST_PATH.is_file():
+        entries = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+        return {entry["file"]: entry.get("caption", entry["file"]) for entry in entries}
+    return {}
+
+
+def add_figure_full_width(
+    doc: Document,
+    styles: dict[str, object],
+    image_path: Path,
+    caption: str,
+) -> None:
+    """Insert a full-width figure in a temporary single-column section."""
+    doc.add_section(WD_SECTION.CONTINUOUS)
+    set_section_columns(doc.sections[-1], 1)
+
+    p = doc.add_paragraph()
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = p.add_run()
+    run.add_picture(str(image_path), width=Inches(6.2))
+
+    cap = doc.add_paragraph()
+    cap.style = styles["Body Text"]
+    cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    add_inline_formatting(cap, caption)
+    add_blank(doc, styles)
+
+    doc.add_section(WD_SECTION.CONTINUOUS)
+    set_section_columns(doc.sections[-1], 2)
+
+
+def insert_figures_for_heading(
+    doc: Document,
+    styles: dict[str, object],
+    heading: str,
+    figure_map: dict[str, list[str]],
+    captions: dict[str, str],
+) -> None:
+    filenames = figure_map.get(heading, [])
+    for filename in filenames:
+        image_path = GRAPHS_DIR / filename
+        if not image_path.is_file():
+            continue
+        caption = captions.get(filename, filename)
+        add_figure_full_width(doc, styles, image_path, caption)
+
+
+def add_body_from_markdown(
+    doc: Document,
+    md_text: str,
+    styles: dict[str, object],
+    *,
+    figure_map: dict[str, list[str]] | None = None,
+    captions: dict[str, str] | None = None,
+) -> None:
+    figure_map = figure_map or DEFAULT_FIGURE_MAP
+    captions = captions or load_figure_captions()
     lines = md_text.splitlines()
     start = body_start_index(lines)
     i = start
@@ -242,7 +323,9 @@ def add_body_from_markdown(doc: Document, md_text: str, styles: dict[str, object
             continue
 
         if stripped.startswith("### "):
-            add_para(doc, stripped[4:], "Heading 2", styles)
+            heading = stripped[4:]
+            add_para(doc, heading, "Heading 2", styles)
+            insert_figures_for_heading(doc, styles, heading, figure_map, captions)
             i += 1
             continue
 
@@ -263,9 +346,11 @@ def add_body_from_markdown(doc: Document, md_text: str, styles: dict[str, object
         add_table(doc, table_buffer)
 
 
-def generate() -> Path:
+def generate(*, embed_figures: bool = True) -> Path:
     md_text = SOURCE_MD.read_text(encoding="utf-8")
     meta = extract_front_matter(md_text)
+    captions = load_figure_captions() if embed_figures else {}
+    figure_map = DEFAULT_FIGURE_MAP if embed_figures and GRAPHS_DIR.is_dir() else {}
 
     shutil.copy(TEMPLATE, OUTPUT)
     doc = Document(str(OUTPUT))
@@ -278,12 +363,25 @@ def generate() -> Path:
     doc.add_section(WD_SECTION.CONTINUOUS)
     set_section_columns(doc.sections[-1], 2)
 
-    add_body_from_markdown(doc, md_text, styles)
+    add_body_from_markdown(doc, md_text, styles, figure_map=figure_map, captions=captions)
 
     doc.save(str(OUTPUT))
     return OUTPUT
 
 
 if __name__ == "__main__":
-    out = generate()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--no-figures", action="store_true", help="Skip embedding graphs/")
+    args = parser.parse_args()
+    out = generate(embed_figures=not args.no_figures)
+    embedded = sum(
+        1
+        for names in DEFAULT_FIGURE_MAP.values()
+        for name in names
+        if (GRAPHS_DIR / name).is_file()
+    )
     print(f"Wrote {out}")
+    if not args.no_figures:
+        print(f"Embedded {embedded} figures from {GRAPHS_DIR}")
